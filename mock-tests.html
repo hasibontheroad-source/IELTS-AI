@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cambridge Academic 1–21 Mock Examination Hub | IELTS Academic AI</title>
+  
+  <link rel="stylesheet" href="../css/main.css" />
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { purple: '#7C3AED', cyan: '#06B6D4', dark: '#0A0F1D', card: '#111B30', border: '#1E2E4E' }
+          }
+        }
+      }
+    };
+  </script>
+  <script src="../js/core.js"></script>
+  <script src="../js/content.js"></script>
+  <script src="../js/cambridge-series.js"></script>
+  <script src="../js/cambridge-writing-data.js"></script>
+  <script src="../js/sidebar.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background: var(--bg-gradient); color: var(--text-primary); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
+    
+    .hub-era-tab {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.825rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .hub-era-tab:hover {
+      border-color: var(--primary);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+    .hub-era-tab.active {
+      background: var(--primary-gradient);
+      border-color: transparent;
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .book-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-card);
+    }
+    .book-card:hover {
+      border-color: var(--card-border-hover);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .test-module-btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.725rem;
+      font-weight: 700;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg-elevated);
+      color: var(--text-primary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.18s ease;
+    }
+    .test-module-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-8">
+
+  <div class="max-w-6xl mx-auto space-y-8">
+    
+    <!-- Top Bar Navigation -->
+    <div class="flex items-center justify-between pb-6 border-b border-slate-800" style="border-bottom-color: var(--card-border)">
+      <div class="flex items-center gap-3">
+        <a href="dashboard.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-2 rounded-xl border border-slate-700 transition font-semibold" style="background:var(--card-bg);border-color:var(--card-border);color:var(--text-primary)">
+          ← Dashboard
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-black text-white" style="color:var(--text-primary)">Cambridge Academic 1–21 Examination Hub</h1>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-900/40 text-indigo-300 border border-indigo-700/50" style="background:rgba(99,102,241,0.15);color:var(--primary);border-color:rgba(99,102,241,0.3)">
+              84 Full Tests
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5" style="color:var(--text-muted)">100% Original Cambridge-Calibrated Computer-Delivered Examination Simulation</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <!-- Theme Toggle Switcher -->
+        <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+          <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+          <span class="theme-text">Light</span>
+        </button>
+
+        <a href="mock-test.html" class="btn-primary text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-lg">
+          <span>⚡</span> Quick Full Exam
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Action Launchpads -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <a href="mock-test.html" class="card group cursor-pointer hover:border-purple-500 no-underline" style="text-decoration:none">
+        <div class="flex items-start gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-xl text-white shadow-md flex-shrink-0 group-hover:scale-105 transition">
+            📋
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white group-hover:text-purple-400 transition" style="color:var(--text-primary)">Full 4-Module Simulation</h3>
+            <p class="text-xs text-slate-400 mt-1" style="color:var(--text-muted)">Timed 2h 45m exact CD exam flow: Listening, Reading, Writing & Speaking with TRF certificate.</p>
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-400 mt-2.5" style="color:var(--primary)">Launch Official Exam →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="ai-tests.html" class="card group cursor-pointer hover:border-cyan-500 no-underline" style="text-decoration:none">
+        <div class="flex items-start gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-600 to-teal-600 flex items-center justify-center text-xl text-white shadow-md flex-shrink-0 group-hover:scale-105 transition">
+            🤖
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-400 transition" style="color:var(--text-primary)">AI Adaptive Exam Generator</h3>
+            <p class="text-xs text-slate-400 mt-1" style="color:var(--text-muted)">Generate custom Cambridge-standard tests tailored to your specific weak question types.</p>
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-cyan-400 mt-2.5" style="color:var(--secondary)">Synthesize Test →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="analytics.html" class="card group cursor-pointer hover:border-emerald-500 no-underline" style="text-decoration:none">
+        <div class="flex items-start gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-600 to-green-600 flex items-center justify-center text-xl text-white shadow-md flex-shrink-0 group-hover:scale-105 transition">
+            📊
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white group-hover:text-emerald-400 transition" style="color:var(--text-primary)">Diagnostic Performance</h3>
+            <p class="text-xs text-slate-400 mt-1" style="color:var(--text-muted)">Inspect your Band score progression, psychometric radar, and 7-day Leap Drill schedule.</p>
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 mt-2.5" style="color:var(--success)">View Analytics →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="card p-5 space-y-4">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <!-- Search -->
+        <div class="relative flex-1">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">🔍</span>
+          <input type="text" id="series-search-input" oninput="filterSeries()" placeholder="Search books by academic topic (e.g., Marine Biology, AI, Architecture, Linguistics)..." class="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm" />
+        </div>
+        
+        <!-- Summary Stats Badge -->
+        <div class="flex items-center gap-2 text-xs font-mono text-slate-400 flex-shrink-0" style="color:var(--text-muted)">
+          <span>Volumes: <strong class="text-white" style="color:var(--text-primary)">21</strong></span>
+          <span>•</span>
+          <span>Tests: <strong class="text-white" style="color:var(--text-primary)">84</strong></span>
+          <span>•</span>
+          <span id="visible-count-badge" class="text-cyan-400 font-bold" style="color:var(--secondary)">Showing 21 Volumes</span>
+        </div>
+      </div>
+
+      <!-- Era Tabs -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1">
+        <button class="hub-era-tab active" onclick="setEraFilter('all', this)">All 21 Volumes (84 Tests)</button>
+        <button class="hub-era-tab" onclick="setEraFilter('cd', this)">Modern CD Era (Books 18–21)</button>
+        <button class="hub-era-tab" onclick="setEraFilter('adv', this)">Advanced Era (Books 14–17)</button>
+        <button class="hub-era-tab" onclick="setEraFilter('std', this)">Standard Era (Books 7–13)</button>
+        <button class="hub-era-tab" onclick="setEraFilter('found', this)">Foundation Era (Books 1–6)</button>
+      </div>
+    </div>
+
+    <!-- Books Grid Container -->
+    <div id="books-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Injected by JavaScript -->
+    </div>
+
+  </div>
+
+  <!-- Detail / Inspection Modal -->
+  <div id="book-inspect-modal" style="display:none;position:fixed;inset:0;background:rgba(5,8,18,0.85);backdrop-filter:blur(10px);z-index:9999;align-items:center;justify-content:center;padding:1.5rem">
+    <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:24px;max-width:760px;width:100%;max-height:90vh;overflow-y:auto;padding:2rem;color:var(--text-primary);box-shadow:var(--shadow-hover)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem">
+        <div>
+          <div id="modal-era-badge" style="display:inline-block;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:6px;margin-bottom:6px"></div>
+          <h2 id="modal-book-title" style="font-size:1.35rem;font-weight:900;color:var(--text-primary);margin:0"></h2>
+          <p id="modal-book-theme" style="font-size:0.85rem;color:var(--text-muted);margin:4px 0 0 0"></p>
+        </div>
+        <button onclick="closeInspectModal()" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer">✕</button>
+      </div>
+
+      <div id="modal-book-content" class="space-y-4">
+        <!-- Content filled dynamically -->
+      </div>
+
+      <div style="margin-top:2rem;display:flex;justify-content:flex-end;gap:0.75rem">
+        <button onclick="closeInspectModal()" class="btn-secondary" style="border-radius:10px;padding:8px 16px">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeEra = 'all';
+    let searchQuery = '';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof Auth !== 'undefined') Auth.requireAuth();
+      renderBooks();
+    });
+
+    function setEraFilter(era, btn) {
+      activeEra = era;
+      document.querySelectorAll('.hub-era-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderBooks();
+    }
+
+    function filterSeries() {
+      searchQuery = (document.getElementById('series-search-input').value || '').trim().toLowerCase();
+      renderBooks();
+    }
+
+    function renderBooks() {
+      const grid = document.getElementById('books-grid');
+      if (!grid || typeof CAMBRIDGE_ACADEMIC_SERIES === 'undefined') return;
+
+      const series = CAMBRIDGE_ACADEMIC_SERIES.books;
+      let filtered = series.filter(b => {
+        // Era filter
+        if (activeEra === 'found' && (b.book < 1 || b.book > 6)) return false;
+        if (activeEra === 'std' && (b.book < 7 || b.book > 13)) return false;
+        if (activeEra === 'adv' && (b.book < 14 || b.book > 17)) return false;
+        if (activeEra === 'cd' && (b.book < 18 || b.book > 21)) return false;
+
+        // Search query
+        if (searchQuery) {
+          const hay = `${b.theme} Book ${b.book} ${b.difficulty} ${b.writing?.t2Topic || ''} ${b.speaking?.topic || ''}`.toLowerCase();
+          if (!hay.includes(searchQuery)) return false;
+        }
+
+        return true;
+      });
+
+      const badge = document.getElementById('visible-count-badge');
+      if (badge) badge.textContent = `Showing ${filtered.length} of ${series.length} Volumes`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center card">
+            <span class="text-4xl">🔍</span>
+            <h3 class="text-base font-bold text-white mt-2" style="color:var(--text-primary)">No Cambridge volumes matched your criteria</h3>
+            <p class="text-xs text-slate-400 mt-1" style="color:var(--text-muted)">Try adjusting your search terms or selecting a different era tab.</p>
+            <button onclick="document.getElementById('series-search-input').value='';searchQuery='';setEraFilter('all', document.querySelector('.hub-era-tab'));" class="btn-secondary text-xs mt-4">
+              Reset Filters
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(b => {
+        const era = CAMBRIDGE_ACADEMIC_SERIES.getEra(b.book);
+        return `
+          <div class="book-card flex flex-col justify-between">
+            <div>
+              <!-- Book Header Banner -->
+              <div class="p-5 border-b border-slate-800" style="border-bottom-color:var(--card-border)">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] font-bold px-2 py-0.5 rounded-md border ${era.badge}">
+                    ${era.name}
+                  </span>
+                  <span class="text-xs font-mono font-bold text-slate-400" style="color:var(--text-muted)">Vol. ${b.book}</span>
+                </div>
+                <h3 class="text-base font-black text-white" style="color:var(--text-primary)">Cambridge Academic ${b.book}</h3>
+                <p class="text-xs text-slate-400 mt-1 line-clamp-2" style="color:var(--text-muted)">${b.theme}</p>
+              </div>
+
+              <!-- Module Highlights -->
+              <div class="p-4 space-y-2.5 text-xs text-slate-300" style="color:var(--text-secondary)">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold flex items-center gap-1.5">🎧 Listening:</span>
+                  <span class="text-slate-400 font-mono" style="color:var(--text-muted)">4 Sections • 40 Qs</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold flex items-center gap-1.5">📖 Reading:</span>
+                  <span class="text-slate-400 font-mono" style="color:var(--text-muted)">3 Passages • 40 Qs</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold flex items-center gap-1.5">✍️ Writing:</span>
+                  <span class="text-slate-400 font-mono" style="color:var(--text-muted)">Tasks 1 & 2 (${b.writing?.t1Type || 'Data'})</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold flex items-center gap-1.5">🎤 Speaking:</span>
+                  <span class="text-slate-400 font-mono" style="color:var(--text-muted)">Parts 1–3 Interview</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Test Launch Buttons -->
+            <div class="p-4 border-t border-slate-800 bg-[#0A0F1D]/50 rounded-b-2xl" style="border-top-color:var(--card-border);background:var(--card-bg-elevated)">
+              <div class="text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-wider" style="color:var(--text-muted)">Practice Tests 1–4</div>
+              
+              <div class="grid grid-cols-2 gap-2 mb-3">
+                <a href="mock-test.html?book=${b.book}&test=1" class="test-module-btn justify-center font-bold" title="Start Full Test 1">
+                  <span>⚡ Test 1</span>
+                </a>
+                <a href="mock-test.html?book=${b.book}&test=2" class="test-module-btn justify-center font-bold" title="Start Full Test 2">
+                  <span>⚡ Test 2</span>
+                </a>
+                <a href="mock-test.html?book=${b.book}&test=3" class="test-module-btn justify-center font-bold" title="Start Full Test 3">
+                  <span>⚡ Test 3</span>
+                </a>
+                <a href="mock-test.html?book=${b.book}&test=4" class="test-module-btn justify-center font-bold" title="Start Full Test 4">
+                  <span>⚡ Test 4</span>
+                </a>
+              </div>
+
+              <!-- Quick Module Links -->
+              <div class="flex items-center justify-between gap-1 pt-2 border-t border-slate-800/80" style="border-top-color:var(--card-border)">
+                <a href="listening.html?book=${b.book}&test=1" class="text-[11px] text-slate-400 hover:text-cyan-400 font-medium" title="Practice Listening">🎧 Listen</a>
+                <span class="text-slate-700">•</span>
+                <a href="reading.html?book=${b.book}&test=1" class="text-[11px] text-slate-400 hover:text-purple-400 font-medium" title="Practice Reading">📖 Read</a>
+                <span class="text-slate-700">•</span>
+                <a href="writing.html?book=${b.book}&test=1" class="text-[11px] text-slate-400 hover:text-indigo-400 font-medium" title="Practice Writing">✍️ Write</a>
+                <span class="text-slate-700">•</span>
+                <button onclick="inspectBook(${b.book})" class="text-[11px] text-cyan-400 hover:underline font-bold" style="color:var(--secondary)">
+                  Inspect Details →
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function inspectBook(bookNum) {
+      if (typeof CAMBRIDGE_ACADEMIC_SERIES === 'undefined') return;
+      const b = CAMBRIDGE_ACADEMIC_SERIES.books.find(x => x.book === bookNum);
+      if (!b) return;
+
+      const era = CAMBRIDGE_ACADEMIC_SERIES.getEra(b.book);
+      document.getElementById('modal-book-title').textContent = `Cambridge Academic ${b.book}`;
+      document.getElementById('modal-book-theme').textContent = b.theme;
+      
+      const badge = document.getElementById('modal-era-badge');
+      badge.textContent = `${era.name} • ${b.difficulty}`;
+      badge.className = `text-[11px] font-bold px-2.5 py-1 rounded-md border ${era.badge}`;
+
+      const content = document.getElementById('modal-book-content');
+      content.innerHTML = `
+        <div class="card p-4 space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-purple-400">📖 Reading Passages</h4>
+          <ul class="text-xs space-y-1 text-slate-300">
+            ${(b.reading || []).map((p, i) => `<li><strong>Passage ${i+1}:</strong> ${p.title} <span class="text-slate-500 font-mono">(${p.diff})</span></li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="card p-4 space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400">🎧 Listening Sections</h4>
+          <ul class="text-xs space-y-1 text-slate-300">
+            <li><strong>Section 1:</strong> ${b.listening?.s1?.title || 'Everyday Social Context'}</li>
+            <li><strong>Section 2:</strong> ${b.listening?.s2?.title || 'Community Informational Monologue'}</li>
+            <li><strong>Section 3:</strong> ${b.listening?.s3?.title || 'Academic Tutorial Dialogue'}</li>
+            <li><strong>Section 4:</strong> ${b.listening?.s4?.title || 'University Research Lecture'}</li>
+          </ul>
+        </div>
+
+        <div class="card p-4 space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400">✍️ Writing Tasks</h4>
+          <div class="text-xs text-slate-300 space-y-1">
+            <p><strong>Task 1:</strong> ${b.writing?.t1Title || 'Visual Data Comparison'} (${b.writing?.t1Type?.toUpperCase() || 'CHART'})</p>
+            <p><strong>Task 2:</strong> ${b.writing?.t2Prompt || 'Academic Discussion Essay'}</p>
+          </div>
+        </div>
+
+        <div class="card p-4 space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">🎤 Speaking Part 2 Cue Card</h4>
+          <p class="text-xs text-slate-300">"${b.speaking?.cueCard || 'Describe an experience related to ' + b.speaking?.topic}"</p>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <a href="mock-test.html?book=${b.book}&test=1" class="btn-primary text-xs flex-1 py-2.5 rounded-xl justify-center font-bold">
+            🚀 Launch Cambridge ${b.book} Full Mock Exam
+          </a>
+        </div>
+      `;
+
+      document.getElementById('book-inspect-modal').style.display = 'flex';
+    }
+
+    function closeInspectModal() {
+      document.getElementById('book-inspect-modal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

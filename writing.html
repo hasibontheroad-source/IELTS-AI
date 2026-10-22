@@ -1,0 +1,2678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing – IELTS Academic AI Platform</title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="../css/main.css" />
+  <script src="../js/theme.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark:    '#0F172A',
+            card:    '#1E293B',
+            border:  '#334155',
+            primary: '#4F46E5',
+            secondary:'#06B6D4',
+            success: '#10B981',
+            warning: '#F59E0B',
+            danger:  '#EF4444',
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Alpine.js CDN -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Core Scripts -->
+  <script src="../js/core.js"></script>
+  <script src="../js/cambridge-writing-data.js"></script>
+  <script src="../js/content.js"></script>
+  <script src="../js/cambridge-series.js"></script>
+
+  <style>
+    /* ── writing-specific extras ── */
+    .writing-textarea {
+      width: 100%;
+      background: var(--input-bg, #0F172A);
+      color: var(--input-text, #F1F5F9);
+      border: 1px solid var(--input-border, #334155);
+      border-radius: 10px;
+      padding: 1.25rem;
+      font-family: 'Merriweather', serif;
+      font-size: 0.95rem;
+      line-height: 1.85;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    [data-theme="light"] .writing-textarea {
+      background: #FFFFFF !important;
+      color: #0F172A !important;
+      border-color: #CBD5E1 !important;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .writing-textarea:focus {
+      border-color: #4F46E5;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+    }
+    .writing-textarea.warn-count {
+      border-color: #F59E0B;
+    }
+    [data-theme="light"] .crit-bar-wrap {
+      background: #E2E8F0 !important;
+    }
+
+    /* word counter badge */
+    .wc-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.3rem 0.75rem; border-radius: 99px;
+      font-size: 0.8rem; font-weight: 700;
+      transition: background 0.3s, color 0.3s;
+    }
+    .wc-badge.below   { background: rgba(239,68,68,0.15);  color: #EF4444; }
+    .wc-badge.near    { background: rgba(245,158,11,0.15); color: #F59E0B; }
+    .wc-badge.reached { background: rgba(16,185,129,0.15); color: #10B981; }
+
+    /* criterion band bar */
+    .crit-bar-wrap { height: 6px; background: #334155; border-radius: 99px; overflow: hidden; margin-top: 0.5rem; }
+    .crit-bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+    /* overall band circle */
+    .band-circle {
+      width: 110px; height: 110px; border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 4px solid currentColor;
+      flex-shrink: 0;
+    }
+
+    /* collapsible panel */
+    .collapsible-content {
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.3s ease;
+    }
+    .collapsible-content.open  { max-height: 2000px; opacity: 1; }
+    .collapsible-content.closed{ max-height: 0;      opacity: 0; }
+
+    /* full-test task indicator */
+    .task-indicator {
+      display: flex; gap: 0.5rem; align-items: center;
+    }
+    .task-indicator-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #334155;
+    }
+    .task-indicator-dot.done   { background: #10B981; }
+    .task-indicator-dot.active { background: #4F46E5; animation: pulse-dot 1.5s ease infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+
+    /* chart container */
+    .chart-wrapper { position: relative; height: 260px; width: 100%; }
+
+    /* planning template rows */
+    .plan-row {
+      background: rgba(79,70,229,0.05);
+      border: 1px solid rgba(79,70,229,0.2);
+      border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.5rem;
+    }
+    .plan-row label { font-size: 0.75rem; font-weight: 700; color: #818CF8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem; }
+    .plan-row-text { background: transparent; border: none; outline: none; color: #F1F5F9; font-family: 'Inter', sans-serif; font-size: 0.875rem; width: 100%; resize: none; min-height: 40px; }
+
+    /* model answer box */
+    .model-answer-box {
+      background: rgba(16,185,129,0.05);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 10px; padding: 1.25rem;
+      font-family: 'Merriweather', serif; font-size: 0.9rem; line-height: 1.85;
+      color: #CBD5E1; white-space: pre-wrap;
+    }
+
+    /* vocab chip */
+    .vocab-chip {
+      display: inline-flex; align-items: center;
+      background: rgba(79,70,229,0.15); border: 1px solid rgba(79,70,229,0.3);
+      color: #818CF8; border-radius: 99px; padding: 0.2rem 0.6rem; font-size: 0.75rem; font-weight: 600;
+      margin: 0.2rem;
+    }
+
+    /* strengths / weaknesses lists */
+    .sw-list li { padding: 0.3rem 0; padding-left: 1.25rem; position: relative; font-size: 0.875rem; }
+    .sw-list.strengths li::before { content: '✓'; position: absolute; left: 0; color: #10B981; font-weight: 700; }
+    .sw-list.weaknesses li::before { content: '✗'; position: absolute; left: 0; color: #EF4444; font-weight: 700; }
+
+    /* improvement tip */
+    .tip-item { display: flex; gap: 0.6rem; align-items: flex-start; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    .tip-num { flex-shrink:0; width:22px; height:22px; border-radius:50%; background:#4F46E5; color:#fff; font-size:0.7rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+
+    /* auto-save dot */
+    .save-dot { width:8px; height:8px; border-radius:50%; background:#10B981; display:inline-block; margin-left:4px; }
+    .save-dot.saving { background:#F59E0B; animation: pulse-dot 0.8s ease infinite; }
+
+    /* page tabs */
+    .main-tab { padding: 0.6rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: 0.875rem; cursor: pointer; border: none; transition: all 0.2s; }
+    .main-tab.active   { background: #4F46E5; color: #fff; }
+    .main-tab.inactive { background: transparent; color: #94A3B8; }
+    .main-tab.inactive:hover { background: rgba(255,255,255,0.05); color: #F1F5F9; }
+
+    @media (max-width: 900px) {
+      .writing-split { flex-direction: column !important; }
+      .writing-split > * { width: 100% !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-dark text-slate-100 min-h-screen">
+
+<!-- ═══════════════════════════  SIDEBAR  ═══════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <a href="../index.html" class="flex items-center gap-2 no-underline">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#4F46E5,#06B6D4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">✍️</div>
+      <div>
+        <div style="font-weight:800;font-size:0.95rem;color:#F1F5F9;">IELTS AI</div>
+        <div style="font-size:0.7rem;color:#64748B;">Academic Platform</div>
+      </div>
+    </a>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <a href="dashboard.html"  class="nav-item">🏠 <span>Dashboard</span></a>
+    <a href="listening.html"  class="nav-item">🎧 <span>Listening</span></a>
+    <a href="reading.html"    class="nav-item">📖 <span>Reading</span></a>
+    <a href="writing.html"    class="nav-item active">✍️ <span>Writing</span></a>
+    <a href="speaking.html"   class="nav-item">🎤 <span>Speaking</span></a>
+
+    <div class="nav-section">Simulations</div>
+    <a href="mock-tests.html" class="nav-item">📚 <span>Cambridge 1–21 Hub</span></a>
+    <a href="mock-test.html"  class="nav-item">📋 <span>Full Mock Exam</span></a>
+    <a href="ai-tests.html"   class="nav-item">🤖 <span>AI Tests</span></a>
+
+    <div class="nav-section">Personal Account</div>
+    <a href="profile.html"    class="nav-item text-purple-300 font-bold">👤 <span>Candidate Profile</span></a>
+    <a href="analytics.html"  class="nav-item">📊 <span>Analytics</span></a>
+    <a href="settings.html"   class="nav-item">⚙️ <span>Settings</span></a>
+    <button onclick="Auth.logout()" class="nav-item" style="text-align:left;color:var(--danger);">🚪 <span>Logout</span></button>
+  </nav>
+
+  <!-- Sidebar Theme Toggle -->
+  <div style="padding:0.85rem 1.25rem;border-top:1px solid var(--sidebar-border);background:var(--glass-bg);display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary)">Theme</span>
+    <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+      <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+      <span class="theme-text">Light</span>
+    </button>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════  MAIN  ═══════════════════════════ -->
+<main class="main-content" x-data="WritingApp()" x-init="init()">
+
+  <!-- ── PAGE HEADER ── -->
+  <header class="page-header">
+    <div class="flex items-center justify-between flex-wrap gap-3 w-full">
+      <div class="flex items-center gap-3">
+        <div style="font-size:1.75rem;">✍️</div>
+        <div>
+          <h1 style="font-size:1.3rem;font-weight:800;line-height:1.2;color:var(--text-primary)">Academic Writing</h1>
+          <p style="font-size:0.8rem;color:var(--text-muted)">Task 1 · Task 2 · Full Test · Practice</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Header Theme Toggle -->
+        <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+          <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+          <span class="theme-text">Light</span>
+        </button>
+
+        <!-- tab switcher -->
+        <div class="flex gap-1 p-1 rounded-xl flex-wrap" style="background:var(--card-bg);border:1px solid var(--card-border)">
+          <button class="main-tab" :class="activeTab==='task1'?'active':'inactive'" @click="switchTab('task1')">📊 Task 1</button>
+          <button class="main-tab" :class="activeTab==='task2'?'active':'inactive'" @click="switchTab('task2')">📝 Task 2</button>
+          <button class="main-tab" :class="activeTab==='full'?'active':'inactive'"  @click="switchTab('full')">⏱ Full Test</button>
+          <button class="main-tab" :class="activeTab==='practice'?'active':'inactive'" @click="switchTab('practice')">🔖 Practice</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── PAGE BODY ── -->
+  <div class="page-body">
+
+    <!-- ═══════ TASK 1 TAB ═══════ -->
+    <div x-show="activeTab==='task1'" x-transition>
+      <div class="flex gap-4 writing-split" style="align-items:flex-start;">
+
+        <!-- LEFT: task display -->
+        <div style="flex:1;min-width:0;">
+
+          <!-- task card -->
+          <div class="card mb-4">
+            <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="badge badge-primary">Task 1</span>
+                <span class="badge badge-warning" x-text="t1.task.chartType ? t1.task.chartType.toUpperCase() : 'BAR'"></span>
+                <span x-show="isAiTest" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-900/50 text-purple-300 border border-purple-500/50 animate-pulse">
+                  🤖 AI Generated Test
+                </span>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <!-- Cambridge 1–21 selector -->
+                <select x-model="cambridgeBook" @change="loadCambridgeBookWriting()" class="form-input" style="width:auto;padding:0.4rem 0.65rem;font-size:0.8rem;border-color:#4F46E5;font-weight:700;color:#A78BFA;background:#0A0F1D;">
+                  <template x-for="n in 21" :key="n">
+                    <option :value="n" x-text="`📚 Cambridge ${n}`"></option>
+                  </template>
+                </select>
+
+                <!-- Cambridge Test 1–4 selector -->
+                <select x-model="cambridgeTest" @change="loadCambridgeBookWriting()" class="form-input" style="width:auto;padding:0.4rem 0.65rem;font-size:0.8rem;border-color:#06B6D4;font-weight:700;color:#67E8F9;background:#0A0F1D;">
+                  <option value="1">Test 1 (Bar / Line)</option>
+                  <option value="2">Test 2 (Pie / Table)</option>
+                  <option value="3">Test 3 (Map / Plan)</option>
+                  <option value="4">Test 4 (Process Diagram)</option>
+                </select>
+
+                <!-- chart type selector -->
+                <select x-model="t1.chartTypeChoice" @change="applyChartTypeChoice()" class="form-input" style="width:auto;padding:0.4rem 0.65rem;font-size:0.8rem;background:#1E293B;">
+                  <option value="bar">Bar Chart</option>
+                  <option value="line">Line Graph</option>
+                  <option value="pie">Pie Chart</option>
+                  <option value="table">Data Table</option>
+                  <option value="map">Map / Site Plan</option>
+                  <option value="process">Process Flowchart</option>
+                  <option value="mixed">Mixed Chart</option>
+                </select>
+
+                <button @click="generateTask1()" :disabled="t1.generating"
+                  class="btn btn-primary btn-sm" style="white-space:nowrap;">
+                  <span x-show="!t1.generating">✨ Generate New</span>
+                  <span x-show="t1.generating" class="flex items-center gap-1">
+                    <span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> Generating…
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <!-- task instruction -->
+            <p style="font-size:0.9rem;color:#CBD5E1;line-height:1.7;margin-bottom:1rem;" x-text="t1.task.instruction"></p>
+
+            <!-- ═══════════════════════════════════════════════════════════════════ -->
+            <!-- OFFICIAL CAMBRIDGE IELTS CD EXAM FIGURE CONTAINER -->
+            <!-- ═══════════════════════════════════════════════════════════════════ -->
+            <div class="exam-figure-card mb-4">
+              <!-- Figure Header -->
+              <div class="exam-figure-header">
+                <div class="exam-figure-title">
+                  <span class="text-base">📊</span>
+                  <span>Figure 1:</span>
+                  <span class="text-cyan-300 font-bold" x-text="t1.task.chartData?.title || t1.task.title || (t1.task.chartType === 'map' ? 'Town of Norbury Spatial Redevelopment (1995 vs 2025)' : (t1.task.chartType === 'process' ? 'Industrial Glass Recycling & Bottle Remanufacturing Sequence' : (t1.task.chartType === 'table' ? 'Multinational R&D Investment and Patent Applications' : 'Comparative Academic Indicators (1995 vs 2025)')))"></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="badge-premium-purple" x-text="(t1.task.chartType || 'bar').toUpperCase() + ' FIGURE'"></span>
+                  <button type="button" @click="openFigureModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-800/60 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
+                    <span>🔍</span> Enlarge Image
+                  </button>
+                </div>
+              </div>
+
+              <!-- Figure Body -->
+              <div class="exam-figure-body">
+                
+                <!-- 1. Bar / Line / Mixed Chart (Chart.js Canvas) -->
+                <div class="chart-wrapper" x-show="['bar', 'line', 'mixed'].includes(t1.task.chartType)">
+                  <canvas id="t1-chart"></canvas>
+                </div>
+
+                <!-- 2. Dual Pie Charts (Interactive SVG Visual) -->
+                <div x-show="t1.task.chartType === 'pie'" class="space-y-4">
+                  <div class="text-center text-xs text-slate-400 font-semibold mb-1">
+                    Comparison of Global Freshwater Allocation by Sector (1980 vs 2020)
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-items-center">
+                    
+                    <!-- 1980 Pie -->
+                    <div class="pie-subcard flex flex-col items-center">
+                      <div class="text-xs font-bold text-indigo-300 mb-2">📅 Year 1980 (Baseline Distribution)</div>
+                      <svg viewBox="0 0 160 160" class="w-48 h-48">
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#1E293B" stroke-width="36"></circle>
+                        <!-- Agriculture 68% (Green) -->
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#10B981" stroke-width="36"
+                          stroke-dasharray="192.26 282.74" stroke-dashoffset="0" transform="rotate(-90 80 80)"></circle>
+                        <!-- Industry 18% (Purple) -->
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#8B5CF6" stroke-width="36"
+                          stroke-dasharray="50.89 282.74" stroke-dashoffset="-192.26" transform="rotate(-90 80 80)"></circle>
+                        <!-- Domestic 9% (Cyan) -->
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#06B6D4" stroke-width="36"
+                          stroke-dasharray="25.45 282.74" stroke-dashoffset="-243.15" transform="rotate(-90 80 80)"></circle>
+                        <!-- Energy Cooling 5% (Amber) -->
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#F59E0B" stroke-width="36"
+                          stroke-dasharray="14.14 282.74" stroke-dashoffset="-268.60" transform="rotate(-90 80 80)"></circle>
+                        <!-- Center Label -->
+                        <text x="80" y="76" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="bold">1980</text>
+                        <text x="80" y="90" text-anchor="middle" fill="#94A3B8" font-size="8">100% Total</text>
+                      </svg>
+                      <div class="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[11px] text-slate-300">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Agriculture: <strong>68%</strong></span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Industry: <strong>18%</strong></span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 inline-block"></span> Domestic: <strong>9%</strong></span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Energy: <strong>5%</strong></span>
+                      </div>
+                    </div>
+
+                    <!-- 2020 Pie -->
+                    <div class="pie-subcard flex flex-col items-center">
+                      <div class="text-xs font-bold text-cyan-300 mb-2">📅 Year 2020 (Modern Allocation)</div>
+                      <svg viewBox="0 0 160 160" class="w-48 h-48">
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#1E293B" stroke-width="36"></circle>
+                        <!-- Agriculture 56% (Green) -->
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#10B981" stroke-width="36"
+                          stroke-dasharray="158.33 282.74" stroke-dashoffset="0" transform="rotate(-90 80 80)"></circle>
+                        <!-- Industry 23% (Purple) -->
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#8B5CF6" stroke-width="36"
+                          stroke-dasharray="65.03 282.74" stroke-dashoffset="-158.33" transform="rotate(-90 80 80)"></circle>
+                        <!-- Domestic 14% (Cyan) -->
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#06B6D4" stroke-width="36"
+                          stroke-dasharray="39.58 282.74" stroke-dashoffset="-223.36" transform="rotate(-90 80 80)"></circle>
+                        <!-- Energy Cooling 7% (Amber) -->
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#F59E0B" stroke-width="36"
+                          stroke-dasharray="19.79 282.74" stroke-dashoffset="-262.94" transform="rotate(-90 80 80)"></circle>
+                        <!-- Center Label -->
+                        <text x="80" y="76" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="bold">2020</text>
+                        <text x="80" y="90" text-anchor="middle" fill="#94A3B8" font-size="8">100% Total</text>
+                      </svg>
+                      <div class="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[11px] text-slate-300">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Agriculture: <strong>56%</strong></span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Industry: <strong>23%</strong></span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 inline-block"></span> Domestic: <strong>14%</strong></span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Energy: <strong>7%</strong></span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- 3. Table Format -->
+                <div x-show="t1.task.chartType === 'table'" class="overflow-x-auto rounded-xl border border-slate-700 bg-slate-900/80 p-2">
+                  <table style="width:100%;border-collapse:collapse;font-size:0.85rem;" x-ref="t1table">
+                    <thead>
+                      <tr style="background:rgba(79,70,229,0.25);">
+                        <template x-for="col in (t1.task.tableData?.headers || [])" :key="col">
+                          <th style="padding:0.75rem 0.6rem;text-align:left;border-bottom:1px solid #334155;font-weight:700;color:#A5B4FC;" x-text="col"></th>
+                        </template>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="row in (t1.task.tableData?.rows || [])" :key="row[0]">
+                        <tr style="border-bottom:1px solid #1E293B;" class="hover:bg-slate-800/40 transition">
+                          <template x-for="(cell, cIdx) in row" :key="cIdx">
+                            <td style="padding:0.65rem 0.6rem;color:#E2E8F0;" :class="cIdx === 0 ? 'font-bold text-white' : ''" x-text="cell"></td>
+                          </template>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- 4. Map / Site Plan Format (Interactive 1995 vs 2025 transformation) -->
+                <div x-show="t1.task.chartType === 'map'" class="space-y-3">
+                  <div class="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-700">
+                    <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider">🗺️ Transformation Comparison: 1995 vs 2025</div>
+                    <div class="flex gap-1.5">
+                      <button type="button" @click="mapViewMode = 'side'" :class="mapViewMode === 'side' ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-300'" class="px-2.5 py-1 text-xs font-semibold rounded transition">Side-by-Side</button>
+                      <button type="button" @click="mapViewMode = '1995'" :class="mapViewMode === '1995' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'" class="px-2.5 py-1 text-xs font-semibold rounded transition">1995 Only</button>
+                      <button type="button" @click="mapViewMode = '2025'" :class="mapViewMode === '2025' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300'" class="px-2.5 py-1 text-xs font-semibold rounded transition">2025 Only</button>
+                    </div>
+                  </div>
+
+                  <!-- Map Visuals (SVG Vectors) -->
+                  <div class="grid gap-3" :class="mapViewMode === 'side' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'">
+                    
+                    <!-- 1995 Map -->
+                    <div x-show="mapViewMode === 'side' || mapViewMode === '1995'" class="bg-slate-900 border border-slate-700 rounded-xl p-3">
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-amber-400">📅 Year: 1995 (Agricultural &amp; Industrial Port)</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Compass: North ↑</span>
+                      </div>
+                      <svg viewBox="0 0 400 260" class="w-full h-auto rounded-lg border border-slate-800 bg-[#0B132B]">
+                        <!-- Background zones -->
+                        <rect x="0" y="0" width="400" height="110" fill="#143622" opacity="0.7"></rect>
+                        <text x="15" y="25" fill="#86EFAC" font-size="11" font-weight="bold">Farmland &amp; Agricultural Fields</text>
+                        
+                        <!-- West Industrial Factories -->
+                        <rect x="15" y="45" width="110" height="60" fill="#312E81" rx="4"></rect>
+                        <text x="22" y="70" fill="#DDD6FE" font-size="10" font-weight="bold">Chemical Factory &amp;</text>
+                        <text x="22" y="85" fill="#DDD6FE" font-size="10" font-weight="bold">Grain Warehouses</text>
+
+                        <!-- East Old School & Cottages -->
+                        <rect x="270" y="45" width="115" height="50" fill="#78350F" rx="4"></rect>
+                        <text x="280" y="68" fill="#FDE68A" font-size="10" font-weight="bold">Primary School &amp;</text>
+                        <text x="280" y="82" fill="#FDE68A" font-size="10" font-weight="bold">12 Farm Cottages</text>
+
+                        <!-- Main Road (2-lane) -->
+                        <path d="M 0 135 Q 200 130 400 135" stroke="#64748B" stroke-width="12" fill="none"></path>
+                        <path d="M 0 135 Q 200 130 400 135" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="8 6" fill="none"></path>
+                        <text x="160" y="125" fill="#E2E8F0" font-size="9" font-weight="bold">Main Road (2 Lanes)</text>
+
+                        <!-- Railway branch -->
+                        <line x1="330" y1="0" x2="330" y2="260" stroke="#475569" stroke-width="4"></line>
+                        <line x1="324" y1="100" x2="336" y2="100" stroke="#94A3B8" stroke-width="2"></line>
+                        <line x1="324" y1="120" x2="336" y2="120" stroke="#94A3B8" stroke-width="2"></line>
+                        <line x1="324" y1="140" x2="336" y2="140" stroke="#94A3B8" stroke-width="2"></line>
+                        <text x="338" y="35" fill="#94A3B8" font-size="9">Single Track Rail</text>
+
+                        <!-- Southern Sea / Working Dock -->
+                        <rect x="0" y="180" width="400" height="80" fill="#0C4A6E"></rect>
+                        <text x="15" y="245" fill="#38BDF8" font-size="12" font-weight="bold">Norbury Sea &amp; Harbour</text>
+                        <rect x="150" y="175" width="80" height="35" fill="#1E293B" rx="3"></rect>
+                        <text x="155" y="195" fill="#94A3B8" font-size="9" font-weight="bold">Commercial Dock</text>
+                        <text x="155" y="206" fill="#64748B" font-size="8">(Fishing Vessels)</text>
+
+                        <!-- Compass Rose -->
+                        <circle cx="370" cy="30" r="14" fill="#1E293B" stroke="#64748B" stroke-width="1.5"></circle>
+                        <text x="367" y="23" fill="#F8FAFC" font-size="9" font-weight="bold">N</text>
+                        <text x="367" y="42" fill="#94A3B8" font-size="8">S</text>
+                        <text x="358" y="33" fill="#94A3B8" font-size="8">W</text>
+                        <text x="378" y="33" fill="#94A3B8" font-size="8">E</text>
+                      </svg>
+                      <p class="text-[11px] text-slate-400 mt-2"><strong>1995 Summary:</strong> Predominantly agricultural in the north, heavy industrial manufacturing in the west, and commercial cargo/fishing docks in the south.</p>
+                    </div>
+
+                    <!-- 2025 Map -->
+                    <div x-show="mapViewMode === 'side' || mapViewMode === '2025'" class="bg-slate-900 border border-slate-700 rounded-xl p-3">
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-emerald-400">📅 Year: 2025 (Redeveloped Waterfront &amp; Suburbs)</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Compass: North ↑</span>
+                      </div>
+                      <svg viewBox="0 0 400 260" class="w-full h-auto rounded-lg border border-slate-800 bg-[#0B132B]">
+                        <!-- Northern Modern Housing Estate & Supermarket -->
+                        <rect x="0" y="0" width="400" height="100" fill="#1E293B" opacity="0.8"></rect>
+                        <rect x="15" y="10" width="180" height="40" fill="#047857" rx="4"></rect>
+                        <text x="25" y="28" fill="#A7F3D0" font-size="10" font-weight="bold">New Residential Suburb</text>
+                        <text x="25" y="42" fill="#D1FAE5" font-size="9">(250 Low-Emission Homes)</text>
+
+                        <rect x="210" y="10" width="105" height="40" fill="#4338CA" rx="4"></rect>
+                        <text x="218" y="28" fill="#E0E7FF" font-size="9" font-weight="bold">Supermarket &amp;</text>
+                        <text x="218" y="42" fill="#E0E7FF" font-size="9" font-weight="bold">Retail Complex</text>
+
+                        <!-- West Redeveloped Waterfront Marina Apartments -->
+                        <rect x="15" y="58" width="125" height="55" fill="#0E7490" rx="4"></rect>
+                        <text x="22" y="80" fill="#CFFAFE" font-size="9" font-weight="bold">Waterfront Apartments &amp;</text>
+                        <text x="22" y="94" fill="#CFFAFE" font-size="9" font-weight="bold">Leisure Promenade</text>
+
+                        <!-- East Academy & High Speed Rail -->
+                        <rect x="270" y="58" width="115" height="50" fill="#9333EA" rx="4"></rect>
+                        <text x="278" y="78" fill="#F3E8FF" font-size="9" font-weight="bold">Modern Academy &amp;</text>
+                        <text x="278" y="93" fill="#F3E8FF" font-size="9" font-weight="bold">Sports Centre</text>
+
+                        <!-- Dual Carriageway + Roundabout -->
+                        <path d="M 0 135 Q 160 130 180 135" stroke="#334155" stroke-width="16" fill="none"></path>
+                        <path d="M 220 135 Q 350 130 400 135" stroke="#334155" stroke-width="16" fill="none"></path>
+                        <circle cx="200" cy="135" r="18" fill="#1E293B" stroke="#38BDF8" stroke-width="3"></circle>
+                        <text x="188" y="139" fill="#38BDF8" font-size="9" font-weight="bold">R'bout</text>
+
+                        <!-- Southern Marina & Passenger Ferry Terminal -->
+                        <rect x="0" y="180" width="400" height="80" fill="#0284C7"></rect>
+                        <text x="15" y="245" fill="#E0F2FE" font-size="12" font-weight="bold">Norbury Leisure Bay</text>
+                        
+                        <rect x="120" y="165" width="160" height="45" fill="#1E293B" rx="4" stroke="#06B6D4" stroke-width="1.5"></rect>
+                        <text x="130" y="185" fill="#67E8F9" font-size="10" font-weight="bold">Marina for Private Yachts &amp;</text>
+                        <text x="130" y="198" fill="#A5F3FC" font-size="9">Passenger Ferry Terminal</text>
+
+                        <!-- Compass Rose -->
+                        <circle cx="370" cy="30" r="14" fill="#1E293B" stroke="#06B6D4" stroke-width="1.5"></circle>
+                        <text x="367" y="23" fill="#38BDF8" font-size="9" font-weight="bold">N</text>
+                        <text x="367" y="42" fill="#94A3B8" font-size="8">S</text>
+                        <text x="358" y="33" fill="#94A3B8" font-size="8">W</text>
+                        <text x="378" y="33" fill="#94A3B8" font-size="8">E</text>
+                      </svg>
+                      <p class="text-[11px] text-slate-400 mt-2"><strong>2025 Summary:</strong> Total modernisation with complete loss of farmland, replacement of factories by marina apartments, construction of a dual carriageway roundabout, and passenger ferry expansion.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 5. Process Diagram / Flowchart (Illustrated Vector SVG + Step Cards) -->
+                <div x-show="t1.task.chartType === 'process'" class="space-y-4">
+                  <div class="text-xs font-bold text-amber-400 uppercase tracking-wider pb-1 border-b border-slate-700 flex items-center justify-between">
+                    <span>⚙️ Flowchart: Industrial Glass Recycling &amp; Remanufacturing Sequence</span>
+                    <span class="text-[10px] text-slate-400 font-mono">6-Stage Cyclical Flow</span>
+                  </div>
+
+                  <!-- Illustrated SVG Flowchart Graphic -->
+                  <div class="process-svg-wrapper bg-[#0A1022] p-3 rounded-xl border border-slate-800">
+                    <svg viewBox="0 0 840 240" class="w-full h-auto">
+                      <defs>
+                        <!-- Arrow Marker -->
+                        <marker id="flow-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                          <path d="M 0 1 L 8 5 L 0 9 z" fill="#06B6D4"></path>
+                        </marker>
+                        <marker id="flow-arrow-down" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                          <path d="M 0 1 L 8 5 L 0 9 z" fill="#F59E0B"></path>
+                        </marker>
+                        <marker id="flow-arrow-return" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10B981"></path>
+                        </marker>
+                      </defs>
+
+                      <!-- Connecting Flow Conduits (Top Row: 1 -> 2 -> 3) -->
+                      <line x1="210" y1="55" x2="310" y2="55" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4" marker-end="url(#flow-arrow)"></line>
+                      <line x1="490" y1="55" x2="590" y2="55" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4" marker-end="url(#flow-arrow)"></line>
+
+                      <!-- Turn Down: 3 -> 4 -->
+                      <path d="M 680 90 L 680 145" stroke="#F59E0B" stroke-width="3" stroke-dasharray="6 4" marker-end="url(#flow-arrow-down)"></path>
+
+                      <!-- Connecting Flow Conduits (Bottom Row: 4 -> 5 -> 6) -->
+                      <line x1="590" y1="180" x2="490" y2="180" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4" marker-end="url(#flow-arrow)"></line>
+                      <line x1="310" y1="180" x2="210" y2="180" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4" marker-end="url(#flow-arrow)"></line>
+
+                      <!-- Return Closed Loop: 6 -> 1 -->
+                      <path d="M 50 145 C 10 145, 10 90, 50 90" stroke="#10B981" stroke-width="2.5" stroke-dasharray="5 3" fill="none" marker-end="url(#flow-arrow-return)"></path>
+                      <text x="25" y="118" fill="#10B981" font-size="8" font-weight="bold" transform="rotate(-90 25 118)">Reuse Loop</text>
+
+                      <!-- Stage 1 Box -->
+                      <g transform="translate(30, 15)">
+                        <rect width="180" height="75" rx="8" fill="#111B30" stroke="#4F46E5" stroke-width="1.5"></rect>
+                        <circle cx="20" cy="22" r="11" fill="#4F46E5"></circle>
+                        <text x="20" y="26" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">1</text>
+                        <text x="38" y="25" fill="#C7D2FE" font-size="10" font-weight="bold">Collection &amp; Sorting</text>
+                        <text x="14" y="45" fill="#94A3B8" font-size="8.5">• Deposit in recycling bins</text>
+                        <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Optical camera sorting</text>
+                      </g>
+
+                      <!-- Stage 2 Box -->
+                      <g transform="translate(310, 15)">
+                        <rect width="180" height="75" rx="8" fill="#111B30" stroke="#06B6D4" stroke-width="1.5"></rect>
+                        <circle cx="20" cy="22" r="11" fill="#06B6D4"></circle>
+                        <text x="20" y="26" fill="#000000" font-size="10" font-weight="bold" text-anchor="middle">2</text>
+                        <text x="38" y="25" fill="#A5F3FC" font-size="10" font-weight="bold">Crushing &amp; Cullet</text>
+                        <text x="14" y="45" fill="#94A3B8" font-size="8.5">• Heavy rollers crush into cullet</text>
+                        <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Magnetic separator removes caps</text>
+                      </g>
+
+                      <!-- Stage 3 Box -->
+                      <g transform="translate(590, 15)">
+                        <rect width="180" height="75" rx="8" fill="#111B30" stroke="#EF4444" stroke-width="1.5"></rect>
+                        <circle cx="20" cy="22" r="11" fill="#EF4444"></circle>
+                        <text x="20" y="26" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">3</text>
+                        <text x="38" y="25" fill="#FECACA" font-size="10" font-weight="bold">Furnace Smelting</text>
+                        <text x="14" y="45" fill="#F87171" font-size="9" font-weight="bold">🔥 Heated to 1500°C</text>
+                        <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Blended with soda ash &amp; silica</text>
+                      </g>
+
+                      <!-- Stage 4 Box -->
+                      <g transform="translate(590, 145)">
+                        <rect width="180" height="75" rx="8" fill="#111B30" stroke="#F59E0B" stroke-width="1.5"></rect>
+                        <circle cx="20" cy="22" r="11" fill="#F59E0B"></circle>
+                        <text x="20" y="26" fill="#000000" font-size="10" font-weight="bold" text-anchor="middle">4</text>
+                        <text x="38" y="25" fill="#FDE68A" font-size="10" font-weight="bold">Mould Injection</text>
+                        <text x="14" y="45" fill="#94A3B8" font-size="8.5">• Molten glass gobs cut</text>
+                        <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Compressed air blow shaping</text>
+                      </g>
+
+                      <!-- Stage 5 Box -->
+                      <g transform="translate(310, 145)">
+                        <rect width="180" height="75" rx="8" fill="#111B30" stroke="#10B981" stroke-width="1.5"></rect>
+                        <circle cx="20" cy="22" r="11" fill="#10B981"></circle>
+                        <text x="20" y="26" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">5</text>
+                        <text x="38" y="25" fill="#A7F3D0" font-size="10" font-weight="bold">Annealing Lehr</text>
+                        <text x="14" y="45" fill="#94A3B8" font-size="8.5">• Controlled thermal cooling</text>
+                        <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Eliminates internal stress</text>
+                      </g>
+
+                      <!-- Stage 6 Box -->
+                      <g transform="translate(30, 145)">
+                        <rect width="180" height="75" rx="8" fill="#111B30" stroke="#8B5CF6" stroke-width="1.5"></rect>
+                        <circle cx="20" cy="22" r="11" fill="#8B5CF6"></circle>
+                        <text x="20" y="26" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">6</text>
+                        <text x="38" y="25" fill="#DDD6FE" font-size="10" font-weight="bold">Laser Inspection</text>
+                        <text x="14" y="45" fill="#94A3B8" font-size="8.5">• Automated laser quality scan</text>
+                        <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Boxed &amp; sent for filling</text>
+                      </g>
+                    </svg>
+                  </div>
+
+                  <!-- 6 Detailed Stage Cards -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                    <!-- Stage 1 -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 hover:border-indigo-500 transition">
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700">STAGE 1</span>
+                        <span class="text-xs">♻️</span>
+                      </div>
+                      <h4 class="text-xs font-bold text-white mb-0.5">Collection &amp; Sorting</h4>
+                      <p class="text-[10px] text-slate-400 leading-relaxed">Containers gathered from bins, sorted by optical sensors into amber, green, and clear streams.</p>
+                    </div>
+
+                    <!-- Stage 2 -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 hover:border-cyan-500 transition">
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700">STAGE 2</span>
+                        <span class="text-xs">🔨</span>
+                      </div>
+                      <h4 class="text-xs font-bold text-white mb-0.5">Crushing &amp; Cullet Granules</h4>
+                      <p class="text-[10px] text-slate-400 leading-relaxed">Crushed into fine cullet, washed with water, and passed under overhead magnets to remove metal lids.</p>
+                    </div>
+
+                    <!-- Stage 3 -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 hover:border-rose-500 transition">
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700">STAGE 3</span>
+                        <span class="text-xs">🔥</span>
+                      </div>
+                      <h4 class="text-xs font-bold text-white mb-0.5">Furnace Melting (1500°C)</h4>
+                      <p class="text-[10px] text-slate-400 leading-relaxed">Blended with raw silica sand, soda ash, and limestone inside a gas furnace heated to 1500°C.</p>
+                    </div>
+
+                    <!-- Stage 4 -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 hover:border-amber-500 transition">
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700">STAGE 4</span>
+                        <span class="text-xs">🏺</span>
+                      </div>
+                      <h4 class="text-xs font-bold text-white mb-0.5">Blow Moulding &amp; Shaping</h4>
+                      <p class="text-[10px] text-slate-400 leading-relaxed">Red-hot molten gobs dropped into blank moulds, blown by compressed air into new bottle shapes.</p>
+                    </div>
+
+                    <!-- Stage 5 -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 hover:border-emerald-500 transition">
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700">STAGE 5</span>
+                        <span class="text-xs">🔍</span>
+                      </div>
+                      <h4 class="text-xs font-bold text-white mb-0.5">Annealing Lehr Cooling</h4>
+                      <p class="text-[10px] text-slate-400 leading-relaxed">Gradual controlled temperature reduction in cooling tunnel prevents thermal shock and internal stress.</p>
+                    </div>
+
+                    <!-- Stage 6 -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 hover:border-purple-500 transition">
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700">STAGE 6</span>
+                        <span class="text-xs">📦</span>
+                      </div>
+                      <h4 class="text-xs font-bold text-white mb-0.5">Laser Scan &amp; Distribution</h4>
+                      <p class="text-[10px] text-slate-400 leading-relaxed">Automated laser cameras inspect container walls for micro-fractures; validated bottles dispatched.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Watermark -->
+                <div class="exam-figure-watermark">Cambridge IELTS Academic Simulation • CD Format</div>
+              </div>
+
+              <!-- Figure Footer -->
+              <div class="exam-figure-footer">
+                <div>
+                  <span class="font-semibold text-slate-300">Data Standard:</span> 
+                  <span x-text="`Cambridge Academic ${cambridgeBook} Test ${cambridgeTest} Spec`"></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] text-slate-400 font-mono">Figure ID: CAM-W1-<span x-text="cambridgeBook"></span>-<span x-text="cambridgeTest"></span></span>
+                  <button type="button" @click="figureModalOpen = true" class="text-cyan-400 hover:text-cyan-300 font-bold text-xs underline cursor-pointer">
+                    View Fullscreen
+                  </button>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- key features -->
+            <div class="mt-3" x-show="t1.task.keyFeatures && t1.task.keyFeatures.length">
+              <p style="font-size:0.75rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;">Key Features to Address</p>
+              <div class="flex flex-wrap gap-2">
+                <template x-for="f in t1.task.keyFeatures" :key="f">
+                  <span style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);color:#06B6D4;border-radius:6px;padding:0.2rem 0.6rem;font-size:0.78rem;" x-text="f"></span>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- paragraph suggestions -->
+          <div class="card">
+            <button @click="t1.suggestOpen=!t1.suggestOpen" class="w-full flex items-center justify-between" style="background:none;border:none;cursor:pointer;color:#F1F5F9;">
+              <span style="font-weight:700;font-size:0.9rem;">💡 Paragraph Structure Suggestions</span>
+              <span x-text="t1.suggestOpen ? '▲' : '▼'" style="color:#94A3B8;"></span>
+            </button>
+            <div class="collapsible-content" :class="t1.suggestOpen ? 'open' : 'closed'">
+              <div class="mt-3 space-y-2">
+                <div class="plan-row"><label>Introduction</label><div style="font-size:0.85rem;color:#CBD5E1;">Paraphrase the task. State what the chart shows (topic + time/place). Do NOT give your opinion.</div></div>
+                <div class="plan-row"><label>Overview (Key Trends)</label><div style="font-size:0.85rem;color:#CBD5E1;">2 sentences. Describe the most significant patterns without data. This is the most important paragraph.</div></div>
+                <div class="plan-row"><label>Body Paragraph 1</label><div style="font-size:0.85rem;color:#CBD5E1;">Describe one main feature with specific data. Compare where relevant. Use accurate figures.</div></div>
+                <div class="plan-row"><label>Body Paragraph 2</label><div style="font-size:0.85rem;color:#CBD5E1;">Describe another feature / contrast. Include precise numbers. Aim for at least 150 words total.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: writing area -->
+        <div style="width:48%;min-width:320px;">
+
+          <!-- timer + meta -->
+          <div class="card mb-4">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <p style="font-size:0.75rem;color:#64748B;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;">Task 1 Timer</p>
+                <div class="timer-display mt-1" :class="t1.timeLeft < 120 ? 'danger' : ''" x-text="formatTime(t1.timeLeft)"></div>
+              </div>
+              <div class="flex gap-2 flex-wrap">
+                <button @click="toggleTimer('t1')" class="btn btn-secondary btn-sm" x-text="t1.timerRunning ? '⏸ Pause' : '▶ Start'"></button>
+                <button @click="resetTimer('t1')" class="btn btn-secondary btn-sm">↺ Reset</button>
+              </div>
+            </div>
+            <!-- progress bar -->
+            <div class="progress-bar mt-3">
+              <div class="progress-fill" :style="`width:${Math.max(0,100-(t1.timeLeft/1200*100))}%`"></div>
+            </div>
+          </div>
+
+          <!-- textarea -->
+          <div class="card mb-4">
+            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <span style="font-weight:700;font-size:0.9rem;">Your Response</span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="wc-badge" :class="t1WordCountClass()" x-text="`${t1.wordCount} / 150 words`"></span>
+                <span x-show="t1.autoSaved" style="font-size:0.75rem;color:#10B981;">✓ Auto-saved</span>
+              </div>
+            </div>
+
+            <textarea
+              class="writing-textarea"
+              :class="t1.wordCount > 0 && t1.wordCount < 150 ? 'warn-count' : ''"
+              style="min-height:340px;"
+              placeholder="Begin your response here. Aim for at least 150 words. Describe the main features and make comparisons where relevant…"
+              x-model="t1.essay"
+              @input="onT1Input()"
+            ></textarea>
+
+            <div class="flex items-center justify-between mt-2 flex-wrap gap-2">
+              <div style="font-size:0.78rem;color:#64748B;">
+                <span x-show="t1.wordCount < 150" style="color:#EF4444;">⚠ Minimum 150 words required</span>
+                <span x-show="t1.wordCount >= 150" style="color:#10B981;">✓ Word count met</span>
+              </div>
+              <div style="font-size:0.78rem;color:#64748B;">Chars: <span x-text="t1.essay.length"></span></div>
+            </div>
+          </div>
+
+          <!-- evaluate button -->
+          <button
+            @click="evaluateTask1()"
+            :disabled="t1.evaluating || t1.wordCount < 10"
+            class="btn btn-primary btn-block btn-lg mb-4"
+            style="font-size:1rem;">
+            <span x-show="!t1.evaluating">🤖 Evaluate with AI</span>
+            <span x-show="t1.evaluating" class="flex items-center gap-2">
+              <span class="spinner" style="width:18px;height:18px;border-width:2px;"></span>
+              AI Examiner is evaluating…
+            </span>
+          </button>
+
+          <!-- clear draft -->
+          <button @click="clearT1Draft()" class="btn btn-secondary btn-block btn-sm">🗑 Clear Draft</button>
+
+        </div>
+      </div>
+
+      <!-- ── T1 FEEDBACK PANEL ── -->
+      <div x-show="t1.feedback" x-transition class="mt-6 card fade-in" id="t1-feedback">
+        <div class="flex items-start justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 style="font-size:1.2rem;font-weight:800;">🎓 AI Examiner Feedback — Task 1</h2>
+            <p style="font-size:0.8rem;color:#64748B;">Based on official IELTS Academic Writing Band Descriptors</p>
+          </div>
+          <!-- overall band -->
+          <div class="band-circle" :style="`color:${bandColor(t1.feedback?.overall_band)};border-color:${bandColor(t1.feedback?.overall_band)};`">
+            <div style="font-size:2rem;font-weight:900;line-height:1;" x-text="t1.feedback?.overall_band"></div>
+            <div style="font-size:0.65rem;font-weight:700;opacity:0.8;" x-text="bandLabel(t1.feedback?.overall_band)"></div>
+          </div>
+        </div>
+
+        <!-- overall feedback -->
+        <div class="feedback-block mb-4">
+          <p style="font-size:0.875rem;line-height:1.7;color:#CBD5E1;" x-text="t1.feedback?.overall_feedback"></p>
+        </div>
+
+        <!-- 4 criteria -->
+        <div class="grid-2 mb-4">
+          <template x-for="crit in t1CriteriaList()" :key="crit.key">
+            <div class="card" style="padding:1rem;">
+              <div class="flex justify-between items-center mb-1">
+                <span class="criterion-name" x-text="crit.label"></span>
+                <span class="criterion-score" :style="`color:${bandColor(crit.score)}`" x-text="crit.score"></span>
+              </div>
+              <div class="crit-bar-wrap">
+                <div class="crit-bar-fill" :style="`width:${(crit.score/9)*100}%;background:${bandColor(crit.score)}`"></div>
+              </div>
+              <p style="font-size:0.8rem;color:#94A3B8;margin-top:0.5rem;line-height:1.5;" x-text="crit.feedback"></p>
+
+              <!-- strengths -->
+              <div class="mt-2" x-show="crit.strengths?.length">
+                <p style="font-size:0.7rem;font-weight:700;color:#10B981;margin-bottom:0.25rem;">STRENGTHS</p>
+                <ul class="sw-list strengths">
+                  <template x-for="s in crit.strengths" :key="s"><li x-text="s"></li></template>
+                </ul>
+              </div>
+              <!-- weaknesses -->
+              <div class="mt-2" x-show="crit.weaknesses?.length">
+                <p style="font-size:0.7rem;font-weight:700;color:#EF4444;margin-bottom:0.25rem;">AREAS TO IMPROVE</p>
+                <ul class="sw-list weaknesses">
+                  <template x-for="w in crit.weaknesses" :key="w"><li x-text="w"></li></template>
+                </ul>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- improvement tips -->
+        <div class="card mb-4" style="padding:1rem;">
+          <h3 style="font-weight:700;margin-bottom:0.75rem;font-size:0.95rem;">🚀 Improvement Tips</h3>
+          <template x-for="(tip,i) in t1.feedback?.improvement_tips" :key="i">
+            <div class="tip-item">
+              <div class="tip-num" x-text="i+1"></div>
+              <span style="color:#CBD5E1;" x-text="tip"></span>
+            </div>
+          </template>
+        </div>
+
+        <!-- model answer (collapsible) -->
+        <div class="card mb-4" style="padding:1rem;">
+          <button @click="t1.modelOpen=!t1.modelOpen" class="w-full flex items-center justify-between" style="background:none;border:none;cursor:pointer;color:#F1F5F9;">
+            <span style="font-weight:700;font-size:0.9rem;">📄 Model Answer (Band 9 Level)</span>
+            <span x-text="t1.modelOpen ? '▲' : '▼'" style="color:#94A3B8;"></span>
+          </button>
+          <div class="collapsible-content" :class="t1.modelOpen ? 'open' : 'closed'">
+            <div class="mt-3 model-answer-box" x-text="t1.task.modelAnswer || t1.feedback?.model_answer_excerpt"></div>
+          </div>
+        </div>
+
+        <!-- vocab suggestions -->
+        <div class="card" style="padding:1rem;" x-show="t1.task.vocabBand9?.length || t1.feedback?.high_band_vocabulary?.length">
+          <h3 style="font-weight:700;margin-bottom:0.5rem;font-size:0.9rem;">🔠 High-Band Vocabulary</h3>
+          <div>
+            <template x-for="v in (t1.task.vocabBand9 || t1.feedback?.high_band_vocabulary || [])" :key="v">
+              <span class="vocab-chip" x-text="v"></span>
+            </template>
+          </div>
+        </div>
+
+        <!-- time advice -->
+        <div class="mt-3" x-show="t1.feedback?.time_advice">
+          <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:0.75rem 1rem;font-size:0.85rem;color:#FCD34D;">
+            ⏰ <strong>Timing advice:</strong> <span x-text="t1.feedback?.time_advice"></span>
+          </div>
+        </div>
+      </div>
+    </div><!-- /task1 -->
+
+
+    <!-- ═══════ TASK 2 TAB ═══════ -->
+    <div x-show="activeTab==='task2'" x-transition>
+      <div class="flex gap-4 writing-split" style="align-items:flex-start;">
+
+        <!-- LEFT: question display -->
+        <div style="flex:1;min-width:0;">
+
+          <!-- question card -->
+          <div class="card mb-4">
+            <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="badge badge-primary">Task 2</span>
+                <span class="badge badge-success" x-text="t2.task.topic || 'Essay'"></span>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <!-- Cambridge 1–21 selector -->
+                <select x-model="cambridgeBook" @change="loadCambridgeBookWriting()" class="form-input" style="width:auto;padding:0.4rem 0.75rem;font-size:0.8rem;border-color:#4F46E5;font-weight:700;color:#A78BFA;background:#0A0F1D;">
+                  <template x-for="n in 21" :key="n">
+                    <option :value="n" x-text="`📚 Cambridge Academic ${n}`"></option>
+                  </template>
+                </select>
+                <!-- topic selector -->
+                <select x-model="t2.topicChoice" class="form-input" style="width:auto;padding:0.4rem 0.75rem;font-size:0.8rem;">
+
+                  <option value="Technology">Technology</option>
+                  <option value="Environment">Environment</option>
+                  <option value="Education">Education</option>
+                  <option value="Health">Health</option>
+                  <option value="Society">Society</option>
+                  <option value="Economy">Economy</option>
+                  <option value="Culture">Culture</option>
+                  <option value="Government">Government</option>
+                </select>
+                <button @click="generateTask2()" :disabled="t2.generating"
+                  class="btn btn-primary btn-sm" style="white-space:nowrap;">
+                  <span x-show="!t2.generating">✨ Generate New</span>
+                  <span x-show="t2.generating" class="flex items-center gap-1">
+                    <span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> Generating…
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <!-- question text -->
+            <div style="background:rgba(79,70,229,0.07);border-left:3px solid #4F46E5;padding:1rem 1.25rem;border-radius:0 8px 8px 0;margin-bottom:1rem;">
+              <p style="font-size:0.95rem;line-height:1.75;color:#E2E8F0;font-family:'Merriweather',serif;" x-text="t2.task.question"></p>
+            </div>
+
+            <!-- keywords -->
+            <div x-show="t2.task.keywords?.length">
+              <p style="font-size:0.7rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Key Concepts</p>
+              <div class="flex flex-wrap gap-1">
+                <template x-for="kw in t2.task.keywords" :key="kw">
+                  <span class="vocab-chip" x-text="kw"></span>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- planning template -->
+          <div class="card">
+            <div class="flex items-center justify-between mb-3">
+              <span style="font-weight:700;font-size:0.9rem;">🗺 Essay Planning</span>
+              <button @click="t2.planOpen=!t2.planOpen" class="btn btn-secondary btn-sm" x-text="t2.planOpen ? 'Hide Plan' : 'Show Plan'"></button>
+            </div>
+            <div class="collapsible-content" :class="t2.planOpen ? 'open' : 'closed'">
+              <div class="plan-row">
+                <label>Introduction</label>
+                <textarea class="plan-row-text" placeholder="Paraphrase + thesis statement…" x-model="t2.plan.intro"></textarea>
+              </div>
+              <div x-show="t2.task.planningStructure">
+                <div style="font-size:0.78rem;color:#818CF8;margin-bottom:0.5rem;" x-text="'Suggested: ' + (t2.task.planningStructure?.introduction || '')"></div>
+              </div>
+              <div class="plan-row">
+                <label>Body Paragraph 1 — Main Argument</label>
+                <textarea class="plan-row-text" placeholder="Topic sentence + supporting points + example…" x-model="t2.plan.body1"></textarea>
+              </div>
+              <div class="plan-row">
+                <label>Body Paragraph 2 — Counter / Development</label>
+                <textarea class="plan-row-text" placeholder="Alternative view or further development…" x-model="t2.plan.body2"></textarea>
+              </div>
+              <div class="plan-row">
+                <label>Conclusion</label>
+                <textarea class="plan-row-text" placeholder="Summarise main points + final position…" x-model="t2.plan.conclusion"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: writing area -->
+        <div style="width:48%;min-width:320px;">
+
+          <!-- timer -->
+          <div class="card mb-4">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <p style="font-size:0.75rem;color:#64748B;text-transform:uppercase;font-weight:700;letter-spacing:0.05em;">Task 2 Timer</p>
+                <div class="timer-display mt-1" :class="t2.timeLeft < 180 ? 'danger' : ''" x-text="formatTime(t2.timeLeft)"></div>
+              </div>
+              <div class="flex gap-2 flex-wrap">
+                <button @click="toggleTimer('t2')" class="btn btn-secondary btn-sm" x-text="t2.timerRunning ? '⏸ Pause' : '▶ Start'"></button>
+                <button @click="resetTimer('t2')" class="btn btn-secondary btn-sm">↺ Reset</button>
+              </div>
+            </div>
+            <div class="progress-bar mt-3">
+              <div class="progress-fill" :style="`width:${Math.max(0,100-(t2.timeLeft/2400*100))}%`"></div>
+            </div>
+          </div>
+
+          <!-- textarea -->
+          <div class="card mb-4">
+            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <span style="font-weight:700;font-size:0.9rem;">Your Essay</span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="wc-badge" :class="t2WordCountClass()" x-text="`${t2.wordCount} / 250 words`"></span>
+                <span x-show="t2.autoSaved" style="font-size:0.75rem;color:#10B981;">✓ Auto-saved</span>
+              </div>
+            </div>
+
+            <textarea
+              class="writing-textarea"
+              :class="t2.wordCount > 0 && t2.wordCount < 250 ? 'warn-count' : ''"
+              style="min-height:420px;"
+              placeholder="Write your essay here. Aim for 250–300 words. Structure: Introduction → Body 1 → Body 2 → Conclusion…"
+              x-model="t2.essay"
+              @input="onT2Input()"
+            ></textarea>
+
+            <div class="flex items-center justify-between mt-2 flex-wrap gap-2">
+              <div style="font-size:0.78rem;color:#64748B;">
+                <span x-show="t2.wordCount < 250" style="color:#EF4444;">⚠ Minimum 250 words required</span>
+                <span x-show="t2.wordCount >= 250" style="color:#10B981;">✓ Word count met</span>
+              </div>
+              <div style="font-size:0.78rem;color:#64748B;">Chars: <span x-text="t2.essay.length"></span></div>
+            </div>
+          </div>
+
+          <button
+            @click="evaluateTask2()"
+            :disabled="t2.evaluating || t2.wordCount < 10"
+            class="btn btn-primary btn-block btn-lg mb-4"
+            style="font-size:1rem;">
+            <span x-show="!t2.evaluating">🤖 Evaluate with AI</span>
+            <span x-show="t2.evaluating" class="flex items-center gap-2">
+              <span class="spinner" style="width:18px;height:18px;border-width:2px;"></span>
+              AI Examiner is evaluating…
+            </span>
+          </button>
+
+          <button @click="clearT2Draft()" class="btn btn-secondary btn-block btn-sm">🗑 Clear Draft</button>
+        </div>
+      </div>
+
+      <!-- ── T2 FEEDBACK PANEL ── -->
+      <div x-show="t2.feedback" x-transition class="mt-6 card fade-in" id="t2-feedback">
+        <div class="flex items-start justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 style="font-size:1.2rem;font-weight:800;">🎓 AI Examiner Feedback — Task 2</h2>
+            <p style="font-size:0.8rem;color:#64748B;">Based on official IELTS Academic Writing Band Descriptors</p>
+          </div>
+          <div class="band-circle" :style="`color:${bandColor(t2.feedback?.overall_band)};border-color:${bandColor(t2.feedback?.overall_band)};`">
+            <div style="font-size:2rem;font-weight:900;line-height:1;" x-text="t2.feedback?.overall_band"></div>
+            <div style="font-size:0.65rem;font-weight:700;opacity:0.8;" x-text="bandLabel(t2.feedback?.overall_band)"></div>
+          </div>
+        </div>
+
+        <div class="feedback-block mb-4">
+          <p style="font-size:0.875rem;line-height:1.7;color:#CBD5E1;" x-text="t2.feedback?.overall_feedback"></p>
+        </div>
+
+        <!-- 4 criteria -->
+        <div class="grid-2 mb-4">
+          <template x-for="crit in t2CriteriaList()" :key="crit.key">
+            <div class="card" style="padding:1rem;">
+              <div class="flex justify-between items-center mb-1">
+                <span class="criterion-name" x-text="crit.label"></span>
+                <span class="criterion-score" :style="`color:${bandColor(crit.score)}`" x-text="crit.score"></span>
+              </div>
+              <div class="crit-bar-wrap">
+                <div class="crit-bar-fill" :style="`width:${(crit.score/9)*100}%;background:${bandColor(crit.score)}`"></div>
+              </div>
+              <p style="font-size:0.8rem;color:#94A3B8;margin-top:0.5rem;line-height:1.5;" x-text="crit.feedback"></p>
+              <div class="mt-2" x-show="crit.strengths?.length">
+                <p style="font-size:0.7rem;font-weight:700;color:#10B981;margin-bottom:0.25rem;">STRENGTHS</p>
+                <ul class="sw-list strengths">
+                  <template x-for="s in crit.strengths" :key="s"><li x-text="s"></li></template>
+                </ul>
+              </div>
+              <div class="mt-2" x-show="crit.weaknesses?.length">
+                <p style="font-size:0.7rem;font-weight:700;color:#EF4444;margin-bottom:0.25rem;">AREAS TO IMPROVE</p>
+                <ul class="sw-list weaknesses">
+                  <template x-for="w in crit.weaknesses" :key="w"><li x-text="w"></li></template>
+                </ul>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <!-- tips -->
+        <div class="card mb-4" style="padding:1rem;">
+          <h3 style="font-weight:700;margin-bottom:0.75rem;font-size:0.95rem;">🚀 Improvement Tips</h3>
+          <template x-for="(tip,i) in t2.feedback?.improvement_tips" :key="i">
+            <div class="tip-item">
+              <div class="tip-num" x-text="i+1"></div>
+              <span style="color:#CBD5E1;" x-text="tip"></span>
+            </div>
+          </template>
+        </div>
+
+        <!-- grammar errors -->
+        <div class="card mb-4" style="padding:1rem;" x-show="t2.feedback?.grammar_errors?.length">
+          <h3 style="font-weight:700;margin-bottom:0.5rem;font-size:0.9rem;">🔍 Grammar / Language Notes</h3>
+          <ul style="list-style:none;padding:0;">
+            <template x-for="g in t2.feedback?.grammar_errors" :key="g">
+              <li style="font-size:0.85rem;color:#CBD5E1;padding:0.3rem 0;border-bottom:1px solid #1E293B;" x-text="g"></li>
+            </template>
+          </ul>
+        </div>
+
+        <!-- high-band vocabulary -->
+        <div class="card mb-4" style="padding:1rem;" x-show="t2.feedback?.high_band_vocabulary?.length">
+          <h3 style="font-weight:700;margin-bottom:0.5rem;font-size:0.9rem;">🔠 High-Band Vocabulary</h3>
+          <div>
+            <template x-for="v in (t2.feedback?.high_band_vocabulary || [])" :key="v">
+              <span class="vocab-chip" x-text="v"></span>
+            </template>
+          </div>
+        </div>
+
+        <!-- word count advice -->
+        <div class="mb-4" x-show="t2.feedback?.word_count_advice">
+          <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:0.75rem 1rem;font-size:0.85rem;color:#FCD34D;">
+            📊 <strong>Word count advice:</strong> <span x-text="t2.feedback?.word_count_advice"></span>
+          </div>
+        </div>
+
+        <!-- model answer (collapsible) -->
+        <div class="card" style="padding:1rem;">
+          <button @click="t2.modelOpen=!t2.modelOpen" class="w-full flex items-center justify-between" style="background:none;border:none;cursor:pointer;color:#F1F5F9;">
+            <span style="font-weight:700;font-size:0.9rem;">📄 Model Answer</span>
+            <span x-text="t2.modelOpen ? '▲' : '▼'" style="color:#94A3B8;"></span>
+          </button>
+          <div class="collapsible-content" :class="t2.modelOpen ? 'open' : 'closed'">
+            <div class="mt-3">
+              <div x-show="t2.task.modelAnswer">
+                <div class="model-answer-box" x-text="t2.task.modelAnswer"></div>
+              </div>
+              <div x-show="!t2.task.modelAnswer">
+                <div x-show="t2.feedback?.model_answer_intro" class="mb-3">
+                  <p style="font-size:0.75rem;font-weight:700;color:#818CF8;margin-bottom:0.35rem;">INTRODUCTION</p>
+                  <div class="model-answer-box" x-text="t2.feedback?.model_answer_intro"></div>
+                </div>
+                <div x-show="t2.feedback?.model_answer_conclusion">
+                  <p style="font-size:0.75rem;font-weight:700;color:#818CF8;margin-bottom:0.35rem;">CONCLUSION</p>
+                  <div class="model-answer-box" x-text="t2.feedback?.model_answer_conclusion"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /task2 -->
+
+
+    <!-- ═══════ FULL TEST TAB ═══════ -->
+    <div x-show="activeTab==='full'" x-transition>
+      <!-- full test header -->
+      <div class="card mb-4">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <h2 style="font-size:1.1rem;font-weight:800;">⏱ Full Writing Test — 60 Minutes</h2>
+              <span class="badge-premium-cyan" x-text="`📚 Cambridge ${cambridgeBook} · Test ${cambridgeTest}`"></span>
+            </div>
+            <p style="font-size:0.8rem;color:#64748B;">Task 1 (recommended 20 min) then Task 2 (recommended 40 min)</p>
+          </div>
+          <!-- overall timer -->
+          <div class="flex items-center gap-3 flex-wrap">
+            <div class="timer-display" :class="full.timeLeft < 300 ? 'danger' : ''" style="font-size:2rem;" x-text="formatTime(full.timeLeft)"></div>
+            <div class="flex gap-2 flex-wrap">
+              <button @click="toggleFullTimer()" class="btn btn-primary btn-sm" x-text="full.running ? '⏸ Pause' : '▶ Start Test'"></button>
+              <button @click="resetFullTest()" class="btn btn-secondary btn-sm">↺ Reset</button>
+              <button @click="submitFullTest()" :disabled="full.submitted" class="btn btn-success btn-sm">✅ Submit</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- progress bar + task indicators -->
+        <div class="mt-3">
+          <div class="progress-bar">
+            <div class="progress-fill" :style="`width:${Math.max(0,100-(full.timeLeft/3600*100))}%`"></div>
+          </div>
+          <div class="flex items-center justify-between mt-2 flex-wrap gap-2">
+            <div class="task-indicator">
+              <div class="task-indicator-dot" :class="full.activeTask==='task1'?'active':(full.task1Submitted?'done':'')"></div>
+              <span style="font-size:0.8rem;color:#94A3B8;">Task 1 <span x-show="full.task1Submitted" style="color:#10B981;">✓</span></span>
+            </div>
+            <div style="font-size:0.75rem;color:#64748B;">Auto-save: <span class="save-dot" :class="full.saving?'saving':''"></span></div>
+            <div class="task-indicator">
+              <div class="task-indicator-dot" :class="full.activeTask==='task2'?'active':(full.task2Submitted?'done':'')"></div>
+              <span style="font-size:0.8rem;color:#94A3B8;">Task 2 <span x-show="full.task2Submitted" style="color:#10B981;">✓</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- task selector -->
+      <div class="flex gap-2 mb-4">
+        <button @click="full.activeTask='task1'" class="btn flex-1" :class="full.activeTask==='task1'?'btn-primary':'btn-secondary'">📊 Task 1</button>
+        <button @click="full.activeTask='task2'" class="btn flex-1" :class="full.activeTask==='task2'?'btn-primary':'btn-secondary'">📝 Task 2</button>
+      </div>
+
+      <!-- FULL: Task 1 -->
+      <div x-show="full.activeTask==='task1'">
+        <div class="flex gap-4 writing-split" style="align-items:flex-start;">
+          <!-- prompt display -->
+          <div style="flex:1;min-width:0;" class="card">
+            <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="badge badge-primary">Task 1</span>
+                <span class="badge-premium-purple" x-text="(t1.task.chartType || 'bar').toUpperCase() + ' FIGURE'"></span>
+              </div>
+              <button type="button" @click="openFigureModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-800/60 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
+                <span>🔍</span> Enlarge Image
+              </button>
+            </div>
+            <p style="font-size:0.9rem;color:#CBD5E1;line-height:1.7;margin-bottom:1rem;" x-text="t1.task.instruction"></p>
+
+            <!-- Figure Frame -->
+            <div class="exam-figure-card mb-2">
+              <div class="exam-figure-header">
+                <div class="exam-figure-title text-xs">
+                  <span>📊 Figure 1:</span>
+                  <span class="text-cyan-300 font-bold" x-text="t1.task.chartData?.title || t1.task.title || 'Official Academic Examination Graphic'"></span>
+                </div>
+                <span class="text-[10px] text-slate-400 font-mono">Exam View</span>
+              </div>
+              <div class="exam-figure-body p-3">
+                <!-- Bar / Line / Mixed -->
+                <div class="chart-wrapper" x-show="['bar', 'line', 'mixed'].includes(t1.task.chartType)">
+                  <canvas id="full-t1-chart"></canvas>
+                </div>
+
+                <!-- Dual Pie Charts SVG -->
+                <div x-show="t1.task.chartType === 'pie'" class="space-y-3">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-center justify-items-center">
+                    <div class="pie-subcard flex flex-col items-center p-2">
+                      <div class="text-[11px] font-bold text-indigo-300 mb-1">📅 Year 1980 (Baseline)</div>
+                      <svg viewBox="0 0 160 160" class="w-36 h-36">
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#1E293B" stroke-width="36"></circle>
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#10B981" stroke-width="36" stroke-dasharray="192.26 282.74" stroke-dashoffset="0" transform="rotate(-90 80 80)"></circle>
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#8B5CF6" stroke-width="36" stroke-dasharray="50.89 282.74" stroke-dashoffset="-192.26" transform="rotate(-90 80 80)"></circle>
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#06B6D4" stroke-width="36" stroke-dasharray="25.45 282.74" stroke-dashoffset="-243.15" transform="rotate(-90 80 80)"></circle>
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#F59E0B" stroke-width="36" stroke-dasharray="14.14 282.74" stroke-dashoffset="-268.60" transform="rotate(-90 80 80)"></circle>
+                        <text x="80" y="82" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="bold">1980</text>
+                      </svg>
+                      <div class="grid grid-cols-2 gap-x-2 text-[10px] text-slate-300 mt-1">
+                        <span>🟢 Agri: 68%</span>
+                        <span>🟣 Ind: 18%</span>
+                        <span>🔵 Dom: 9%</span>
+                        <span>🟡 Eng: 5%</span>
+                      </div>
+                    </div>
+                    <div class="pie-subcard flex flex-col items-center p-2">
+                      <div class="text-[11px] font-bold text-cyan-300 mb-1">📅 Year 2020 (Modern)</div>
+                      <svg viewBox="0 0 160 160" class="w-36 h-36">
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#1E293B" stroke-width="36"></circle>
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#10B981" stroke-width="36" stroke-dasharray="158.33 282.74" stroke-dashoffset="0" transform="rotate(-90 80 80)"></circle>
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#8B5CF6" stroke-width="36" stroke-dasharray="65.03 282.74" stroke-dashoffset="-158.33" transform="rotate(-90 80 80)"></circle>
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#06B6D4" stroke-width="36" stroke-dasharray="39.58 282.74" stroke-dashoffset="-223.36" transform="rotate(-90 80 80)"></circle>
+                        <circle cx="80" cy="80" r="45" fill="none" stroke="#F59E0B" stroke-width="36" stroke-dasharray="19.79 282.74" stroke-dashoffset="-262.94" transform="rotate(-90 80 80)"></circle>
+                        <text x="80" y="82" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="bold">2020</text>
+                      </svg>
+                      <div class="grid grid-cols-2 gap-x-2 text-[10px] text-slate-300 mt-1">
+                        <span>🟢 Agri: 56%</span>
+                        <span>🟣 Ind: 23%</span>
+                        <span>🔵 Dom: 14%</span>
+                        <span>🟡 Eng: 7%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Table Format -->
+                <div x-show="t1.task.chartType === 'table'" class="overflow-x-auto rounded-lg border border-slate-700 bg-slate-900/80 p-1.5">
+                  <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+                    <thead>
+                      <tr style="background:rgba(79,70,229,0.25);">
+                        <template x-for="col in (t1.task.tableData?.headers || [])" :key="col">
+                          <th style="padding:0.5rem;text-align:left;border-bottom:1px solid #334155;color:#A5B4FC;" x-text="col"></th>
+                        </template>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="row in (t1.task.tableData?.rows || [])" :key="row[0]">
+                        <tr style="border-bottom:1px solid #1E293B;">
+                          <template x-for="(cell, cIdx) in row" :key="cIdx">
+                            <td style="padding:0.45rem;color:#E2E8F0;" :class="cIdx === 0 ? 'font-bold text-white' : ''" x-text="cell"></td>
+                          </template>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Map Format -->
+                <div x-show="t1.task.chartType === 'map'" class="space-y-2">
+                  <div class="text-[11px] font-bold text-cyan-400 mb-1">🗺️ Norbury Town Transformation: 1995 vs 2025</div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div class="bg-slate-900 border border-slate-700 rounded-lg p-2">
+                      <div class="text-[10px] font-bold text-amber-400 mb-1">Year: 1995 (Agricultural &amp; Industrial)</div>
+                      <svg viewBox="0 0 400 240" class="w-full h-auto rounded border border-slate-800 bg-[#0B132B]">
+                        <rect x="0" y="0" width="400" height="95" fill="#143622" opacity="0.7"></rect>
+                        <text x="15" y="25" fill="#86EFAC" font-size="10" font-weight="bold">Farmland Fields</text>
+                        <rect x="15" y="40" width="105" height="50" fill="#312E81" rx="4"></rect>
+                        <text x="20" y="65" fill="#DDD6FE" font-size="9" font-weight="bold">Factories &amp; Grain</text>
+                        <rect x="270" y="40" width="115" height="50" fill="#78350F" rx="4"></rect>
+                        <text x="278" y="65" fill="#FDE68A" font-size="9" font-weight="bold">Primary School</text>
+                        <path d="M 0 120 Q 200 115 400 120" stroke="#64748B" stroke-width="10" fill="none"></path>
+                        <text x="160" y="112" fill="#E2E8F0" font-size="8" font-weight="bold">2-Lane Road</text>
+                        <rect x="0" y="160" width="400" height="80" fill="#0C4A6E"></rect>
+                        <text x="15" y="225" fill="#38BDF8" font-size="11" font-weight="bold">Norbury Harbour</text>
+                        <rect x="140" y="155" width="85" height="30" fill="#1E293B" rx="3"></rect>
+                        <text x="145" y="174" fill="#94A3B8" font-size="8" font-weight="bold">Fishing Dock</text>
+                      </svg>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-700 rounded-lg p-2">
+                      <div class="text-[10px] font-bold text-emerald-400 mb-1">Year: 2025 (Redeveloped Waterfront)</div>
+                      <svg viewBox="0 0 400 240" class="w-full h-auto rounded border border-slate-800 bg-[#0B132B]">
+                        <rect x="0" y="0" width="400" height="95" fill="#1E293B" opacity="0.8"></rect>
+                        <rect x="15" y="10" width="170" height="35" fill="#047857" rx="4"></rect>
+                        <text x="22" y="28" fill="#A7F3D0" font-size="9" font-weight="bold">Residential Suburb</text>
+                        <rect x="200" y="10" width="100" height="35" fill="#4338CA" rx="4"></rect>
+                        <text x="208" y="28" fill="#E0E7FF" font-size="8" font-weight="bold">Retail Supermarket</text>
+                        <rect x="15" y="52" width="115" height="42" fill="#0E7490" rx="4"></rect>
+                        <text x="20" y="72" fill="#CFFAFE" font-size="8" font-weight="bold">Marina Apartments</text>
+                        <rect x="270" y="52" width="115" height="42" fill="#9333EA" rx="4"></rect>
+                        <text x="278" y="72" fill="#F3E8FF" font-size="8" font-weight="bold">Modern Academy</text>
+                        <path d="M 0 120 Q 160 115 180 120" stroke="#334155" stroke-width="12" fill="none"></path>
+                        <path d="M 220 120 Q 350 115 400 120" stroke="#334155" stroke-width="12" fill="none"></path>
+                        <circle cx="200" cy="120" r="14" fill="#1E293B" stroke="#38BDF8" stroke-width="2.5"></circle>
+                        <text x="189" y="123" fill="#38BDF8" font-size="7" font-weight="bold">R'bout</text>
+                        <rect x="0" y="160" width="400" height="80" fill="#0284C7"></rect>
+                        <text x="15" y="225" fill="#E0F2FE" font-size="11" font-weight="bold">Leisure Bay</text>
+                        <rect x="120" y="148" width="150" height="38" fill="#1E293B" rx="4" stroke="#06B6D4" stroke-width="1.5"></rect>
+                        <text x="130" y="166" fill="#67E8F9" font-size="9" font-weight="bold">Yacht Marina &amp; Ferry</text>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Process Flowchart Format -->
+                <div x-show="t1.task.chartType === 'process'" class="space-y-2">
+                  <div class="text-[11px] font-bold text-amber-400">⚙️ 6-Stage Recycling Flowchart</div>
+                  <div class="process-svg-wrapper bg-[#0A1022] p-2 rounded-lg border border-slate-800">
+                    <svg viewBox="0 0 840 220" class="w-full h-auto">
+                      <line x1="210" y1="50" x2="310" y2="50" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4"></line>
+                      <line x1="490" y1="50" x2="590" y2="50" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4"></line>
+                      <path d="M 680 80 L 680 135" stroke="#F59E0B" stroke-width="3" stroke-dasharray="6 4"></path>
+                      <line x1="590" y1="165" x2="490" y2="165" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4"></line>
+                      <line x1="310" y1="165" x2="210" y2="165" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4"></line>
+                      <g transform="translate(30, 15)">
+                        <rect width="180" height="65" rx="6" fill="#111B30" stroke="#4F46E5" stroke-width="1.5"></rect>
+                        <text x="15" y="25" fill="#C7D2FE" font-size="10" font-weight="bold">1. Sorting &amp; Bins</text>
+                        <text x="15" y="45" fill="#94A3B8" font-size="8">Optical color camera</text>
+                      </g>
+                      <g transform="translate(310, 15)">
+                        <rect width="180" height="65" rx="6" fill="#111B30" stroke="#06B6D4" stroke-width="1.5"></rect>
+                        <text x="15" y="25" fill="#A5F3FC" font-size="10" font-weight="bold">2. Crushing / Cullet</text>
+                        <text x="15" y="45" fill="#94A3B8" font-size="8">Magnetic cap removal</text>
+                      </g>
+                      <g transform="translate(590, 15)">
+                        <rect width="180" height="65" rx="6" fill="#111B30" stroke="#EF4444" stroke-width="1.5"></rect>
+                        <text x="15" y="25" fill="#FECACA" font-size="10" font-weight="bold">3. Smelting 1500°C</text>
+                        <text x="15" y="45" fill="#F87171" font-size="8">Blended with soda ash</text>
+                      </g>
+                      <g transform="translate(590, 135)">
+                        <rect width="180" height="65" rx="6" fill="#111B30" stroke="#F59E0B" stroke-width="1.5"></rect>
+                        <text x="15" y="25" fill="#FDE68A" font-size="10" font-weight="bold">4. Mould &amp; Blowing</text>
+                        <text x="15" y="45" fill="#94A3B8" font-size="8">Compressed air forming</text>
+                      </g>
+                      <g transform="translate(310, 135)">
+                        <rect width="180" height="65" rx="6" fill="#111B30" stroke="#10B981" stroke-width="1.5"></rect>
+                        <text x="15" y="25" fill="#A7F3D0" font-size="10" font-weight="bold">5. Annealing Lehr</text>
+                        <text x="15" y="45" fill="#94A3B8" font-size="8">Thermal stress relief</text>
+                      </g>
+                      <g transform="translate(30, 135)">
+                        <rect width="180" height="65" rx="6" fill="#111B30" stroke="#8B5CF6" stroke-width="1.5"></rect>
+                        <text x="15" y="25" fill="#DDD6FE" font-size="10" font-weight="bold">6. Laser Inspection</text>
+                        <text x="15" y="45" fill="#94A3B8" font-size="8">Scan &amp; dispatch bottles</text>
+                      </g>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- writing -->
+          <div style="width:48%;min-width:300px;" class="card">
+            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <span style="font-weight:700;">Task 1 Response</span>
+              <span class="wc-badge" :class="full.t1WordCount < 150 ? 'below' : 'reached'" x-text="`${full.t1WordCount} words`"></span>
+            </div>
+            <textarea class="writing-textarea" style="min-height:320px;"
+              placeholder="Write Task 1 here (min. 150 words)…"
+              x-model="full.t1Essay"
+              @input="full.t1WordCount = countWords(full.t1Essay)">
+            </textarea>
+            <button @click="full.task1Submitted=true;Toast.success('Task 1 saved! Move to Task 2.')" class="btn btn-success btn-block btn-sm mt-3">✓ Save &amp; Move to Task 2</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FULL: Task 2 -->
+      <div x-show="full.activeTask==='task2'">
+        <div class="flex gap-4 writing-split" style="align-items:flex-start;">
+          <!-- prompt display -->
+          <div style="flex:1;min-width:0;" class="card">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="badge badge-primary">Task 2</span>
+              <span style="font-size:0.8rem;color:#94A3B8;">Recommended: 40 minutes</span>
+            </div>
+            <div style="background:rgba(79,70,229,0.07);border-left:3px solid #4F46E5;padding:1rem;border-radius:0 8px 8px 0;">
+              <p style="font-size:0.95rem;line-height:1.75;color:#E2E8F0;font-family:'Merriweather',serif;" x-text="t2.task.question"></p>
+            </div>
+          </div>
+          <!-- writing -->
+          <div style="width:48%;min-width:300px;" class="card">
+            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <span style="font-weight:700;">Task 2 Essay</span>
+              <span class="wc-badge" :class="full.t2WordCount < 250 ? 'below' : 'reached'" x-text="`${full.t2WordCount} words`"></span>
+            </div>
+            <textarea class="writing-textarea" style="min-height:380px;"
+              placeholder="Write Task 2 here (min. 250 words)…"
+              x-model="full.t2Essay"
+              @input="full.t2WordCount = countWords(full.t2Essay)">
+            </textarea>
+            <button @click="full.task2Submitted=true;Toast.success('Task 2 saved!')" class="btn btn-success btn-block btn-sm mt-3">✓ Save Task 2</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- full test result after submit -->
+      <div x-show="full.submitted" x-transition class="mt-6 card text-center fade-in" style="padding:2.5rem;">
+        <div style="font-size:3rem;margin-bottom:1rem;">🎉</div>
+        <h2 style="font-size:1.5rem;font-weight:900;margin-bottom:0.5rem;">Test Complete!</h2>
+        <p style="color:#94A3B8;margin-bottom:1.5rem;">Your writing has been saved. Use the individual Task 1 &amp; Task 2 tabs to get AI feedback.</p>
+        <div class="flex gap-3 justify-center flex-wrap">
+          <button @click="switchTab('task1');t1.essay=full.t1Essay;onT1Input();" class="btn btn-primary">📊 Evaluate Task 1</button>
+          <button @click="switchTab('task2');t2.essay=full.t2Essay;onT2Input();" class="btn btn-primary">📝 Evaluate Task 2</button>
+        </div>
+      </div>
+    </div><!-- /full -->
+
+
+    <!-- ═══════ PRACTICE TAB ═══════ -->
+    <div x-show="activeTab==='practice'" x-transition>
+      <div class="grid-2 mb-6">
+        <!-- vocab builder -->
+        <div class="card">
+          <h3 style="font-weight:800;margin-bottom:1rem;">🔠 Academic Vocabulary Builder</h3>
+          <p style="font-size:0.85rem;color:#94A3B8;margin-bottom:1rem;">Essential words for IELTS Academic Writing. Click to reveal meaning.</p>
+          <div class="flex flex-wrap gap-2">
+            <template x-for="item in practiceVocab" :key="item.word">
+              <div @click="item.revealed=!item.revealed"
+                style="cursor:pointer;border-radius:8px;padding:0.5rem 0.75rem;font-size:0.8rem;transition:all 0.2s;"
+                :style="item.revealed ? 'background:rgba(79,70,229,0.2);border:1px solid #4F46E5;' : 'background:#1E293B;border:1px solid #334155;'">
+                <div style="font-weight:700;color:#F1F5F9;" x-text="item.word"></div>
+                <div x-show="item.revealed" style="color:#94A3B8;font-size:0.75rem;margin-top:0.2rem;" x-text="item.meaning"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- linking words -->
+        <div class="card">
+          <h3 style="font-weight:800;margin-bottom:1rem;">🔗 Linking Words &amp; Phrases</h3>
+          <div class="space-y-3">
+            <template x-for="group in linkingWords" :key="group.cat">
+              <div>
+                <p style="font-size:0.7rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.35rem;" x-text="group.cat"></p>
+                <div class="flex flex-wrap gap-1">
+                  <template x-for="w in group.words" :key="w">
+                    <span class="vocab-chip" x-text="w"></span>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- task 1 language -->
+        <div class="card">
+          <h3 style="font-weight:800;margin-bottom:1rem;">📊 Task 1 Language Bank</h3>
+          <div class="space-y-3">
+            <template x-for="grp in t1Language" :key="grp.cat">
+              <div>
+                <p style="font-size:0.7rem;font-weight:700;color:#06B6D4;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.35rem;" x-text="grp.cat"></p>
+                <div class="flex flex-wrap gap-1">
+                  <template x-for="ph in grp.phrases" :key="ph">
+                    <span style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);color:#06B6D4;border-radius:6px;padding:0.2rem 0.5rem;font-size:0.75rem;" x-text="ph"></span>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- band descriptors -->
+        <div class="card">
+          <h3 style="font-weight:800;margin-bottom:1rem;">🎯 Band Descriptors Reference</h3>
+          <div class="space-y-2">
+            <template x-for="bd in bandDescriptors" :key="bd.band">
+              <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;border-radius:8px;background:rgba(255,255,255,0.03);">
+                <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;flex-shrink:0;"
+                  :style="`color:${bandColor(bd.band)};border:2px solid ${bandColor(bd.band)};background:transparent;`"
+                  x-text="bd.band"></div>
+                <div>
+                  <div style="font-weight:700;font-size:0.85rem;" :style="`color:${bandColor(bd.band)}`" x-text="bd.label"></div>
+                  <div style="font-size:0.78rem;color:#94A3B8;" x-text="bd.desc"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- sentence starters -->
+      <div class="card mb-4">
+        <h3 style="font-weight:800;margin-bottom:1rem;">✏️ Sentence Starter Templates</h3>
+        <div class="grid-2">
+          <template x-for="st in sentenceStarters" :key="st.context">
+            <div>
+              <p style="font-size:0.7rem;font-weight:700;color:#F59E0B;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.35rem;" x-text="st.context"></p>
+              <ul style="list-style:none;padding:0;">
+                <template x-for="s in st.starters" :key="s">
+                  <li style="font-size:0.82rem;color:#CBD5E1;padding:0.25rem 0;border-bottom:1px dashed #1E293B;" x-text="s"></li>
+                </template>
+              </ul>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- mini writing challenge -->
+      <div class="card">
+        <h3 style="font-weight:800;margin-bottom:0.5rem;">⚡ Quick Writing Challenge</h3>
+        <p style="font-size:0.85rem;color:#94A3B8;margin-bottom:1rem;">Write a single overview paragraph for the Task 1 chart shown above (2–3 sentences, no data needed).</p>
+        <textarea class="writing-textarea" style="min-height:100px;" placeholder="The chart clearly shows that overall… The most striking trend is… In general…" x-model="practice.miniEssay" @input="practice.miniWC = countWords(practice.miniEssay)"></textarea>
+        <div class="flex items-center justify-between mt-2 flex-wrap gap-2">
+          <span style="font-size:0.8rem;color:#94A3B8;">Words: <span x-text="practice.miniWC"></span></span>
+          <button @click="practice.miniEssay='';practice.miniWC=0;" class="btn btn-secondary btn-sm">Clear</button>
+        </div>
+      </div>
+    </div><!-- /practice -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- HIGH RESOLUTION EXAM FIGURE MODAL (FULLSCREEN / ZOOM VIEW) -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div x-show="figureModalOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="figure-modal-overlay" 
+         style="display: none;"
+         @keydown.escape.window="figureModalOpen = false">
+      
+      <div class="figure-modal-dialog" @click.away="figureModalOpen = false">
+        <!-- Modal Header -->
+        <div class="figure-modal-header">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🔍</span>
+            <div>
+              <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                <span>Figure 1: High-Resolution Examination Diagram</span>
+                <span class="badge-premium-cyan" x-text="(t1.task.chartType || 'bar').toUpperCase()"></span>
+              </h3>
+              <p class="text-xs text-slate-400" x-text="t1.task.chartData?.title || t1.task.title || 'Official Academic Examination Graphic'"></p>
+            </div>
+          </div>
+          <button type="button" @click="figureModalOpen = false" class="figure-modal-close-btn" title="Close Modal">
+            ✕
+          </button>
+        </div>
+
+        <!-- Modal Body (Enlarged Graphic) -->
+        <div class="figure-modal-body p-6 overflow-y-auto max-h-[75vh]">
+          
+          <!-- Bar / Line / Mixed Modal Canvas -->
+          <div x-show="['bar', 'line', 'mixed'].includes(t1.task.chartType)" class="w-full">
+            <div class="p-4 bg-slate-900/90 rounded-2xl border border-slate-700/80">
+              <div style="height: 420px; width: 100%;">
+                <canvas id="modal-t1-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pie Charts Modal View -->
+          <div x-show="t1.task.chartType === 'pie'" class="space-y-6">
+            <div class="text-center text-sm font-semibold text-slate-300">
+              Global Freshwater Allocation by Sector (1980 Baseline vs 2020 Modern Distribution)
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center justify-items-center">
+              <!-- 1980 Large -->
+              <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-6 flex flex-col items-center w-full max-w-md">
+                <div class="text-sm font-bold text-indigo-300 mb-3">📅 Year 1980 (Baseline Distribution)</div>
+                <svg viewBox="0 0 160 160" class="w-64 h-64">
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#1E293B" stroke-width="36"></circle>
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#10B981" stroke-width="36" stroke-dasharray="192.26 282.74" stroke-dashoffset="0" transform="rotate(-90 80 80)"></circle>
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#8B5CF6" stroke-width="36" stroke-dasharray="50.89 282.74" stroke-dashoffset="-192.26" transform="rotate(-90 80 80)"></circle>
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#06B6D4" stroke-width="36" stroke-dasharray="25.45 282.74" stroke-dashoffset="-243.15" transform="rotate(-90 80 80)"></circle>
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#F59E0B" stroke-width="36" stroke-dasharray="14.14 282.74" stroke-dashoffset="-268.60" transform="rotate(-90 80 80)"></circle>
+                  <text x="80" y="76" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="bold">1980</text>
+                  <text x="80" y="92" text-anchor="middle" fill="#94A3B8" font-size="10">Total: 100%</text>
+                </svg>
+                <div class="grid grid-cols-2 gap-3 mt-4 text-xs text-slate-200 w-full px-4">
+                  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Agriculture: <strong>68%</strong></div>
+                  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500"></span> Industry: <strong>18%</strong></div>
+                  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-500"></span> Domestic: <strong>9%</strong></div>
+                  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> Energy: <strong>5%</strong></div>
+                </div>
+              </div>
+
+              <!-- 2020 Large -->
+              <div class="bg-slate-900/90 border border-slate-700 rounded-2xl p-6 flex flex-col items-center w-full max-w-md">
+                <div class="text-sm font-bold text-cyan-300 mb-3">📅 Year 2020 (Modern Allocation)</div>
+                <svg viewBox="0 0 160 160" class="w-64 h-64">
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#1E293B" stroke-width="36"></circle>
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#10B981" stroke-width="36" stroke-dasharray="158.33 282.74" stroke-dashoffset="0" transform="rotate(-90 80 80)"></circle>
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#8B5CF6" stroke-width="36" stroke-dasharray="65.03 282.74" stroke-dashoffset="-158.33" transform="rotate(-90 80 80)"></circle>
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#06B6D4" stroke-width="36" stroke-dasharray="39.58 282.74" stroke-dashoffset="-223.36" transform="rotate(-90 80 80)"></circle>
+                  <circle cx="80" cy="80" r="45" fill="none" stroke="#F59E0B" stroke-width="36" stroke-dasharray="19.79 282.74" stroke-dashoffset="-262.94" transform="rotate(-90 80 80)"></circle>
+                  <text x="80" y="76" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="bold">2020</text>
+                  <text x="80" y="92" text-anchor="middle" fill="#94A3B8" font-size="10">Total: 100%</text>
+                </svg>
+                <div class="grid grid-cols-2 gap-3 mt-4 text-xs text-slate-200 w-full px-4">
+                  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Agriculture: <strong>56%</strong></div>
+                  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500"></span> Industry: <strong>23%</strong></div>
+                  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-500"></span> Domestic: <strong>14%</strong></div>
+                  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> Energy: <strong>7%</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table Modal View -->
+          <div x-show="t1.task.chartType === 'table'" class="overflow-x-auto rounded-xl border border-slate-700 bg-slate-900/95 p-4">
+            <table style="width:100%;border-collapse:collapse;font-size:0.95rem;">
+              <thead>
+                <tr style="background:rgba(79,70,229,0.35);">
+                  <template x-for="col in (t1.task.tableData?.headers || [])" :key="col">
+                    <th style="padding:0.75rem 1rem;text-align:left;border-bottom:2px solid #475569;color:#C7D2FE;font-weight:700;" x-text="col"></th>
+                  </template>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="row in (t1.task.tableData?.rows || [])" :key="row[0]">
+                  <tr style="border-bottom:1px solid #334155;">
+                    <template x-for="(cell, cIdx) in row" :key="cIdx">
+                      <td style="padding:0.75rem 1rem;color:#F1F5F9;" :class="cIdx === 0 ? 'font-bold text-white' : ''" x-text="cell"></td>
+                    </template>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Map Modal View -->
+          <div x-show="t1.task.chartType === 'map'" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+                <div class="text-xs font-bold text-amber-400 mb-2">📅 Year: 1995 (Agricultural &amp; Heavy Industrial Town)</div>
+                <svg viewBox="0 0 400 260" class="w-full h-auto rounded-lg border border-slate-800 bg-[#0B132B]">
+                  <rect x="0" y="0" width="400" height="100" fill="#143622" opacity="0.7"></rect>
+                  <text x="15" y="25" fill="#86EFAC" font-size="11" font-weight="bold">Farmland &amp; Pasture</text>
+                  <rect x="15" y="45" width="115" height="55" fill="#312E81" rx="4"></rect>
+                  <text x="22" y="70" fill="#DDD6FE" font-size="10" font-weight="bold">Factories &amp; Stores</text>
+                  <rect x="270" y="45" width="115" height="55" fill="#78350F" rx="4"></rect>
+                  <text x="278" y="70" fill="#FDE68A" font-size="10" font-weight="bold">Primary School</text>
+                  <path d="M 0 135 Q 200 130 400 135" stroke="#64748B" stroke-width="12" fill="none"></path>
+                  <text x="160" y="125" fill="#E2E8F0" font-size="9" font-weight="bold">Two-Lane Main Road</text>
+                  <rect x="0" y="180" width="400" height="80" fill="#0C4A6E"></rect>
+                  <text x="15" y="245" fill="#38BDF8" font-size="12" font-weight="bold">Norbury Sea &amp; Harbour</text>
+                  <rect x="150" y="175" width="80" height="35" fill="#1E293B" rx="3"></rect>
+                  <text x="155" y="195" fill="#94A3B8" font-size="9" font-weight="bold">Commercial Dock</text>
+                  <circle cx="370" cy="30" r="14" fill="#1E293B" stroke="#64748B" stroke-width="1.5"></circle>
+                  <text x="367" y="23" fill="#F8FAFC" font-size="9" font-weight="bold">N</text>
+                </svg>
+              </div>
+              <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+                <div class="text-xs font-bold text-emerald-400 mb-2">📅 Year: 2025 (Redeveloped Waterfront &amp; Modern Suburbs)</div>
+                <svg viewBox="0 0 400 260" class="w-full h-auto rounded-lg border border-slate-800 bg-[#0B132B]">
+                  <rect x="0" y="0" width="400" height="100" fill="#1E293B" opacity="0.8"></rect>
+                  <rect x="15" y="10" width="180" height="40" fill="#047857" rx="4"></rect>
+                  <text x="25" y="28" fill="#A7F3D0" font-size="10" font-weight="bold">New Residential Suburb</text>
+                  <rect x="210" y="10" width="105" height="40" fill="#4338CA" rx="4"></rect>
+                  <text x="218" y="28" fill="#E0E7FF" font-size="9" font-weight="bold">Supermarket Complex</text>
+                  <rect x="15" y="58" width="125" height="55" fill="#0E7490" rx="4"></rect>
+                  <text x="22" y="80" fill="#CFFAFE" font-size="9" font-weight="bold">Waterfront Apartments</text>
+                  <rect x="270" y="58" width="115" height="50" fill="#9333EA" rx="4"></rect>
+                  <text x="278" y="78" fill="#F3E8FF" font-size="9" font-weight="bold">Modern Academy</text>
+                  <path d="M 0 135 Q 160 130 180 135" stroke="#334155" stroke-width="16" fill="none"></path>
+                  <path d="M 220 135 Q 350 130 400 135" stroke="#334155" stroke-width="16" fill="none"></path>
+                  <circle cx="200" cy="135" r="18" fill="#1E293B" stroke="#38BDF8" stroke-width="3"></circle>
+                  <text x="188" y="139" fill="#38BDF8" font-size="9" font-weight="bold">R'bout</text>
+                  <rect x="0" y="180" width="400" height="80" fill="#0284C7"></rect>
+                  <text x="15" y="245" fill="#E0F2FE" font-size="12" font-weight="bold">Norbury Leisure Bay</text>
+                  <rect x="120" y="165" width="160" height="45" fill="#1E293B" rx="4" stroke="#06B6D4" stroke-width="1.5"></rect>
+                  <text x="130" y="185" fill="#67E8F9" font-size="10" font-weight="bold">Marina &amp; Ferry Terminal</text>
+                  <circle cx="370" cy="30" r="14" fill="#1E293B" stroke="#06B6D4" stroke-width="1.5"></circle>
+                  <text x="367" y="23" fill="#38BDF8" font-size="9" font-weight="bold">N</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Process Modal View -->
+          <div x-show="t1.task.chartType === 'process'" class="space-y-4">
+            <div class="text-xs font-bold text-amber-400 mb-2">⚙️ Industrial Glass Recycling Flowchart (Full High-Resolution Diagram)</div>
+            <div class="bg-[#0A1022] p-4 rounded-xl border border-slate-800">
+              <svg viewBox="0 0 840 240" class="w-full h-auto">
+                <line x1="210" y1="55" x2="310" y2="55" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4"></line>
+                <line x1="490" y1="55" x2="590" y2="55" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4"></line>
+                <path d="M 680 90 L 680 145" stroke="#F59E0B" stroke-width="3" stroke-dasharray="6 4"></path>
+                <line x1="590" y1="180" x2="490" y2="180" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4"></line>
+                <line x1="310" y1="180" x2="210" y2="180" stroke="#06B6D4" stroke-width="3" stroke-dasharray="6 4"></line>
+                <path d="M 50 145 C 10 145, 10 90, 50 90" stroke="#10B981" stroke-width="2.5" stroke-dasharray="5 3" fill="none"></path>
+
+                <g transform="translate(30, 15)">
+                  <rect width="180" height="75" rx="8" fill="#111B30" stroke="#4F46E5" stroke-width="1.5"></rect>
+                  <circle cx="20" cy="22" r="11" fill="#4F46E5"></circle>
+                  <text x="20" y="26" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">1</text>
+                  <text x="38" y="25" fill="#C7D2FE" font-size="10" font-weight="bold">Collection &amp; Sorting</text>
+                  <text x="14" y="45" fill="#94A3B8" font-size="8.5">• Deposit in recycling bins</text>
+                  <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Optical camera sorting</text>
+                </g>
+                <g transform="translate(310, 15)">
+                  <rect width="180" height="75" rx="8" fill="#111B30" stroke="#06B6D4" stroke-width="1.5"></rect>
+                  <circle cx="20" cy="22" r="11" fill="#06B6D4"></circle>
+                  <text x="20" y="26" fill="#000000" font-size="10" font-weight="bold" text-anchor="middle">2</text>
+                  <text x="38" y="25" fill="#A5F3FC" font-size="10" font-weight="bold">Crushing &amp; Cullet</text>
+                  <text x="14" y="45" fill="#94A3B8" font-size="8.5">• Heavy rollers crush into cullet</text>
+                  <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Magnetic separator removes caps</text>
+                </g>
+                <g transform="translate(590, 15)">
+                  <rect width="180" height="75" rx="8" fill="#111B30" stroke="#EF4444" stroke-width="1.5"></rect>
+                  <circle cx="20" cy="22" r="11" fill="#EF4444"></circle>
+                  <text x="20" y="26" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">3</text>
+                  <text x="38" y="25" fill="#FECACA" font-size="10" font-weight="bold">Furnace Smelting</text>
+                  <text x="14" y="45" fill="#F87171" font-size="9" font-weight="bold">🔥 Heated to 1500°C</text>
+                  <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Blended with soda ash &amp; silica</text>
+                </g>
+                <g transform="translate(590, 145)">
+                  <rect width="180" height="75" rx="8" fill="#111B30" stroke="#F59E0B" stroke-width="1.5"></rect>
+                  <circle cx="20" cy="22" r="11" fill="#F59E0B"></circle>
+                  <text x="20" y="26" fill="#000000" font-size="10" font-weight="bold" text-anchor="middle">4</text>
+                  <text x="38" y="25" fill="#FDE68A" font-size="10" font-weight="bold">Mould Injection</text>
+                  <text x="14" y="45" fill="#94A3B8" font-size="8.5">• Molten glass gobs cut</text>
+                  <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Compressed air blow shaping</text>
+                </g>
+                <g transform="translate(310, 145)">
+                  <rect width="180" height="75" rx="8" fill="#111B30" stroke="#10B981" stroke-width="1.5"></rect>
+                  <circle cx="20" cy="22" r="11" fill="#10B981"></circle>
+                  <text x="20" y="26" fill="#000000" font-size="10" font-weight="bold" text-anchor="middle">5</text>
+                  <text x="38" y="25" fill="#A7F3D0" font-size="10" font-weight="bold">Annealing Lehr</text>
+                  <text x="14" y="45" fill="#94A3B8" font-size="8.5">• Gradual cooling lehr tunnel</text>
+                  <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Prevents thermal stress fractures</text>
+                </g>
+                <g transform="translate(30, 145)">
+                  <rect width="180" height="75" rx="8" fill="#111B30" stroke="#8B5CF6" stroke-width="1.5"></rect>
+                  <circle cx="20" cy="22" r="11" fill="#8B5CF6"></circle>
+                  <text x="20" y="26" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">6</text>
+                  <text x="38" y="25" fill="#DDD6FE" font-size="10" font-weight="bold">Inspection &amp; Dispatch</text>
+                  <text x="14" y="45" fill="#94A3B8" font-size="8.5">• High-speed laser scanner checks</text>
+                  <text x="14" y="58" fill="#94A3B8" font-size="8.5">• Packed and delivered to bottlers</text>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="figure-modal-footer">
+          <span class="text-xs text-slate-400">💡 Tip: Press ESC or click outside to return to test writing interface.</span>
+          <button type="button" @click="figureModalOpen = false" class="btn btn-secondary btn-sm">Close Figure</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-body -->
+</main><!-- /main -->
+
+
+<!-- ═══════════════════ ALPINE JS APP ═══════════════════ -->
+<script>
+function WritingApp() {
+  return {
+
+    /* ─── shared ─── */
+    activeTab: 'task1',
+    cambridgeBook: 1,
+    cambridgeTest: 1,
+    isAiTest: false,
+    mapViewMode: 'side',
+    figureModalOpen: false,
+    rubricDrawerOpen: false,
+    fontSize: 'standard',
+    contrastMode: 'obsidian',
+    modalZoom: 100,
+    highlightPrompt: false,
+    t1Chart: null,
+    fullT1Chart: null,
+    modalT1Chart: null,
+
+
+    /* ─── task 1 ─── */
+
+    t1: {
+      task: {},
+      essay: '',
+      wordCount: 0,
+      timeLeft: 1200,     // 20 min
+      timerRunning: false,
+      timerInterval: null,
+      evaluating: false,
+      generating: false,
+      feedback: null,
+      autoSaved: false,
+      suggestOpen: false,
+      modelOpen: false,
+      chartTypeChoice: 'bar',
+    },
+
+    /* ─── task 2 ─── */
+    t2: {
+      task: {},
+      essay: '',
+      wordCount: 0,
+      timeLeft: 2400,     // 40 min
+      timerRunning: false,
+      timerInterval: null,
+      evaluating: false,
+      generating: false,
+      feedback: null,
+      autoSaved: false,
+      planOpen: false,
+      modelOpen: false,
+      topicChoice: 'Technology',
+      plan: { intro: '', body1: '', body2: '', conclusion: '' },
+    },
+
+    /* ─── full test ─── */
+    full: {
+      timeLeft: 3600,     // 60 min
+      running: false,
+      interval: null,
+      activeTask: 'task1',
+      t1Essay: '',
+      t2Essay: '',
+      t1WordCount: 0,
+      t2WordCount: 0,
+      task1Submitted: false,
+      task2Submitted: false,
+      submitted: false,
+      saving: false,
+      autoSaveInterval: null,
+    },
+
+    /* ─── practice data ─── */
+    practiceVocab: [
+      { word: 'proliferate', meaning: 'increase rapidly in number', revealed: false },
+      { word: 'unprecedented', meaning: 'never done or known before', revealed: false },
+      { word: 'exacerbate', meaning: 'make a problem worse', revealed: false },
+      { word: 'mitigate', meaning: 'make less severe', revealed: false },
+      { word: 'paradigm', meaning: 'a typical example or pattern', revealed: false },
+      { word: 'disparity', meaning: 'a great difference', revealed: false },
+      { word: 'pervasive', meaning: 'spreading widely throughout', revealed: false },
+      { word: 'tangible', meaning: 'clear and definite; real', revealed: false },
+      { word: 'detrimental', meaning: 'tending to cause harm', revealed: false },
+      { word: 'compelling', meaning: 'evoking interest or admiration', revealed: false },
+      { word: 'substantial', meaning: 'of considerable importance', revealed: false },
+      { word: 'intrinsic', meaning: 'belonging naturally; essential', revealed: false },
+      { word: 'marginal', meaning: 'relating to minor differences', revealed: false },
+      { word: 'trajectory', meaning: 'path of development over time', revealed: false },
+      { word: 'counterpart', meaning: 'a person with same role elsewhere', revealed: false },
+      { word: 'demographic', meaning: 'relating to population statistics', revealed: false },
+    ],
+
+    linkingWords: [
+      { cat: 'Addition', words: ['Furthermore', 'Moreover', 'In addition', 'Additionally', 'Likewise'] },
+      { cat: 'Contrast', words: ['However', 'Nevertheless', 'In contrast', 'Conversely', 'Despite this', 'Whereas'] },
+      { cat: 'Cause / Effect', words: ['Consequently', 'As a result', 'Therefore', 'This leads to', 'Hence'] },
+      { cat: 'Concession', words: ['Although', 'While it is true that', 'Admittedly', 'Even though', 'Granted that'] },
+      { cat: 'Illustration', words: ['For instance', 'For example', 'To illustrate', 'Such as', 'Namely'] },
+      { cat: 'Conclusion', words: ['In conclusion', 'To summarise', 'Overall', 'In summary', 'On balance'] },
+    ],
+
+    t1Language: [
+      { cat: 'Describing Trends (up)', phrases: ['rose sharply', 'increased steadily', 'climbed to', 'surged by', 'reached a peak of'] },
+      { cat: 'Describing Trends (down)', phrases: ['fell dramatically', 'declined gradually', 'dropped to', 'plummeted by', 'reached a low of'] },
+      { cat: 'No Change', phrases: ['remained stable', 'levelled off', 'stayed constant', 'fluctuated slightly around'] },
+      { cat: 'Comparisons', phrases: ['significantly higher than', 'roughly double', 'approximately three times', 'marginally lower than', 'considerably more than'] },
+      { cat: 'Overview', phrases: ['Overall, it is clear that', 'The most striking trend is', 'In general, it can be seen that', 'The chart reveals that'] },
+    ],
+
+    bandDescriptors: [
+      { band: 9,   label: 'Expert',           desc: 'Fully satisfies all requirements, appropriate register' },
+      { band: 8,   label: 'Very Good',         desc: 'Covers requirements, few lapses in accuracy or appropriacy' },
+      { band: 7,   label: 'Good',              desc: 'Covers main requirements, some lapses in cohesion/vocabulary' },
+      { band: 6,   label: 'Competent',         desc: 'Addresses requirements adequately but not fully' },
+      { band: 5,   label: 'Modest',            desc: 'Partially addresses requirements, noticeable errors' },
+      { band: 4,   label: 'Limited',           desc: 'Inadequate response, many errors impede communication' },
+    ],
+
+    sentenceStarters: [
+      {
+        context: 'Task 1 — Introducing',
+        starters: [
+          'The bar/line graph illustrates…',
+          'The chart provides data on…',
+          'The diagram compares…',
+          'As shown in the graph, …',
+        ]
+      },
+      {
+        context: 'Task 1 — Overview',
+        starters: [
+          'Overall, it is clear that…',
+          'In general, the data suggests…',
+          'The most notable trend is…',
+          'A striking feature of the data is…',
+        ]
+      },
+      {
+        context: 'Task 2 — Introduction',
+        starters: [
+          'In recent years, there has been considerable debate about…',
+          'The question of whether … has generated significant controversy.',
+          'It is widely argued that…; however, others contend that…',
+        ]
+      },
+      {
+        context: 'Task 2 — Body Paragraph',
+        starters: [
+          'One compelling argument in favour of … is…',
+          'Proponents of … contend that…',
+          'Perhaps the most significant factor is…',
+          'This can be illustrated by the example of…',
+        ]
+      },
+      {
+        context: 'Task 2 — Counter-argument',
+        starters: [
+          'On the other hand, critics argue that…',
+          'Nevertheless, it would be misguided to…',
+          'While this view has merit, it overlooks…',
+          'A counterargument to this position is…',
+        ]
+      },
+      {
+        context: 'Task 2 — Conclusion',
+        starters: [
+          'In conclusion, although…, I believe that…',
+          'To summarise, the evidence suggests…',
+          'On balance, it seems that…',
+          'Overall, while challenges remain, …',
+        ]
+      },
+    ],
+
+    practice: { miniEssay: '', miniWC: 0 },
+
+    /* ══════════════════════════════════════
+       INIT
+    ══════════════════════════════════════ */
+    init() {
+      Auth.requireAuth();
+
+      // sidebar user name
+      const user = Auth.getUser();
+      const el = document.getElementById('sidebar-user');
+      if (el && user) el.textContent = user.name || user.email || 'Student';
+
+      // check URL for book and test parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAi = urlParams.get('source') === 'ai';
+
+      const paramBook = parseInt(urlParams.get('book'), 10);
+      if (paramBook && paramBook >= 1 && paramBook <= 21) {
+        this.cambridgeBook = paramBook;
+      }
+      const paramTest = parseInt(urlParams.get('test'), 10);
+      if (paramTest && paramTest >= 1 && paramTest <= 4) {
+        this.cambridgeTest = paramTest;
+      }
+
+      if (isAi) {
+        this.isAiTest = true;
+        const aiTestStr = localStorage.getItem('ielts_ai_generated_test');
+        let loaded = false;
+        if (aiTestStr) {
+          try {
+            const parsed = JSON.parse(aiTestStr);
+            const t1Data = parsed.writing_t1 || parsed.task1 || (parsed.writing && parsed.writing.task1) || (parsed.task_instruction ? parsed : null);
+            const t2Data = parsed.writing_t2 || parsed.task2 || (parsed.writing && parsed.writing.task2) || (parsed.question ? parsed : null);
+
+            if (t1Data) {
+              this.t1.task = this.buildT1Task({
+                chartType:   t1Data.chart_type || t1Data.chartType || 'bar',
+                instruction: t1Data.task_instruction || t1Data.instruction || t1Data.title || '',
+                chartData:   t1Data.chart_data || t1Data.chartData || null,
+                keyFeatures: t1Data.key_features || t1Data.keyFeatures || [],
+                modelAnswer: t1Data.model_answer || t1Data.modelAnswer || '',
+                band_9_vocabulary: t1Data.band_9_vocabulary || []
+              });
+              this.t1.chartTypeChoice = this.t1.task.chartType;
+              loaded = true;
+            }
+            if (t2Data) {
+              this.t2.task = {
+                topic: t2Data.topic || 'Academic Essay',
+                question: t2Data.question || t2Data.prompt || 'Some people argue that technological innovation creates economic disparities...',
+                keywords: t2Data.keywords || [],
+                modelAnswer: t2Data.model_answer || t2Data.modelAnswer || '',
+                highBandVocab: t2Data.high_band_vocabulary || []
+              };
+              loaded = true;
+            }
+          } catch(err) {
+            console.warn('Could not parse AI writing payload:', err);
+          }
+        }
+        if (!loaded) {
+          this.generateTask1();
+          this.generateTask2();
+        } else {
+          Toast.success('Loaded AI-Generated Writing Test!');
+        }
+      } else {
+        // load tasks from Cambridge series (1 to 21, Tests 1 to 4)
+        this.loadCambridgeBookWriting();
+      }
+
+      // restore drafts from localStorage
+      this.t1.essay      = Storage.get('draft_t1_essay', '');
+      this.t2.essay      = Storage.get('draft_t2_essay', '');
+      this.full.t1Essay  = Storage.get('draft_full_t1', '');
+      this.full.t2Essay  = Storage.get('draft_full_t2', '');
+      this.t1.wordCount  = countWords(this.t1.essay);
+      this.t2.wordCount  = countWords(this.t2.essay);
+      this.full.t1WordCount = countWords(this.full.t1Essay);
+      this.full.t2WordCount = countWords(this.full.t2Essay);
+
+      // initial chart after a tick (DOM needs to be ready)
+      this.$nextTick(() => {
+        this.renderT1Chart('t1-chart', this.t1.task);
+      });
+
+      // watch figure modal open to render enlarged canvas if needed
+      this.$watch('figureModalOpen', (val) => {
+        if (val && ['bar', 'line', 'mixed'].includes(this.t1.task.chartType)) {
+          this.$nextTick(() => {
+            this.renderT1Chart('modal-t1-chart', this.t1.task);
+          });
+        }
+      });
+
+      // full-test auto-save every 30 s
+      this.full.autoSaveInterval = setInterval(() => this.autoSaveFull(), 30000);
+    },
+
+    loadCambridgeBookWriting() {
+      const bNum = parseInt(this.cambridgeBook, 10) || 1;
+      const tNum = parseInt(this.cambridgeTest, 10) || 1;
+      this.isAiTest = false;
+      const wData = IELTS_CONTENT.getWritingTest ? IELTS_CONTENT.getWritingTest(bNum, tNum) : null;
+      if (!wData) return;
+
+      if (wData.task1) {
+        this.t1.task = this.buildT1Task(wData.task1);
+        this.t1.chartTypeChoice = this.t1.task.chartType || 'bar';
+        this.$nextTick(() => {
+          this.renderT1Chart('t1-chart', this.t1.task);
+          this.renderT1Chart('full-t1-chart', this.t1.task);
+        });
+      }
+      if (wData.task2) {
+        this.t2.task = { ...wData.task2 };
+      }
+      Toast.success(`Loaded Cambridge Academic ${bNum} Test ${tNum} Writing!`);
+    },
+
+
+    /* ── helpers ── */
+    buildT1Task(raw) {
+      return {
+        chartType:   raw.chartType   || raw.chart_type || 'bar',
+        title:       raw.title       || '',
+        instruction: raw.instruction || raw.task_instruction || '',
+        chartData:   raw.chartData   || raw.chart_data || null,
+        pieData:     raw.pieData     || null,
+        tableData:   raw.tableData   || { headers: [], rows: [] },
+        mapData:     raw.mapData     || null,
+        processData: raw.processData || null,
+        xLabel:      raw.xLabel      || raw.chartData?.x_axis || '',
+        yLabel:      raw.yLabel      || raw.chartData?.y_axis || '',
+        keyFeatures: raw.keyFeatures || raw.key_features || [],
+        modelAnswer: raw.modelAnswer || raw.model_answer || '',
+        vocabBand9:  raw.band_9_vocabulary || raw.vocabBand9 || [],
+      };
+    },
+
+    getPieSvgSlices(segments) {
+      if (!segments || !Array.isArray(segments) || segments.length === 0) return [];
+      const total = segments.reduce((acc, s) => acc + (parseFloat(s.value) || 0), 0) || 100;
+      const circumference = 282.743; // 2 * PI * 45
+      let offset = 0;
+      return segments.map(s => {
+        const val = parseFloat(s.value) || 0;
+        const dash = (val / total) * circumference;
+        const res = {
+          label: s.label,
+          value: val,
+          color: s.color || '#4F46E5',
+          dasharray: `${dash.toFixed(2)} ${circumference.toFixed(2)}`,
+          dashoffset: (-offset).toFixed(2)
+        };
+        offset += dash;
+        return res;
+      });
+    },
+
+    getProcessSvgStages(stages) {
+      if (!stages || !Array.isArray(stages)) return [];
+      const colors = ['#4F46E5', '#06B6D4', '#EF4444', '#F59E0B', '#10B981', '#8B5CF6', '#EC4899'];
+      return stages.map((s, idx) => {
+        let x, y;
+        if (idx < 3) {
+          x = 30 + idx * 280;
+          y = 15;
+        } else {
+          x = 590 - (idx - 3) * 280;
+          y = 145;
+        }
+        return {
+          ...s,
+          x: x,
+          y: y,
+          color: colors[idx % colors.length]
+        };
+      });
+    },
+
+    getWordCountStatus(count, target) {
+      if (count < target * 0.7) return { text: '⚠️ Below Minimum Target', color: 'text-rose-400', bg: 'bg-rose-950/60 border-rose-700' };
+      if (count < target) return { text: '🟡 Approaching Target', color: 'text-amber-400', bg: 'bg-amber-950/60 border-amber-700' };
+      if (count <= target * 1.5) return { text: '✅ Target Met (Ideal Length)', color: 'text-emerald-400', bg: 'bg-emerald-950/60 border-emerald-700' };
+      return { text: 'ℹ️ Comprehensive Length', color: 'text-cyan-400', bg: 'bg-cyan-950/60 border-cyan-700' };
+    },
+
+    calcParagraphs(text) {
+      if (!text || !text.trim()) return 0;
+      return text.trim().split(/\n\s*\n+/).filter(p => p.trim().length > 0).length;
+    },
+
+    selectCambridgeTest(t) {
+      this.cambridgeTest = t;
+      this.loadCambridgeBookWriting();
+    },
+
+    /* ── chart rendering ── */
+    renderT1Chart(canvasId, task) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+
+      // destroy previous
+      if (canvasId === 't1-chart' && this.t1Chart) { this.t1Chart.destroy(); this.t1Chart = null; }
+      if (canvasId === 'full-t1-chart' && this.fullT1Chart) { this.fullT1Chart.destroy(); this.fullT1Chart = null; }
+      if (canvasId === 'modal-t1-chart' && this.modalT1Chart) { this.modalT1Chart.destroy(); this.modalT1Chart = null; }
+
+      if (!task.chartData) return;
+      const type = task.chartType === 'mixed' ? 'bar' : (task.chartType || 'bar');
+      if (type === 'table') return;
+
+      const ctx = canvas.getContext('2d');
+      const chartInstance = new Chart(ctx, {
+        type: type,
+        data: {
+          labels: task.chartData.labels || task.chartData.categories || [],
+          datasets: task.chartData.datasets || task.chartData.series?.map((s, i) => ({
+            label: s.name,
+            data: s.data,
+            backgroundColor: (task.chartData.colors || ['#4F46E5','#06B6D4','#10B981','#F59E0B','#EF4444'])[i] || '#4F46E5',
+            borderColor:     (task.chartData.colors || ['#4F46E5','#06B6D4','#10B981','#F59E0B','#EF4444'])[i] || '#4F46E5',
+            fill: false,
+            tension: 0.4,
+          })) || [],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94A3B8', font: { family: 'Inter', size: 12 } }
+            },
+            title: {
+              display: !!(task.chartData.title),
+              text: task.chartData.title || '',
+              color: '#F1F5F9',
+              font: { size: 13, weight: '700', family: 'Inter' },
+              padding: { bottom: 10 }
+            }
+          },
+          scales: type === 'pie' ? {} : {
+            x: {
+              title: { display: !!(task.xLabel), text: task.xLabel || '', color: '#94A3B8' },
+              ticks: { color: '#94A3B8' },
+              grid: { color: 'rgba(51,65,85,0.5)' }
+            },
+            y: {
+              title: { display: !!(task.yLabel), text: task.yLabel || '', color: '#94A3B8' },
+              ticks: { color: '#94A3B8' },
+              grid: { color: 'rgba(51,65,85,0.5)' }
+            }
+          },
+          animation: { duration: 700, easing: 'easeInOutQuart' }
+        }
+      });
+
+      if (canvasId === 't1-chart')      this.t1Chart      = chartInstance;
+      if (canvasId === 'full-t1-chart') this.fullT1Chart  = chartInstance;
+      if (canvasId === 'modal-t1-chart') this.modalT1Chart = chartInstance;
+    },
+
+    /* ── tab switching ── */
+    switchTab(tab) {
+      this.activeTab = tab;
+      this.$nextTick(() => {
+        if (tab === 'task1') {
+          this.renderT1Chart('t1-chart', this.t1.task);
+        }
+        if (tab === 'full') {
+          this.renderT1Chart('full-t1-chart', this.t1.task);
+        }
+      });
+    },
+
+    /* ── chart type choice ── */
+    applyChartTypeChoice() {
+      const choice = this.t1.chartTypeChoice;
+      if (choice === 'map') {
+        this.cambridgeTest = 3;
+        const mapTest = IELTS_CONTENT.getWritingTest ? IELTS_CONTENT.getWritingTest(this.cambridgeBook, 3) : null;
+        if (mapTest && mapTest.task1) {
+          this.t1.task = this.buildT1Task(mapTest.task1);
+          this.$nextTick(() => {
+            this.renderT1Chart('t1-chart', this.t1.task);
+            this.renderT1Chart('full-t1-chart', this.t1.task);
+          });
+          return;
+        }
+      } else if (choice === 'process') {
+        this.cambridgeTest = 4;
+        const procTest = IELTS_CONTENT.getWritingTest ? IELTS_CONTENT.getWritingTest(this.cambridgeBook, 4) : null;
+        if (procTest && procTest.task1) {
+          this.t1.task = this.buildT1Task(procTest.task1);
+          this.$nextTick(() => {
+            this.renderT1Chart('t1-chart', this.t1.task);
+            this.renderT1Chart('full-t1-chart', this.t1.task);
+          });
+          return;
+        }
+      } else if (choice === 'table') {
+        this.cambridgeTest = 2;
+        const tabTest = IELTS_CONTENT.getWritingTest ? IELTS_CONTENT.getWritingTest(this.cambridgeBook, 2) : null;
+        if (tabTest && tabTest.task1) {
+          this.t1.task = this.buildT1Task(tabTest.task1);
+          this.$nextTick(() => {
+            this.renderT1Chart('t1-chart', this.t1.task);
+            this.renderT1Chart('full-t1-chart', this.t1.task);
+          });
+          return;
+        }
+      } else if (choice === 'pie') {
+        this.cambridgeTest = 2;
+        const pieTest = IELTS_CONTENT.getWritingTest ? IELTS_CONTENT.getWritingTest(this.cambridgeBook, 2) : null;
+        if (pieTest && pieTest.task1 && pieTest.task1.chartType === 'pie') {
+          this.t1.task = this.buildT1Task(pieTest.task1);
+          this.$nextTick(() => {
+            this.renderT1Chart('t1-chart', this.t1.task);
+            this.renderT1Chart('full-t1-chart', this.t1.task);
+          });
+          return;
+        }
+      } else if (choice === 'bar' || choice === 'line' || choice === 'mixed') {
+        this.cambridgeTest = 1;
+        const bTest = IELTS_CONTENT.getWritingTest ? IELTS_CONTENT.getWritingTest(this.cambridgeBook, 1) : null;
+        if (bTest && bTest.task1) {
+          this.t1.task = this.buildT1Task(bTest.task1);
+        }
+      }
+      this.t1.task = { ...this.t1.task, chartType: choice };
+      this.$nextTick(() => {
+        this.renderT1Chart('t1-chart', this.t1.task);
+        this.renderT1Chart('full-t1-chart', this.t1.task);
+      });
+    },
+
+    openFigureModal() {
+      this.figureModalOpen = true;
+      this.$nextTick(() => {
+        if (['bar', 'line', 'mixed'].includes(this.t1.task.chartType)) {
+          this.renderT1Chart('modal-t1-chart', this.t1.task);
+        }
+      });
+    },
+
+
+    /* ── timer helpers ── */
+    formatTime(secs) {
+      const m = Math.floor(Math.abs(secs) / 60).toString().padStart(2,'0');
+      const s = (Math.abs(secs) % 60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    },
+
+    toggleTimer(task) {
+      const t = this[task];
+      if (t.timerRunning) {
+        clearInterval(t.timerInterval);
+        t.timerRunning = false;
+      } else {
+        t.timerRunning = true;
+        t.timerInterval = setInterval(() => {
+          if (t.timeLeft > 0) {
+            t.timeLeft--;
+          } else {
+            clearInterval(t.timerInterval);
+            t.timerRunning = false;
+            Toast.warning(`${task === 't1' ? 'Task 1' : 'Task 2'} time is up!`);
+          }
+        }, 1000);
+      }
+    },
+
+    resetTimer(task) {
+      const t = this[task];
+      clearInterval(t.timerInterval);
+      t.timerRunning = false;
+      t.timeLeft = task === 't1' ? 1200 : 2400;
+    },
+
+    /* ── full test timer ── */
+    toggleFullTimer() {
+      if (this.full.running) {
+        clearInterval(this.full.interval);
+        this.full.running = false;
+      } else {
+        this.full.running = true;
+        this.full.interval = setInterval(() => {
+          if (this.full.timeLeft > 0) {
+            this.full.timeLeft--;
+            if (this.full.timeLeft === 300) Toast.warning('5 minutes remaining!');
+          } else {
+            clearInterval(this.full.interval);
+            this.full.running = false;
+            Toast.error('Time is up! Please submit your test.');
+          }
+        }, 1000);
+      }
+    },
+
+    resetFullTest() {
+      clearInterval(this.full.interval);
+      this.full.timeLeft = 3600;
+      this.full.running = false;
+      this.full.task1Submitted = false;
+      this.full.task2Submitted = false;
+      this.full.submitted = false;
+      this.full.t1Essay = '';
+      this.full.t2Essay = '';
+      this.full.t1WordCount = 0;
+      this.full.t2WordCount = 0;
+      this.full.activeTask = 'task1';
+    },
+
+    submitFullTest() {
+      this.full.submitted = true;
+      clearInterval(this.full.interval);
+      this.full.running = false;
+      // persist for evaluation
+      Storage.set('draft_full_t1', this.full.t1Essay);
+      Storage.set('draft_full_t2', this.full.t2Essay);
+      Toast.success('Full test submitted! Now get AI feedback.');
+    },
+
+    autoSaveFull() {
+      this.full.saving = true;
+      Storage.set('draft_full_t1', this.full.t1Essay);
+      Storage.set('draft_full_t2', this.full.t2Essay);
+      setTimeout(() => { this.full.saving = false; }, 800);
+    },
+
+    /* ── word counter helpers ── */
+    onT1Input() {
+      this.t1.wordCount = countWords(this.t1.essay);
+      this.debounceSaveT1();
+    },
+
+    onT2Input() {
+      this.t2.wordCount = countWords(this.t2.essay);
+      this.debounceSaveT2();
+    },
+
+    _t1SaveTimer: null,
+    debounceSaveT1() {
+      clearTimeout(this._t1SaveTimer);
+      this._t1SaveTimer = setTimeout(() => {
+        Storage.set('draft_t1_essay', this.t1.essay);
+        this.t1.autoSaved = true;
+        setTimeout(() => { this.t1.autoSaved = false; }, 2000);
+      }, 1500);
+    },
+
+    _t2SaveTimer: null,
+    debounceSaveT2() {
+      clearTimeout(this._t2SaveTimer);
+      this._t2SaveTimer = setTimeout(() => {
+        Storage.set('draft_t2_essay', this.t2.essay);
+        this.t2.autoSaved = true;
+        setTimeout(() => { this.t2.autoSaved = false; }, 2000);
+      }, 1500);
+    },
+
+    t1WordCountClass() {
+      if (this.t1.wordCount === 0)        return '';
+      if (this.t1.wordCount < 120)        return 'below';
+      if (this.t1.wordCount < 150)        return 'near';
+      return 'reached';
+    },
+
+    t2WordCountClass() {
+      if (this.t2.wordCount === 0)        return '';
+      if (this.t2.wordCount < 200)        return 'below';
+      if (this.t2.wordCount < 250)        return 'near';
+      return 'reached';
+    },
+
+    clearT1Draft() {
+      this.t1.essay = '';
+      this.t1.wordCount = 0;
+      this.t1.feedback = null;
+      Storage.del('draft_t1_essay');
+      Toast.info('Task 1 draft cleared.');
+    },
+
+    clearT2Draft() {
+      this.t2.essay = '';
+      this.t2.wordCount = 0;
+      this.t2.feedback = null;
+      Storage.del('draft_t2_essay');
+      Toast.info('Task 2 draft cleared.');
+    },
+
+    /* ── AI generation ── */
+    async generateTask1() {
+      this.t1.generating = true;
+      try {
+        const result = await ContentGenerator.generateWritingTask1(this.t1.chartTypeChoice);
+
+        // normalise API response
+        const task = {
+          chartType:   result.chart_type || this.t1.chartTypeChoice,
+          instruction: result.task_instruction || result.title || '',
+          keyFeatures: result.key_features || [],
+          modelAnswer: result.model_answer || '',
+          vocabBand9:  result.band_9_vocabulary || [],
+          tableData:   { headers: [], rows: [] },
+          chartData:   null,
+          xLabel:      result.chart_data?.x_axis || '',
+          yLabel:      result.chart_data?.y_axis || '',
+        };
+
+        // build Chart.js-compatible chartData from API response
+        const cd = result.chart_data;
+        if (cd) {
+          const cats = cd.categories || cd.labels || [];
+          const series = cd.series || [];
+          const colors = cd.colors || ['#4F46E5','#06B6D4','#10B981','#F59E0B','#EF4444'];
+
+          if (task.chartType === 'pie') {
+            task.chartData = {
+              title: cd.title || '',
+              labels: cats,
+              datasets: [{
+                data: series[0]?.data || cats.map(() => Math.floor(Math.random()*30)+10),
+                backgroundColor: colors.slice(0, cats.length),
+              }]
+            };
+          } else {
+            task.chartData = {
+              title: cd.title || '',
+              labels: cats,
+              datasets: series.map((s, i) => ({
+                label: s.name,
+                data: s.data,
+                backgroundColor: colors[i] || '#4F46E5',
+                borderColor:     colors[i] || '#4F46E5',
+                fill: false,
+                tension: 0.4,
+              }))
+            };
+          }
+        }
+
+        this.t1.task = task;
+        this.t1.chartTypeChoice = task.chartType;
+        this.$nextTick(() => this.renderT1Chart('t1-chart', task));
+        Toast.success('New Task 1 generated!');
+      } catch(e) {
+        Toast.error('Generation failed: ' + e.message);
+      } finally {
+        this.t1.generating = false;
+      }
+    },
+
+    async generateTask2() {
+      this.t2.generating = true;
+      try {
+        const result = await ContentGenerator.generateWritingTask2(this.t2.topicChoice);
+        this.t2.task = {
+          topic: result.topic || this.t2.topicChoice,
+          question: result.question || '',
+          keywords: result.keywords || [],
+          planningStructure: result.planning_structure || null,
+          modelAnswer: result.model_answer || '',
+          highBandVocab: result.high_band_vocabulary || [],
+        };
+        Toast.success('New Task 2 question generated!');
+      } catch(e) {
+        Toast.error('Generation failed: ' + e.message);
+      } finally {
+        this.t2.generating = false;
+      }
+    },
+
+    /* ── AI evaluation ── */
+    async evaluateTask1() {
+      if (!this.t1.essay.trim()) { Toast.warning('Please write your response first.'); return; }
+      this.t1.evaluating = true;
+      this.t1.feedback = null;
+      try {
+        const fb = await WritingEvaluator.evaluateTask1(this.t1.essay, this.t1.task.instruction);
+        this.t1.feedback = fb;
+
+        // save to analytics
+        Analytics.addResult({
+          module: 'writing',
+          title: 'Writing Task 1',
+          band: fb.overall_band,
+          writing_band: fb.overall_band,
+          overall_band: fb.overall_band,
+          task_achievement: fb.task_achievement?.score,
+          coherence_cohesion: fb.coherence_cohesion?.score,
+          lexical_resource: fb.lexical_resource?.score,
+          grammatical_range: fb.grammatical_range?.score,
+          word_count: this.t1.wordCount,
+          task_type: 'task1',
+        });
+
+        // scroll to feedback
+        this.$nextTick(() => {
+          const el = document.getElementById('t1-feedback');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        Toast.success(`Band ${fb.overall_band} — ${this.bandLabel(fb.overall_band)}`);
+      } catch(e) {
+        Toast.error('Evaluation failed: ' + e.message);
+      } finally {
+        this.t1.evaluating = false;
+      }
+    },
+
+    async evaluateTask2() {
+      if (!this.t2.essay.trim()) { Toast.warning('Please write your essay first.'); return; }
+      this.t2.evaluating = true;
+      this.t2.feedback = null;
+      try {
+        const fb = await WritingEvaluator.evaluateTask2(this.t2.essay, this.t2.task.question);
+        this.t2.feedback = fb;
+
+        Analytics.addResult({
+          module: 'writing',
+          title: 'Writing Task 2',
+          band: fb.overall_band,
+          writing_band: fb.overall_band,
+          overall_band: fb.overall_band,
+          task_achievement: fb.task_achievement?.score,
+          coherence_cohesion: fb.coherence_cohesion?.score,
+          lexical_resource: fb.lexical_resource?.score,
+          grammatical_range: fb.grammatical_range?.score,
+          word_count: this.t2.wordCount,
+          task_type: 'task2',
+          topic: this.t2.task.topic,
+        });
+
+        this.$nextTick(() => {
+          const el = document.getElementById('t2-feedback');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        Toast.success(`Band ${fb.overall_band} — ${this.bandLabel(fb.overall_band)}`);
+      } catch(e) {
+        Toast.error('Evaluation failed: ' + e.message);
+      } finally {
+        this.t2.evaluating = false;
+      }
+    },
+
+    /* ── feedback helpers ── */
+    t1CriteriaList() {
+      if (!this.t1.feedback) return [];
+      const fb = this.t1.feedback;
+      return [
+        { key: 'ta', label: 'Task Achievement',        score: fb.task_achievement?.score,    feedback: fb.task_achievement?.feedback,    strengths: fb.task_achievement?.strengths,    weaknesses: fb.task_achievement?.weaknesses },
+        { key: 'cc', label: 'Coherence & Cohesion',    score: fb.coherence_cohesion?.score,  feedback: fb.coherence_cohesion?.feedback,  strengths: fb.coherence_cohesion?.strengths,  weaknesses: fb.coherence_cohesion?.weaknesses },
+        { key: 'lr', label: 'Lexical Resource',        score: fb.lexical_resource?.score,    feedback: fb.lexical_resource?.feedback,    strengths: fb.lexical_resource?.strengths,    weaknesses: fb.lexical_resource?.weaknesses },
+        { key: 'gr', label: 'Grammatical Range',       score: fb.grammatical_range?.score,   feedback: fb.grammatical_range?.feedback,   strengths: fb.grammatical_range?.strengths,   weaknesses: fb.grammatical_range?.weaknesses },
+      ];
+    },
+
+    t2CriteriaList() {
+      if (!this.t2.feedback) return [];
+      const fb = this.t2.feedback;
+      return [
+        { key: 'ta', label: 'Task Achievement',        score: fb.task_achievement?.score,    feedback: fb.task_achievement?.feedback,    strengths: fb.task_achievement?.strengths,    weaknesses: fb.task_achievement?.weaknesses },
+        { key: 'cc', label: 'Coherence & Cohesion',    score: fb.coherence_cohesion?.score,  feedback: fb.coherence_cohesion?.feedback,  strengths: fb.coherence_cohesion?.strengths,  weaknesses: fb.coherence_cohesion?.weaknesses },
+        { key: 'lr', label: 'Lexical Resource',        score: fb.lexical_resource?.score,    feedback: fb.lexical_resource?.feedback,    strengths: fb.lexical_resource?.strengths,    weaknesses: fb.lexical_resource?.weaknesses },
+        { key: 'gr', label: 'Grammatical Range',       score: fb.grammatical_range?.score,   feedback: fb.grammatical_range?.feedback,   strengths: fb.grammatical_range?.strengths,   weaknesses: fb.grammatical_range?.weaknesses },
+      ];
+    },
+
+    bandColor(band) {
+      return IELTSScoring.bandColor(band || 0);
+    },
+
+    bandLabel(band) {
+      return IELTSScoring.bandLabel(band || 0);
+    },
+
+    countWords(text) {
+      return countWords(text);
+    },
+  };
+}
+</script>
+
+</body>
+</html>

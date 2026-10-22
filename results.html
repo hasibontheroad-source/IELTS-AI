@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnostic Test Results & Coaching | IELTS Academic AI</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    body { background: var(--bg-gradient); color: var(--text-primary); font-family: 'Plus Jakarta Sans', sans-serif; }
+    .diag-tab-btn {
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+    }
+    .diag-tab-btn.active {
+      background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(6,182,212,0.25));
+      border-color: #7C3AED;
+      color: #FFFFFF;
+      box-shadow: 0 4px 15px rgba(124,58,237,0.25);
+    }
+    .diag-tab-btn:not(.active) {
+      background: rgba(30,41,59,0.5);
+      color: #94A3B8;
+      border-color: #334155;
+    }
+    .diag-tab-btn:not(.active):hover {
+      background: rgba(51,65,85,0.7);
+      color: #E2E8F0;
+    }
+    .mistake-card {
+      background: #111B30;
+      border: 1px solid #1E2E4E;
+      border-radius: 14px;
+      padding: 1.25rem;
+      transition: all 0.25s ease;
+    }
+    .mistake-card:hover {
+      border-color: #7C3AED;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+<script src="../js/core.js"></script>
+<script src="../js/content.js"></script>
+  <script src="../js/cambridge-series.js"></script>
+<script src="../js/sidebar.js"></script>
+
+<div class="main-content">
+  <!-- Page Header -->
+  <div class="page-header" style="border-bottom:1px solid var(--border-color, #1E293B);padding-bottom:1.25rem">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button onclick="history.back()" class="btn btn-secondary btn-sm">← Back</button>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <h1 style="font-size:1.35rem;font-weight:800;color:var(--text-primary, #fff);margin:0">Post-Exam Diagnostic Report</h1>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-purple-900/40 text-purple-300 border border-purple-700/50">
+            Cambridge Standard
+          </span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted, #94A3B8);margin-top:2px" id="result-subtitle">
+          Root-Cause Mistake Analysis & How to Score Higher on Your Next Attempt
+        </p>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center">
+      <!-- Theme Switcher -->
+      <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+        <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+        <span class="theme-text">Light</span>
+      </button>
+      <button onclick="window.print()" class="btn btn-secondary btn-sm flex items-center gap-1.5">
+        <span>🖨️</span> Print Report
+      </button>
+      <a href="profile.html" class="btn btn-secondary btn-sm flex items-center gap-1.5" style="border-color:#7C3AED;color:#C4B5FD">
+        <span>👤</span> My Profile
+      </a>
+      <a href="dashboard.html" class="btn btn-primary btn-sm flex items-center gap-1.5">
+        <span>🏠</span> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <!-- Candidate Personal Target Benchmark Card -->
+    <div class="bg-gradient-to-r from-purple-950/40 via-slate-900 to-cyan-950/40 border border-purple-800/40 rounded-2xl p-5 mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <a href="profile.html" title="View Candidate Profile" class="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center text-2xl font-black text-white shadow-lg hover:ring-2 hover:ring-cyan-400 transition cursor-pointer no-underline" id="cand-avatar">
+          🎓
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Candidate Profile</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono" id="cand-username">@student</span>
+          </div>
+          <h2 class="text-lg font-bold text-white mt-0.5"><a href="profile.html" class="hover:text-cyan-400 transition no-underline text-white" id="cand-fullname">Aisha Rahman</a></h2>
+          <div class="flex flex-wrap gap-3 text-xs text-slate-400 mt-1 font-mono">
+            <span>Target: <strong class="text-cyan-400" id="cand-target">Band 7.5</strong></span>
+            <span>•</span>
+            <span id="cand-countdown">⏳ 28 Days to Official Exam</span>
+            <span>•</span>
+            <span class="text-slate-300" id="cand-dest">University of Oxford</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="profile.html" class="text-xs bg-cyan-950/50 hover:bg-cyan-900/60 text-cyan-300 px-3.5 py-2 rounded-xl border border-cyan-800/50 font-semibold transition flex items-center gap-1">
+          <span>✏️</span> Edit Profile
+        </a>
+        <button onclick="window.openSwitchAccountModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-2 rounded-xl border border-slate-700 font-semibold transition">
+          Switch Profile 👥
+        </button>
+        <a href="mock-test.html" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-purple-600/30">
+          Full Simulation 📋
+        </a>
+      </div>
+    </div>
+
+    <!-- Score Hero -->
+    <div id="score-hero" style="text-align:center;padding:2.5rem 1rem;background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(6,182,212,0.12));border:1px solid rgba(124,58,237,0.25);border-radius:20px;margin-bottom:2rem;position:relative;overflow:hidden">
+      <div style="font-size:0.85rem;color:#94A3B8;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:1px;font-weight:700">Calculated IELTS Band Score</div>
+      <div id="overall-score" style="font-size:6.5rem;font-weight:900;line-height:1;background:linear-gradient(135deg,#A78BFA,#22D3EE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">7.5</div>
+      <div id="band-label" style="font-size:1.15rem;font-weight:700;color:#F1F5F9;margin-top:0.5rem">Good User • CEFR C1 Effective Operational</div>
+      <div id="target-gap-badge" class="inline-block mt-3 px-3 py-1 rounded-full text-xs font-bold bg-purple-900/40 text-purple-300 border border-purple-700/50 font-mono">
+        🎯 Target Gap: +0.0 (Target Met!)
+      </div>
+      <div id="result-date" style="font-size:0.8rem;color:#64748B;margin-top:0.5rem"></div>
+    </div>
+
+    <!-- Module Scores Grid -->
+    <div class="grid-4" style="margin-bottom:2rem">
+      <div class="card" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:0.5rem">🎧</div>
+        <div style="font-size:0.8rem;color:#94A3B8;margin-bottom:0.25rem;font-weight:700">LISTENING</div>
+        <div id="listening-score" style="font-size:2.5rem;font-weight:800;color:#7C3AED">--</div>
+        <div id="listening-raw" style="font-size:0.75rem;color:#64748B"></div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:0.5rem">📖</div>
+        <div style="font-size:0.8rem;color:#94A3B8;margin-bottom:0.25rem;font-weight:700">READING</div>
+        <div id="reading-score" style="font-size:2.5rem;font-weight:800;color:#06B6D4">--</div>
+        <div id="reading-raw" style="font-size:0.75rem;color:#64748B"></div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:0.5rem">✍️</div>
+        <div style="font-size:0.8rem;color:#94A3B8;margin-bottom:0.25rem;font-weight:700">WRITING</div>
+        <div id="writing-score" style="font-size:2.5rem;font-weight:800;color:#10B981">--</div>
+        <div id="writing-raw" style="font-size:0.75rem;color:#64748B">4 Criteria Graded</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:0.5rem">🎤</div>
+        <div style="font-size:0.8rem;color:#94A3B8;margin-bottom:0.25rem;font-weight:700">SPEAKING</div>
+        <div id="speaking-score" style="font-size:2.5rem;font-weight:800;color:#F59E0B">--</div>
+        <div id="speaking-raw" style="font-size:0.75rem;color:#64748B">Fluency & Pronunciation</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- PRIMARY DIAGNOSTIC & COACHING CENTER ("Where Wrong & How to Do Better") -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="card" style="margin-bottom:2rem;background:#0F172A;border:1px solid #1E293B">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl">💡</span>
+            <h2 class="text-lg font-bold text-white">Diagnostic Feedback & Band Elevation Coaching</h2>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">
+            Exact breakdown of where errors occurred, why Cambridge traps succeeded, and how to score higher.
+          </p>
+        </div>
+        
+        <!-- Diagnostic Tabs -->
+        <div class="flex flex-wrap gap-2" id="diag-tabs">
+          <button class="diag-tab-btn active" onclick="switchDiagTab('mistakes', this)">
+            <span>❌</span> Where It Went Wrong (<span id="tab-mistakes-count">0</span>)
+          </button>
+          <button class="diag-tab-btn" onclick="switchDiagTab('tactics', this)">
+            <span>🚀</span> How to Do Better
+          </button>
+          <button class="diag-tab-btn" onclick="switchDiagTab('clinic', this)">
+            <span>✍️</span> Sentence Rewrite Clinic
+          </button>
+          <button class="diag-tab-btn" onclick="switchDiagTab('plan', this)">
+            <span>📅</span> 7-Day Action Plan
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 1: WHERE IT WENT WRONG -->
+      <div id="diag-tab-mistakes" class="mt-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <span>🔍</span> Identified Point-Loss Areas & Trap Analysis
+          </h3>
+          <span class="text-xs text-slate-400 font-mono">Exam Breakdown</span>
+        </div>
+        <div id="mistakes-container" class="space-y-4">
+          <!-- Filled dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- TAB 2: HOW TO DO BETTER (TACTICS) -->
+      <div id="diag-tab-tactics" class="mt-6 space-y-4 hidden">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <span>🎯</span> Official Cambridge Examiner Strategies
+          </h3>
+          <span class="text-xs text-cyan-400 font-semibold font-mono">Proven High-Band Techniques</span>
+        </div>
+        <div id="tactics-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Filled dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- TAB 3: SENTENCE TRANSFORMATION CLINIC -->
+      <div id="diag-tab-clinic" class="mt-6 space-y-4 hidden">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <span>✨</span> Band 6.0 → Band 8.5 Transformation Clinic
+          </h3>
+          <span class="text-xs text-emerald-400 font-semibold font-mono">Sentence-Level Upgrades</span>
+        </div>
+        <p class="text-xs text-slate-400">
+          Compare common candidate sentences with examiner-calibrated academic structures to master sophisticated nominalisation, hedging, and subordination.
+        </p>
+        <div id="clinic-container" class="space-y-4">
+          <!-- Filled dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- TAB 4: 7-DAY REMEDIATION PLAN -->
+      <div id="diag-tab-plan" class="mt-6 space-y-4 hidden">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <span>🗓️</span> Targeted 7-Day Band Elevation Roadmap
+          </h3>
+          <span class="text-xs text-purple-400 font-semibold font-mono">Customized To Your Mistakes</span>
+        </div>
+        <p class="text-xs text-slate-400">
+          Daily high-yield drills designed to systematically eliminate the exact traps that reduced your score today.
+        </p>
+        <div id="plan-container" class="space-y-3">
+          <!-- Filled dynamically by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Radar Chart & Score Breakdown -->
+    <div class="grid-2" style="margin-bottom:2rem">
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:1rem">Performance Radar</h3>
+        <canvas id="radar-chart" height="250"></canvas>
+      </div>
+      <div class="card">
+        <h3 style="font-weight:700;margin-bottom:1rem">Module Progression</h3>
+        <div id="score-breakdown" style="display:flex;flex-direction:column;gap:1rem"></div>
+      </div>
+    </div>
+
+    <!-- Next Actions -->
+    <div class="card">
+      <h3 style="font-weight:700;margin-bottom:1rem">🎯 Recommended Next Actions</h3>
+      <div id="recommendations" class="grid-2">
+        <div style="color:#94A3B8">Loading recommendations...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+initSidebar('results');
+Auth.requireAuth();
+
+let currentDiagnosticData = null;
+
+function switchDiagTab(tabKey, btn) {
+  document.querySelectorAll('.diag-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  ['mistakes', 'tactics', 'clinic', 'plan'].forEach(t => {
+    const el = document.getElementById(`diag-tab-${t}`);
+    if (el) el.classList.toggle('hidden', t !== tabKey);
+  });
+}
+
+function loadResults() {
+  const params = new URLSearchParams(window.location.search);
+  const resultId = params.get('id');
+  
+  let result;
+  const history = Analytics.getHistory();
+  if (resultId) {
+    result = history.find(h => h.id == resultId);
+  } else {
+    result = history[0];
+  }
+  
+  // If no result exists yet, seed a rich demonstration test result so candidate sees full diagnostics
+  if (!result) {
+    result = {
+      id: Date.now(),
+      module: 'listening',
+      title: 'Academic Listening Simulation Test 1',
+      rawScore: 31,
+      band: 7.5,
+      date: new Date().toISOString(),
+      sectionBreakdown: { 1: 9, 2: 8, 3: 7, 4: 7 }
+    };
+    Analytics.addResult(result);
+  }
+
+  // Load candidate profile
+  const user = Auth.getUser() || { name: 'Aisha Rahman', username: 'student', targetBand: 7.5 };
+  document.getElementById('cand-fullname').textContent = user.name || 'Candidate';
+  document.getElementById('cand-username').textContent = user.username ? `@${user.username}` : '@student';
+  document.getElementById('cand-avatar').textContent = (user.name || 'C')[0].toUpperCase();
+  document.getElementById('cand-target').textContent = `Band ${user.targetBand || 7.5}`;
+  document.getElementById('cand-dest').textContent = user.targetDestination || 'Top Tier University';
+  
+  if (user.targetExamDate && typeof UserAccounts !== 'undefined') {
+    const days = UserAccounts.getDaysUntilExam(user.targetExamDate);
+    if (days !== null) {
+      document.getElementById('cand-countdown').textContent = days > 0 ? `⏳ ${days} Days to Official Exam` : '🎯 Official Exam Ready';
+    }
+  }
+  
+  // Normalize module scores
+  const listeningBand = result.listening_band || (result.module === 'listening' ? result.band : 7.5);
+  const readingBand = result.reading_band || (result.module === 'reading' ? result.band : 8.0);
+  const writingBand = result.writing_band || (result.module === 'writing' ? result.band : 6.5);
+  const speakingBand = result.speaking_band || (result.module === 'speaking' ? result.band : 7.0);
+
+  const overall = result.overall_band || result.band || IELTSScoring.overallBand(
+    listeningBand || 0,
+    readingBand || 0,
+    writingBand || 0,
+    speakingBand || 0
+  );
+  
+  document.getElementById('overall-score').textContent = overall ? Number(overall).toFixed(1) : '--';
+  document.getElementById('band-label').textContent = `${IELTSScoring.bandLabel(overall)} • CEFR ${IELTSScoring.cefrLevel(overall)}`;
+  document.getElementById('result-subtitle').textContent = result.module ? `${result.module.toUpperCase()} Diagnostic Test Result` : 'Full IELTS Academic Mock Exam Diagnostic';
+  document.getElementById('result-date').textContent = result.date ? new Date(result.date).toLocaleDateString('en-GB', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '';
+  
+  // Target Gap
+  const targetBandNum = parseFloat(user.targetBand) || 7.5;
+  const gap = (overall - targetBandNum).toFixed(1);
+  const gapEl = document.getElementById('target-gap-badge');
+  if (gap >= 0) {
+    gapEl.textContent = `🎯 Target Met (+${gap} above Band ${targetBandNum})`;
+    gapEl.className = 'inline-block mt-3 px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-700/50 font-mono';
+  } else {
+    gapEl.textContent = `🎯 Target Gap: ${gap} (Target: Band ${targetBandNum})`;
+    gapEl.className = 'inline-block mt-3 px-3 py-1 rounded-full text-xs font-bold bg-amber-950/60 text-amber-300 border border-amber-700/50 font-mono';
+  }
+
+  // Module scores grid
+  const modules = [
+    { id: 'listening', score: listeningBand, raw: result.listening_raw || (result.module === 'listening' ? result.rawScore : null), rawOf: 40 },
+    { id: 'reading', score: readingBand, raw: result.reading_raw || (result.module === 'reading' ? result.rawScore : null), rawOf: 40 },
+    { id: 'writing', score: writingBand },
+    { id: 'speaking', score: speakingBand }
+  ];
+  
+  modules.forEach(m => {
+    const el = document.getElementById(`${m.id}-score`);
+    if (el) {
+      el.textContent = m.score != null ? Number(m.score).toFixed(1) : '--';
+      if (m.score != null) el.style.color = IELTSScoring.bandColor(m.score);
+    }
+    const rawEl = document.getElementById(`${m.id}-raw`);
+    if (rawEl && m.raw != null) rawEl.textContent = `Raw: ${m.raw}/${m.rawOf}`;
+  });
+  
+  // Render theme-aware radar chart
+  let radarResultsChart = null;
+  function renderResultsRadar(theme) {
+    const isDark = theme === 'dark';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)';
+    const textColor = isDark ? '#E2E8F0' : '#1E293B';
+    const labelColor = isDark ? '#94A3B8' : '#64748B';
+
+    if (radarResultsChart) radarResultsChart.destroy();
+    const ctx = document.getElementById('radar-chart').getContext('2d');
+    radarResultsChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['Listening', 'Reading', 'Writing', 'Speaking'],
+        datasets: [
+          {
+            label: 'Your Score',
+            data: [listeningBand || 0, readingBand || 0, writingBand || 0, speakingBand || 0],
+            backgroundColor: 'rgba(124,58,237,0.25)',
+            borderColor: '#7C3AED',
+            pointBackgroundColor: '#7C3AED',
+            pointRadius: 5
+          },
+          {
+            label: 'Your Target Band',
+            data: [targetBandNum, targetBandNum, targetBandNum, targetBandNum],
+            borderColor: 'rgba(6,182,212,0.8)',
+            borderDash: [5, 5],
+            backgroundColor: 'transparent',
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        plugins: { legend: { labels: { color: labelColor } } },
+        scales: { r: {
+          min: 0, max: 9,
+          ticks: { color: labelColor, stepSize: 1, backdropColor: 'transparent' },
+          grid: { color: gridColor },
+          angleLines: { color: gridColor },
+          pointLabels: { color: textColor, font: { size: 12, weight: 'bold' } }
+        }},
+        responsive: true, maintainAspectRatio: false
+      }
+    });
+  }
+
+  const curTheme = document.documentElement.getAttribute('data-theme') || (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  renderResultsRadar(curTheme);
+  window.addEventListener('themechanged', e => renderResultsRadar(e.detail.theme));
+
+  // Score breakdown bars
+  const breakdownEl = document.getElementById('score-breakdown');
+  const bandModules = [
+    { name: 'Listening', band: listeningBand, color: '#7C3AED', icon: '🎧' },
+    { name: 'Reading', band: readingBand, color: '#06B6D4', icon: '📖' },
+    { name: 'Writing', band: writingBand, color: '#10B981', icon: '✍️' },
+    { name: 'Speaking', band: speakingBand, color: '#F59E0B', icon: '🎤' }
+  ];
+  
+  breakdownEl.innerHTML = bandModules.map(m => `
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem">
+        <span style="font-size:0.875rem;color:#94A3B8">${m.icon} ${m.name}</span>
+        <span style="font-weight:700;color:${m.color}">Band ${m.band ? Number(m.band).toFixed(1) : 'N/A'}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${m.band ? (m.band/9*100) : 0}%;background:${m.color}"></div>
+      </div>
+    </div>
+  `).join('');
+
+  // ═══════════════════════════════════════════════════════════════════
+  // POPULATE DIAGNOSTIC ENGINE FEEDBACK ("WHERE IS WRONG & HOW TO DO BETTER")
+  // ═══════════════════════════════════════════════════════════════════
+  const diag = DiagnosticEngine.analyze(result);
+  currentDiagnosticData = diag;
+
+  // 1. Where It Went Wrong (Mistakes list)
+  const mistakesList = diag.mistakes || [];
+  document.getElementById('tab-mistakes-count').textContent = mistakesList.length || (diag.criteria ? diag.criteria.length : '4');
+  
+  const mistakesContainer = document.getElementById('mistakes-container');
+  if (mistakesList.length) {
+    mistakesContainer.innerHTML = mistakesList.map(m => `
+      <div class="mistake-card">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-rose-950/60 text-rose-400 border border-rose-800/40 flex items-center justify-center font-mono font-bold text-xs">
+              Q${m.qNumber}
+            </span>
+            <span class="text-xs font-semibold text-slate-300">
+              ${m.section ? `Section ${m.section}` : (m.passage ? `Passage ${m.passage}` : 'Test Question')}
+            </span>
+          </div>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-rose-900/30 text-rose-300 border border-rose-700/40">
+            ${m.category}
+          </span>
+        </div>
+
+        <div class="text-sm font-semibold text-white mb-2">
+          ${m.questionText}
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3 font-mono">
+          <div class="p-2.5 rounded-lg bg-rose-950/20 border border-rose-900/30">
+            <span class="text-slate-400 block text-[10px] uppercase tracking-wider">Your Submitted Answer:</span>
+            <span class="font-bold text-rose-300">${m.userAnswer}</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-900/30">
+            <span class="text-slate-400 block text-[10px] uppercase tracking-wider">Correct Target Answer:</span>
+            <span class="font-bold text-emerald-300">${m.correctAnswer}</span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800 text-xs text-slate-300 mb-2">
+          <strong class="text-amber-400 block mb-1">⚠️ Why This Happened (The Trap):</strong>
+          ${m.explanation}
+        </div>
+
+        ${m.audioExcerpt ? `
+          <div class="p-2.5 rounded-lg bg-purple-950/20 border border-purple-900/30 text-[11px] text-purple-200 italic mb-2">
+            <strong>🎧 Audio Transcript Evidence:</strong> ${m.audioExcerpt}
+          </div>
+        ` : ''}
+
+        ${m.passageExcerpt ? `
+          <div class="p-2.5 rounded-lg bg-cyan-950/20 border border-cyan-900/30 text-[11px] text-cyan-200 italic mb-2">
+            <strong>📖 Reading Passage Evidence:</strong> ${m.passageExcerpt}
+          </div>
+        ` : ''}
+
+        <div class="text-xs text-cyan-300 font-medium flex items-start gap-1.5 pt-1">
+          <span>💡</span>
+          <span><strong>How to Prevent This:</strong> ${m.tacticalRule}</span>
+        </div>
+      </div>
+    `).join('');
+  } else if (diag.criteria) {
+    // For Writing
+    mistakesContainer.innerHTML = diag.criteria.map(c => `
+      <div class="mistake-card">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+          <span class="text-sm font-bold text-white">${c.criterion}</span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-900/40 text-purple-300 font-mono">
+            Band ${Number(c.score).toFixed(1)}
+          </span>
+        </div>
+        <div class="p-3 rounded-lg bg-rose-950/20 border border-rose-900/30 text-xs text-rose-200 mb-2">
+          <strong class="block text-rose-400 mb-1">❌ Where Points Were Lost:</strong>
+          ${c.whereWrong}
+        </div>
+        <div class="p-3 rounded-lg bg-emerald-950/20 border border-emerald-900/30 text-xs text-emerald-200">
+          <strong class="block text-emerald-400 mb-1">💡 How to Score Band 8+:</strong>
+          ${c.howToDoBetter}
+        </div>
+      </div>
+    `).join('');
+  } else if (diag.speechDiagnosis) {
+    // For Speaking
+    mistakesContainer.innerHTML = diag.speechDiagnosis.map(s => `
+      <div class="mistake-card">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+          <span class="text-sm font-bold text-white">${s.dimension}</span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-900/40 text-amber-300 font-mono">
+            Band ${Number(s.score).toFixed(1)}
+          </span>
+        </div>
+        <div class="p-3 rounded-lg bg-rose-950/20 border border-rose-900/30 text-xs text-rose-200 mb-2">
+          <strong class="block text-rose-400 mb-1">⚠️ Fluency / Accuracy Bottleneck:</strong>
+          ${s.pitfall}
+        </div>
+        <div class="p-3 rounded-lg bg-emerald-950/20 border border-emerald-900/30 text-xs text-emerald-200">
+          <strong class="block text-emerald-400 mb-1">💡 Natural Speech Remedy:</strong>
+          ${s.remedy}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 2. How to Do Better (Tactics)
+  const tactics = diag.tacticalStrategies || [
+    { title: 'The 3-Step T/F/NG Logic Algorithm', icon: '⚖️', tag: 'Logic Matrix', problem: 'Confusing information not discussed with factual contradiction.', solution: 'Confirm subject + predicate. Direct contradiction = FALSE. Absence of definitive proof = NOT GIVEN.' },
+    { title: 'Listening Pivot Word Detection', icon: '🎧', tag: 'Aural Cues', problem: 'Falling for preliminary distractor quotes.', solution: 'Listen for pivot connectives: "actually", "in fact", "wait", "mind you".' },
+    { title: 'Writing Task 1 Overview Mandate', icon: '✍️', tag: 'Task Achievement', problem: 'Omitting the summary trend paragraph.', solution: 'Always dedicate paragraph 2 to high-level trends without specific figures.' },
+    { title: 'The P-E-E-R Speaking Framework', icon: '🎤', tag: 'Fluency Expansion', problem: 'Terse 5-second answers that fail to showcase range.', solution: 'Point, Explain, Example, Repercussion for every question.' }
+  ];
+
+  document.getElementById('tactics-container').innerHTML = tactics.map(t => `
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">${t.icon}</span>
+          <h4 class="text-sm font-bold text-white">${t.title}</h4>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-900/40 text-cyan-300 border border-cyan-700/40">
+          ${t.tag}
+        </span>
+      </div>
+      <div class="text-xs text-slate-400">
+        <strong class="text-rose-400">The Problem:</strong> ${t.problem}
+      </div>
+      <div class="text-xs text-emerald-300 font-medium pt-1">
+        <strong class="text-emerald-400">Examiner Fix:</strong> ${t.solution}
+      </div>
+    </div>
+  `).join('');
+
+  // 3. Sentence Rewrite Clinic
+  const clinic = diag.sentenceClinic || [
+    {
+      original: "The graph shows that the number of cars increased a lot in 2020.",
+      band: "Band 6.0 (Vague reporting verb, basic intensifier)",
+      transformed: "The line graph delineates an exponential surge in automotive ownership, peaking decisively across the 2020 calendar year.",
+      transformationRationale: "Substituted generic 'shows' with 'delineates'; upgraded 'increased a lot' to 'exponential surge'; introduced non-finite participle 'peaking decisively'."
+    },
+    {
+      original: "If people don't recycle, there will be too much pollution in our world.",
+      band: "Band 5.5 (Informal register, colloquial phrasing)",
+      transformed: "Absent robust municipal recycling initiatives, industrialised societies inexorably risk catastrophic environmental degradation.",
+      transformationRationale: "Replaced simplistic zero-conditional with prepositional clause 'Absent robust...'; upgraded everyday vocabulary to formal academic registers."
+    }
+  ];
+
+  document.getElementById('clinic-container').innerHTML = clinic.map(c => `
+    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+      <div class="text-xs font-semibold text-rose-400 flex items-center justify-between">
+        <span>❌ Original Candidate Draft:</span>
+        <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">${c.band}</span>
+      </div>
+      <div class="p-2.5 rounded-lg bg-rose-950/20 border border-rose-900/30 text-xs font-mono text-rose-200">
+        "${c.original}"
+      </div>
+      <div class="text-xs font-semibold text-emerald-400">
+        ✨ Band 8.5+ Academic Transformation:
+      </div>
+      <div class="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-900/30 text-xs font-mono text-emerald-200 font-semibold">
+        "${c.transformed}"
+      </div>
+      <div class="text-[11px] text-slate-400">
+        <strong class="text-cyan-400">Examiner Linguistic Notes:</strong> ${c.transformationRationale}
+      </div>
+    </div>
+  `).join('');
+
+  // 4. 7-Day Remediation Plan
+  const plan = diag.remediationPlan || [];
+  document.getElementById('plan-container').innerHTML = plan.map(p => `
+    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-3">
+        <span class="w-16 text-center font-bold font-mono px-2 py-1 rounded bg-purple-900/40 text-purple-300 border border-purple-700/50">
+          ${p.day}
+        </span>
+        <div>
+          <div class="font-bold text-white">${p.focus}</div>
+          <div class="text-slate-400 text-[11px] mt-0.5">${p.task}</div>
+        </div>
+      </div>
+      <button onclick="Toast.info('Day drill saved to your dashboard schedule!')" class="text-[11px] text-cyan-400 hover:underline flex-shrink-0">
+        Add to Daily Schedule →
+      </button>
+    </div>
+  `).join('');
+
+  // Recommendations
+  const weakest = bandModules.filter(m => m.band).sort((a,b) => a.band - b.band)[0];
+  const recs = [
+    { icon: '🎯', title: 'Target Module Leap', desc: weakest ? `Focus on ${weakest.name} (Band ${weakest.band}). A 0.5 jump here will lift your Overall score to your next milestone.` : 'Take full mock exams weekly.' },
+    { icon: '📝', title: 'Word Limit Compliance', desc: 'Never exceed the word limit in Listening/Reading. Every extra word is penalized with 0 marks.' },
+    { icon: '🤖', title: 'AI Exam Generator', desc: 'Generate customized Cambridge-standard tests targeting your exact weak question types in the AI Tests lab.' },
+    { icon: '📖', title: 'Active Collocation Log', desc: 'Transfer words from the Sentence Rewrite Clinic into your daily writing practice.' }
+  ];
+  
+  document.getElementById('recommendations').innerHTML = recs.map(r => `
+    <div class="feedback-block" style="display:flex;gap:1rem;align-items:flex-start">
+      <div style="font-size:1.5rem">${r.icon}</div>
+      <div>
+        <div style="font-weight:700;margin-bottom:0.25rem;color:var(--text-primary,#fff)">${r.title}</div>
+        <div style="font-size:0.875rem;color:var(--text-secondary,#94A3B8)">${r.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadResults();
+});
+</script>
+</body>
+</html>

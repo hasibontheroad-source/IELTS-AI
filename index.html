@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IELTS Academic AI – Master the Exam with AI Precision</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { inter: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: {
+              purple: '#7C3AED',
+              cyan:   '#06B6D4',
+              dark:   '#0F0F1A',
+              card:   '#1A1A2E',
+              border: '#2A2A4A',
+            }
+          },
+          animation: {
+            'float':        'float 6s ease-in-out infinite',
+            'float-delay':  'float 6s ease-in-out 2s infinite',
+            'float-delay2': 'float 6s ease-in-out 4s infinite',
+            'pulse-slow':   'pulse 4s ease-in-out infinite',
+            'gradient':     'gradientShift 8s ease infinite',
+            'fade-in-up':   'fadeInUp 0.8s ease forwards',
+          },
+          keyframes: {
+            float:         { '0%,100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-20px)' } },
+            gradientShift: { '0%,100%': { backgroundPosition: '0% 50%' }, '50%': { backgroundPosition: '100% 50%' } },
+            fadeInUp:      { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+          }
+        }
+      }
+    };
+  </script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; background: var(--bg-gradient); color: var(--text-primary); }
+    .hero-gradient {
+      background: linear-gradient(135deg, var(--bg-app) 0%, rgba(124,58,237,0.12) 30%, rgba(6,182,212,0.08) 60%, var(--bg-app) 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+    }
+    @keyframes gradientShift {
+      0%,100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0px) rotate(0deg); }
+      50%      { transform: translateY(-18px) rotate(2deg); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes glow {
+      0%,100% { box-shadow: 0 0 20px rgba(124,58,237,0.4), 0 0 60px rgba(124,58,237,0.1); }
+      50%      { box-shadow: 0 0 40px rgba(124,58,237,0.8), 0 0 80px rgba(124,58,237,0.3); }
+    }
+    .logo-glow { animation: glow 3s ease-in-out infinite; }
+    .float-1   { animation: float 6s ease-in-out infinite; }
+    .float-2   { animation: float 6s ease-in-out 2s infinite; }
+    .float-3   { animation: float 6s ease-in-out 4s infinite; }
+    .fade-in-1 { animation: fadeInUp 0.8s ease 0.1s both; }
+    .fade-in-2 { animation: fadeInUp 0.8s ease 0.3s both; }
+    .fade-in-3 { animation: fadeInUp 0.8s ease 0.5s both; }
+    .fade-in-4 { animation: fadeInUp 0.8s ease 0.7s both; }
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+    }
+    .glass-light {
+      background: rgba(124,58,237,0.08);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #A78BFA, #06B6D4, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7C3AED, #4F46E5);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #9F67FF, #6366F1);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .btn-primary:hover::before { opacity: 1; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(124,58,237,0.4); }
+    .btn-primary span { position: relative; z-index: 1; }
+    .input-field {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #7C3AED;
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+    }
+    .module-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-card);
+      transition: all 0.3s ease;
+    }
+    .module-card:hover {
+      border-color: rgba(124,58,237,0.5);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-card);
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    .score-ring {
+      background: conic-gradient(#7C3AED var(--pct), rgba(124,58,237,0.1) var(--pct));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- ═══════════════════════════════════════════ NAVBAR ═══════ -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-purple-900/30" style="border-bottom-color: var(--glass-border)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center text-xl logo-glow">🎓</div>
+        <span class="text-lg font-bold gradient-text">IELTS Academic AI</span>
+      </div>
+      <div class="hidden md:flex items-center gap-6 text-sm text-slate-400">
+        <a href="#features" class="hover:text-purple-400 transition-colors" style="color:var(--text-secondary)">Features</a>
+        <a href="#modules"  class="hover:text-purple-400 transition-colors" style="color:var(--text-secondary)">Modules</a>
+        <a href="pages/mock-tests.html" class="hover:text-cyan-400 transition-colors font-semibold" style="color:var(--secondary)">Cambridge 1–21 Hub</a>
+        <a href="pages/mock-test.html" class="hover:text-purple-400 transition-colors" style="color:var(--text-secondary)">Full Mock Exam</a>
+        <a href="#stats"    class="hover:text-purple-400 transition-colors" style="color:var(--text-secondary)">Stats</a>
+        
+        <!-- Theme Switcher -->
+        <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+          <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+          <span class="theme-text">Light</span>
+        </button>
+
+        <a href="#login"    class="btn-primary text-white px-5 py-2 rounded-lg font-semibold text-sm"><span>Get Started</span></a>
+      </div>
+      <div class="md:hidden flex items-center gap-2">
+        <button class="theme-toggle-btn theme-toggle-icon-only" type="button" onclick="ThemeManager.toggle()" title="Toggle Theme" style="padding:6px;width:32px;height:32px;border-radius:8px">
+          <span class="theme-icon">☀️</span>
+        </button>
+        <a href="#login" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-semibold"><span>Login</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════ HERO ═══════════ -->
+  <section class="hero-gradient relative min-h-screen flex items-center pt-16 overflow-hidden">
+    <!-- decorative orbs -->
+    <div class="orb w-96 h-96 bg-purple-600" style="top:-10%;left:-5%"></div>
+    <div class="orb w-80 h-80 bg-cyan-500"   style="top:20%;right:-5%"></div>
+    <div class="orb w-64 h-64 bg-indigo-700" style="bottom:10%;left:20%"></div>
+
+    <!-- grid lines -->
+    <div class="absolute inset-0 opacity-5" style="background-image:linear-gradient(rgba(124,58,237,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.5) 1px,transparent 1px);background-size:60px 60px;"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- LEFT: text + login -->
+        <div>
+          <div class="fade-in-1 inline-flex items-center gap-2 glass-light px-4 py-2 rounded-full text-sm text-purple-300 mb-6">
+            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            AI-Powered IELTS Preparation Platform
+          </div>
+
+          <h1 class="fade-in-2 text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-6">
+            <span class="text-white">Master the</span><br/>
+            <span class="gradient-text">IELTS Academic</span><br/>
+            <span class="text-white">Exam with</span>
+            <span class="gradient-text"> AI Precision</span>
+          </h1>
+
+          <p class="fade-in-3 text-slate-400 text-lg mb-10 leading-relaxed max-w-lg">
+            Practise all four IELTS Academic modules with real-time AI evaluation, instant band scoring, and personalised feedback — built to take you to Band 9.
+          </p>
+
+          <!-- ─── AUTHENTICATION (LOGIN & SIGNUP) ─── -->
+          <div id="login" class="fade-in-4 glass rounded-2xl p-6 sm:p-8 max-w-md shadow-2xl border border-purple-500/20">
+            
+            <!-- Auth Mode Switcher Tabs -->
+            <div class="flex items-center p-1 bg-black/40 border border-purple-900/40 rounded-xl mb-6">
+              <button type="button" id="tab-btn-login" onclick="switchAuthTab('login')"
+                class="flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-white bg-purple-600 shadow-md">
+                🔑 Log In
+              </button>
+              <button type="button" id="tab-btn-signup" onclick="switchAuthTab('signup')"
+                class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-white">
+                ✨ Sign Up
+              </button>
+            </div>
+
+            <!-- Error Notification Banner -->
+            <div id="auth-error" class="hidden mb-4 px-4 py-3 rounded-lg bg-red-900/30 border border-red-500/40 text-red-300 text-xs sm:text-sm leading-relaxed"></div>
+            <!-- Success Notification Banner -->
+            <div id="auth-success" class="hidden mb-4 px-4 py-3 rounded-lg bg-emerald-900/30 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm leading-relaxed"></div>
+
+            <!-- 1. LOG IN FORM PANE -->
+            <div id="login-form-pane" class="space-y-4">
+              <div>
+                <label for="login-username" class="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+                  Username <span class="text-purple-400">*</span>
+                </label>
+                <input id="login-username" type="text" placeholder="e.g. student or aisha" autocomplete="username"
+                  class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-slate-500 text-sm font-mono" />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="login-password" class="block text-xs sm:text-sm font-medium text-slate-300">
+                    Password <span class="text-purple-400">*</span>
+                  </label>
+                  <button type="button" onclick="togglePasswordVisibility('login-password')" 
+                    class="text-[11px] text-purple-400 hover:underline">Show / Hide</button>
+                </div>
+                <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"
+                  class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-slate-500 text-sm font-mono" />
+              </div>
+
+              <!-- Quick Demo Fill Chips -->
+              <div class="p-3 rounded-xl bg-purple-950/30 border border-purple-800/30">
+                <span class="text-[11px] font-semibold text-slate-400 block mb-1.5">⚡ Instant Demo Credentials:</span>
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" onclick="fillDemoCredentials('student', 'password123')"
+                    class="text-[11px] bg-purple-900/50 hover:bg-purple-800/60 text-purple-200 border border-purple-700/50 px-2.5 py-1 rounded-md transition font-mono">
+                    👤 student / password123
+                  </button>
+                  <button type="button" onclick="fillDemoCredentials('admin', 'admin123')"
+                    class="text-[11px] bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-800/50 px-2.5 py-1 rounded-md transition font-mono">
+                    🛡️ admin / admin123
+                  </button>
+                </div>
+              </div>
+
+              <button onclick="handleLogin()" id="login-btn"
+                class="btn-primary w-full py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30">
+                <span id="login-btn-label">🚀 Log In to Account</span>
+                <svg id="login-spinner" class="hidden w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+              </button>
+
+              <p class="text-center text-xs text-slate-400 pt-1">
+                Don't have an account? 
+                <button type="button" onclick="switchAuthTab('signup')" class="text-cyan-400 hover:underline font-semibold ml-1">Create one here</button>
+              </p>
+            </div>
+
+            <!-- 2. SIGN UP FORM PANE (Initially Hidden) -->
+            <div id="signup-form-pane" class="space-y-4 hidden">
+              <div>
+                <label for="signup-name" class="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+                  Full Name <span class="text-purple-400">*</span>
+                </label>
+                <input id="signup-name" type="text" placeholder="e.g. Aisha Rahman"
+                  class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-slate-500 text-sm" />
+              </div>
+
+              <div>
+                <label for="signup-username" class="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+                  Choose Username <span class="text-purple-400">*</span>
+                </label>
+                <input id="signup-username" type="text" placeholder="e.g. aisha" autocomplete="username"
+                  class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-slate-500 text-sm font-mono" />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="signup-password" class="block text-xs sm:text-sm font-medium text-slate-300">
+                    Create Password <span class="text-purple-400">*</span>
+                  </label>
+                  <button type="button" onclick="togglePasswordVisibility('signup-password')" 
+                    class="text-[11px] text-purple-400 hover:underline">Show / Hide</button>
+                </div>
+                <input id="signup-password" type="password" placeholder="At least 6 characters" autocomplete="new-password"
+                  class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-slate-500 text-sm font-mono" />
+              </div>
+
+              <div>
+                <label for="signup-api-key" class="block text-xs sm:text-sm font-medium text-slate-300 mb-1">
+                  Gemini API Key
+                  <span class="text-slate-500 text-xs font-normal ml-1">(Optional)</span>
+                </label>
+                <input id="signup-api-key" type="password" placeholder="AIzaSy... (optional for AI features)"
+                  class="input-field w-full px-4 py-2.5 rounded-xl text-white placeholder-slate-500 text-xs font-mono" />
+                <p class="mt-1 text-[11px] text-slate-500">Free key at <a href="https://aistudio.google.com" target="_blank" class="text-purple-400 hover:underline">aistudio.google.com</a></p>
+              </div>
+
+              <button onclick="handleSignup()" id="signup-btn"
+                class="btn-primary w-full py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30">
+                <span id="signup-btn-label">✨ Create Account & Start</span>
+                <svg id="signup-spinner" class="hidden w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+              </button>
+
+              <p class="text-center text-xs text-slate-400 pt-1">
+                Already registered? 
+                <button type="button" onclick="switchAuthTab('login')" class="text-cyan-400 hover:underline font-semibold ml-1">Log in here</button>
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT: floating score cards -->
+        <div class="hidden lg:flex items-center justify-center relative h-[560px]">
+          <!-- central orb -->
+          <div class="absolute w-64 h-64 rounded-full" style="background:radial-gradient(circle,rgba(124,58,237,0.25) 0%,transparent 70%);"></div>
+
+          <!-- main score card -->
+          <div class="absolute glass rounded-2xl p-6 w-52 text-center shadow-2xl float-1" style="top:8%;left:22%;">
+            <div class="text-4xl font-black gradient-text mb-1">8.5</div>
+            <div class="text-xs text-slate-400">Overall Band</div>
+            <div class="mt-3 h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div class="h-full rounded-full bg-gradient-to-r from-purple-500 to-cyan-400" style="width:94%"></div>
+            </div>
+          </div>
+
+          <!-- listening card -->
+          <div class="absolute glass-light rounded-xl p-4 w-40 float-2 shadow-xl" style="top:30%;right:8%;">
+            <div class="text-2xl mb-1">🎧</div>
+            <div class="text-sm font-semibold text-white">Listening</div>
+            <div class="text-2xl font-bold text-cyan-400 mt-1">9.0</div>
+          </div>
+
+          <!-- reading card -->
+          <div class="absolute glass-light rounded-xl p-4 w-40 float-3 shadow-xl" style="bottom:28%;left:8%;">
+            <div class="text-2xl mb-1">📖</div>
+            <div class="text-sm font-semibold text-white">Reading</div>
+            <div class="text-2xl font-bold text-purple-400 mt-1">8.0</div>
+          </div>
+
+          <!-- writing card -->
+          <div class="absolute glass rounded-xl p-4 w-44 float-1 shadow-xl" style="bottom:12%;right:18%;">
+            <div class="text-2xl mb-1">✍️</div>
+            <div class="text-sm font-semibold text-white">Writing</div>
+            <div class="text-2xl font-bold text-indigo-400 mt-1">7.5</div>
+            <div class="text-xs text-slate-400 mt-1">AI Evaluated</div>
+          </div>
+
+          <!-- speaking card -->
+          <div class="absolute glass-light rounded-xl p-4 w-40 float-2 shadow-xl" style="top:10%;right:10%;">
+            <div class="text-2xl mb-1">🎤</div>
+            <div class="text-sm font-semibold text-white">Speaking</div>
+            <div class="text-2xl font-bold text-green-400 mt-1">8.5</div>
+          </div>
+
+          <!-- AI feedback pill -->
+          <div class="absolute glass-light rounded-full px-4 py-2 text-xs text-purple-300 font-medium float-3" style="bottom:8%;left:22%;">
+            ✨ AI Feedback Ready
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ STATS ═══════════ -->
+  <section id="stats" class="py-16 border-y border-purple-900/20" style="background:#0D0D1A;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="stat-card rounded-2xl p-6 text-center">
+          <div class="text-3xl font-black gradient-text mb-1">10,000+</div>
+          <div class="text-slate-400 text-sm">Active Students</div>
+        </div>
+        <div class="stat-card rounded-2xl p-6 text-center">
+          <div class="text-3xl font-black gradient-text mb-1">4</div>
+          <div class="text-slate-400 text-sm">Full Modules</div>
+        </div>
+        <div class="stat-card rounded-2xl p-6 text-center">
+          <div class="text-3xl font-black gradient-text mb-1">AI</div>
+          <div class="text-slate-400 text-sm">Real-time Evaluation</div>
+        </div>
+        <div class="stat-card rounded-2xl p-6 text-center">
+          <div class="text-3xl font-black gradient-text mb-1">Band 9</div>
+          <div class="text-slate-400 text-sm">Expert Content</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ FEATURES ════════ -->
+  <section id="features" class="py-24" style="background:#0F0F1A;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-2 glass-light px-4 py-2 rounded-full text-sm text-purple-300 mb-4">⚡ Why Choose Us</div>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mb-4">Everything You Need to <span class="gradient-text">Achieve Band 9</span></h2>
+        <p class="text-slate-400 max-w-2xl mx-auto">Comprehensive AI-powered preparation tools designed specifically for the IELTS Academic exam format.</p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="module-card rounded-2xl p-6">
+          <div class="w-12 h-12 rounded-xl bg-purple-900/50 border border-purple-700/40 flex items-center justify-center text-2xl mb-4">🤖</div>
+          <h3 class="text-white font-bold mb-2">AI-Powered Evaluation</h3>
+          <p class="text-slate-400 text-sm">Get instant, detailed feedback on Writing and Speaking responses using the Gemini AI — just like a real examiner.</p>
+        </div>
+        <div class="module-card rounded-2xl p-6">
+          <div class="w-12 h-12 rounded-xl bg-cyan-900/50 border border-cyan-700/40 flex items-center justify-center text-2xl mb-4">📊</div>
+          <h3 class="text-white font-bold mb-2">Detailed Analytics</h3>
+          <p class="text-slate-400 text-sm">Track your progress over time with beautiful charts and identify your weak areas to focus your study.</p>
+        </div>
+        <div class="module-card rounded-2xl p-6">
+          <div class="w-12 h-12 rounded-xl bg-indigo-900/50 border border-indigo-700/40 flex items-center justify-center text-2xl mb-4">📝</div>
+          <h3 class="text-white font-bold mb-2">Full Mock Tests</h3>
+          <p class="text-slate-400 text-sm">Simulate real exam conditions with timed tests across all four modules using authentic IELTS question formats.</p>
+        </div>
+        <div class="module-card rounded-2xl p-6">
+          <div class="w-12 h-12 rounded-xl bg-green-900/50 border border-green-700/40 flex items-center justify-center text-2xl mb-4">⚡</div>
+          <h3 class="text-white font-bold mb-2">Instant Band Scoring</h3>
+          <p class="text-slate-400 text-sm">Receive your band score immediately after completing each section, with breakdown by criterion.</p>
+        </div>
+        <div class="module-card rounded-2xl p-6">
+          <div class="w-12 h-12 rounded-xl bg-rose-900/50 border border-rose-700/40 flex items-center justify-center text-2xl mb-4">🎯</div>
+          <h3 class="text-white font-bold mb-2">Personalised Tips</h3>
+          <p class="text-slate-400 text-sm">AI-generated study tips tailored to your performance patterns and target band score.</p>
+        </div>
+        <div class="module-card rounded-2xl p-6">
+          <div class="w-12 h-12 rounded-xl bg-amber-900/50 border border-amber-700/40 flex items-center justify-center text-2xl mb-4">🔒</div>
+          <h3 class="text-white font-bold mb-2">100% Private</h3>
+          <p class="text-slate-400 text-sm">All your data is stored locally on your device. Your API key and test history never leave your browser.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ MODULES ═════════ -->
+  <section id="modules" class="py-24" style="background:#0D0D1A;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-2 glass-light px-4 py-2 rounded-full text-sm text-cyan-300 mb-4">📚 Four Modules</div>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mb-4">Master Every <span class="gradient-text">IELTS Section</span></h2>
+        <p class="text-slate-400 max-w-2xl mx-auto">Complete preparation for all four Academic modules with AI evaluation where it matters most.</p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Listening -->
+        <div class="module-card rounded-2xl p-6 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-br from-cyan-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="relative">
+            <div class="text-4xl mb-4">🎧</div>
+            <h3 class="text-white font-bold text-lg mb-2">Listening</h3>
+            <p class="text-slate-400 text-sm mb-4">4 sections · 40 questions · 30 minutes. Audio-based comprehension with multiple question types.</p>
+            <div class="flex items-center gap-2 text-xs text-cyan-400">
+              <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full"></span>
+              MC, Gap-fill, Matching
+            </div>
+          </div>
+        </div>
+        <!-- Reading -->
+        <div class="module-card rounded-2xl p-6 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="relative">
+            <div class="text-4xl mb-4">📖</div>
+            <h3 class="text-white font-bold text-lg mb-2">Reading</h3>
+            <p class="text-slate-400 text-sm mb-4">3 passages · 40 questions · 60 minutes. Academic texts with diverse question formats.</p>
+            <div class="flex items-center gap-2 text-xs text-purple-400">
+              <span class="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
+              True/False, Headings, MC
+            </div>
+          </div>
+        </div>
+        <!-- Writing -->
+        <div class="module-card rounded-2xl p-6 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="relative">
+            <div class="text-4xl mb-4">✍️</div>
+            <h3 class="text-white font-bold text-lg mb-2">Writing</h3>
+            <p class="text-slate-400 text-sm mb-4">Task 1 (report) + Task 2 (essay) · 60 minutes. Full AI evaluation on all 4 criteria.</p>
+            <div class="flex items-center gap-2 text-xs text-indigo-400">
+              <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full"></span>
+              AI Band Scoring
+            </div>
+          </div>
+        </div>
+        <!-- Speaking -->
+        <div class="module-card rounded-2xl p-6 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-br from-green-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="relative">
+            <div class="text-4xl mb-4">🎤</div>
+            <h3 class="text-white font-bold text-lg mb-2">Speaking</h3>
+            <p class="text-slate-400 text-sm mb-4">3 parts · 11–14 minutes. Text-based simulation with AI feedback on fluency & coherence.</p>
+            <div class="flex items-center gap-2 text-xs text-green-400">
+              <span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+              AI Fluency Analysis
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ CTA ═════════════ -->
+  <section class="py-20 relative overflow-hidden" style="background:linear-gradient(135deg,#1A0533 0%,#0D1B3E 100%);">
+    <div class="orb w-80 h-80 bg-purple-600" style="top:-20%;right:-5%;"></div>
+    <div class="orb w-64 h-64 bg-cyan-500" style="bottom:-20%;left:-5%;"></div>
+    <div class="relative max-w-3xl mx-auto px-4 text-center">
+      <h2 class="text-3xl sm:text-4xl font-black text-white mb-4">Ready to achieve your <span class="gradient-text">target band score</span>?</h2>
+      <p class="text-slate-400 mb-8">Join thousands of students already preparing smarter with AI-powered IELTS practice.</p>
+      <a href="#login" class="btn-primary inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-lg"><span>🚀 Start for Free</span></a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ FOOTER ══════════ -->
+  <footer class="py-10 border-t border-purple-900/20" style="background:#0A0A14;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center text-sm">🎓</div>
+        <span class="text-sm font-semibold gradient-text">IELTS Academic AI</span>
+      </div>
+      <p class="text-slate-500 text-sm">© 2025 IELTS Academic AI. All rights reserved.</p>
+      <div class="flex items-center gap-4 text-xs text-slate-500">
+        <span>Privacy</span>
+        <span>Terms</span>
+        <span>Contact</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════ SCRIPTS ═════════ -->
+  <script src="js/core.js"></script>
+  <script src="js/content.js"></script>
+  <script>
+    // Default Users Database in LocalStorage
+    const DEFAULT_USERS = [
+      { name: 'Aisha Rahman', username: 'student', password: 'password123', role: 'student', joinDate: '2026-01-15T09:00:00.000Z' },
+      { name: 'Dr. Margaret Thornton', username: 'admin', password: 'admin123', role: 'admin', joinDate: '2025-11-01T08:00:00.000Z' }
+    ];
+
+    function getRegisteredUsers() {
+      try {
+        const raw = localStorage.getItem('ielts_registered_users');
+        if (!raw) {
+          localStorage.setItem('ielts_registered_users', JSON.stringify(DEFAULT_USERS));
+          return DEFAULT_USERS;
+        }
+        return JSON.parse(raw);
+      } catch {
+        return DEFAULT_USERS;
+      }
+    }
+
+    function saveRegisteredUsers(users) {
+      try {
+        localStorage.setItem('ielts_registered_users', JSON.stringify(users));
+      } catch(e) {
+        console.warn('Storage error:', e);
+      }
+    }
+
+    // Switch between Log In and Sign Up tabs
+    function switchAuthTab(mode) {
+      const loginTab = document.getElementById('tab-btn-login');
+      const signupTab = document.getElementById('tab-btn-signup');
+      const loginPane = document.getElementById('login-form-pane');
+      const signupPane = document.getElementById('signup-form-pane');
+      const errEl = document.getElementById('auth-error');
+      const succEl = document.getElementById('auth-success');
+
+      errEl.classList.add('hidden');
+      succEl.classList.add('hidden');
+
+      if (mode === 'signup') {
+        loginTab.className = 'flex-1 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-white';
+        signupTab.className = 'flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-white bg-purple-600 shadow-md';
+        loginPane.classList.add('hidden');
+        signupPane.classList.remove('hidden');
+        document.getElementById('signup-name').focus();
+      } else {
+        signupTab.className = 'flex-1 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-white';
+        loginTab.className = 'flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-white bg-purple-600 shadow-md';
+        signupPane.classList.add('hidden');
+        loginPane.classList.remove('hidden');
+        document.getElementById('login-username').focus();
+      }
+    }
+
+    // Toggle password visibility
+    function togglePasswordVisibility(fieldId) {
+      const inp = document.getElementById(fieldId);
+      if (inp) {
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+      }
+    }
+
+    // Fill demo credentials
+    function fillDemoCredentials(username, password) {
+      switchAuthTab('login');
+      document.getElementById('login-username').value = username;
+      document.getElementById('login-password').value = password;
+      Toast.success(`Filled credentials for ${username}`);
+    }
+
+    // Log In Handler (Enter Username & Password)
+    function handleLogin() {
+      const userEl = document.getElementById('login-username');
+      const passEl = document.getElementById('login-password');
+      const errEl = document.getElementById('auth-error');
+      const succEl = document.getElementById('auth-success');
+      const spinner = document.getElementById('login-spinner');
+      const btnLbl = document.getElementById('login-btn-label');
+
+      errEl.classList.add('hidden');
+      succEl.classList.add('hidden');
+
+      const username = userEl.value.trim();
+      const password = passEl.value.trim();
+
+      if (!username) {
+        errEl.textContent = '⚠️ Please enter your username.';
+        errEl.classList.remove('hidden');
+        userEl.focus();
+        return;
+      }
+      if (!password) {
+        errEl.textContent = '⚠️ Please enter your password.';
+        errEl.classList.remove('hidden');
+        passEl.focus();
+        return;
+      }
+
+      spinner.classList.remove('hidden');
+      btnLbl.textContent = 'Authenticating…';
+
+      setTimeout(() => {
+        const users = getRegisteredUsers();
+        const matched = users.find(u => 
+          u.username.toLowerCase() === username.toLowerCase() && u.password === password
+        );
+
+        if (matched) {
+          succEl.textContent = `✅ Welcome back, ${matched.name}! Redirecting to dashboard...`;
+          succEl.classList.remove('hidden');
+
+          const sessionUser = {
+            name: matched.name,
+            username: matched.username,
+            role: matched.role || 'student',
+            lastLogin: new Date().toISOString()
+          };
+
+          if (typeof Storage !== 'undefined' && typeof Storage.set === 'function') {
+            Storage.set('user', sessionUser);
+          } else {
+            localStorage.setItem('ielts_user', JSON.stringify(sessionUser));
+          }
+
+          setTimeout(() => {
+            window.location.href = 'pages/dashboard.html';
+          }, 600);
+        } else {
+          spinner.classList.add('hidden');
+          btnLbl.textContent = '🚀 Log In to Account';
+          errEl.textContent = '❌ Invalid username or password. You can also sign up for a new account.';
+          errEl.classList.remove('hidden');
+        }
+      }, 500);
+    }
+
+    // Sign Up Handler (Enter Name, Username & Password)
+    function handleSignup() {
+      const nameEl = document.getElementById('signup-name');
+      const userEl = document.getElementById('signup-username');
+      const passEl = document.getElementById('signup-password');
+      const keyEl = document.getElementById('signup-api-key');
+      const errEl = document.getElementById('auth-error');
+      const succEl = document.getElementById('auth-success');
+      const spinner = document.getElementById('signup-spinner');
+      const btnLbl = document.getElementById('signup-btn-label');
+
+      errEl.classList.add('hidden');
+      succEl.classList.add('hidden');
+
+      const name = nameEl.value.trim();
+      const username = userEl.value.trim();
+      const password = passEl.value.trim();
+      const apiKey = keyEl ? keyEl.value.trim() : '';
+
+      if (!name) {
+        errEl.textContent = '⚠️ Please enter your full name.';
+        errEl.classList.remove('hidden');
+        nameEl.focus();
+        return;
+      }
+      if (!username) {
+        errEl.textContent = '⚠️ Please choose a username.';
+        errEl.classList.remove('hidden');
+        userEl.focus();
+        return;
+      }
+      if (!password || password.length < 4) {
+        errEl.textContent = '⚠️ Password must be at least 4 characters.';
+        errEl.classList.remove('hidden');
+        passEl.focus();
+        return;
+      }
+
+      spinner.classList.remove('hidden');
+      btnLbl.textContent = 'Creating Account…';
+
+      setTimeout(() => {
+        const users = getRegisteredUsers();
+        const exists = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+
+        if (exists) {
+          spinner.classList.add('hidden');
+          btnLbl.textContent = '✨ Create Account & Start';
+          errEl.textContent = '⚠️ This username is already taken. Please choose another username or log in.';
+          errEl.classList.remove('hidden');
+          userEl.focus();
+          return;
+        }
+
+        const newUser = {
+          name: name,
+          username: username,
+          password: password,
+          role: username.toLowerCase() === 'admin' ? 'admin' : 'student',
+          apiKey: apiKey,
+          joinDate: new Date().toISOString()
+        };
+
+        users.push(newUser);
+        saveRegisteredUsers(users);
+
+        const sessionUser = {
+          name: newUser.name,
+          username: newUser.username,
+          role: newUser.role,
+          lastLogin: new Date().toISOString()
+        };
+
+        if (typeof Storage !== 'undefined' && typeof Storage.set === 'function') {
+          Storage.set('user', sessionUser);
+          if (apiKey) Storage.set('gemini_api_key', apiKey);
+        } else {
+          localStorage.setItem('ielts_user', JSON.stringify(sessionUser));
+          if (apiKey) localStorage.setItem('ielts_gemini_key', apiKey);
+        }
+
+        succEl.textContent = `🎉 Account created! Welcome, ${name}. Loading your workspace...`;
+        succEl.classList.remove('hidden');
+
+        setTimeout(() => {
+          window.location.href = 'pages/dashboard.html';
+        }, 700);
+      }, 500);
+    }
+
+    // Enter key triggers
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ensure default users seeded
+      getRegisteredUsers();
+
+      // Enter listener on login inputs
+      ['login-username', 'login-password'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleLogin();
+          });
+        }
+      });
+
+      // Enter listener on signup inputs
+      ['signup-name', 'signup-username', 'signup-password', 'signup-api-key'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('keydown', e => {
+            if (e.key === 'Enter') handleSignup();
+          });
+        }
+      });
+
+      // Check if already authenticated
+      try {
+        const raw = localStorage.getItem('ielts_user');
+        if (raw) {
+          const u = JSON.parse(raw);
+          if (u && u.name) {
+            // Already logged in
+            window.location.href = 'pages/dashboard.html';
+          }
+        }
+      } catch(_) {}
+    });
+  </script>
+</body>
+</html>

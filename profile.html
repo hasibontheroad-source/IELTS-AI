@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidate Profile & Edit Preferences | IELTS Academic AI</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { purple: '#7C3AED', cyan: '#06B6D4', dark: '#0A0F1D', card: '#111B30', border: '#1E2E4E' }
+          }
+        }
+      }
+    };
+  </script>
+  <script src="../js/core.js"></script>
+  <script src="../js/content.js"></script>
+  <script src="../js/sidebar.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background: var(--bg-body, #0A0F1D); color: var(--text-primary, #E2E8F0); font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; min-height: 100vh; }
+    .profile-card {
+      background: var(--bg-card, #111B30);
+      border: 1px solid var(--border-color, #1E2E4E);
+      border-radius: 18px;
+      padding: 1.5rem;
+      transition: all 0.25s ease;
+    }
+    [data-theme="light"] .profile-card {
+      background: #FFFFFF !important;
+      border-color: #E2E8F0 !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .profile-tab-btn {
+      padding: 10px 18px;
+      font-size: 0.825rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid transparent;
+    }
+    .profile-tab-btn.active {
+      background: linear-gradient(135deg, rgba(124,58,237,0.35), rgba(6,182,212,0.25));
+      border-color: #7C3AED;
+      color: #FFFFFF;
+      box-shadow: 0 4px 15px rgba(124,58,237,0.25);
+    }
+    [data-theme="light"] .profile-tab-btn.active {
+      background: linear-gradient(135deg, #6366F1, #06B6D4) !important;
+      color: #FFFFFF !important;
+    }
+    .profile-tab-btn:not(.active) {
+      background: rgba(15,23,42,0.6);
+      color: #94A3B8;
+      border-color: #1E293B;
+    }
+    [data-theme="light"] .profile-tab-btn:not(.active) {
+      background: #F1F5F9;
+      color: #475569;
+      border-color: #CBD5E1;
+    }
+    .profile-tab-btn:not(.active):hover {
+      background: rgba(30,41,59,0.8);
+      color: #E2E8F0;
+    }
+    [data-theme="light"] .profile-tab-btn:not(.active):hover {
+      background: #E2E8F0;
+      color: #0F172A;
+    }
+    .avatar-choice {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .avatar-choice:hover {
+      transform: scale(1.08);
+    }
+    .avatar-choice.selected {
+      border-color: #06B6D4 !important;
+      box-shadow: 0 0 12px rgba(6,182,212,0.4);
+    }
+    [data-theme="light"] .page-header {
+      border-bottom-color: #E2E8F0 !important;
+    }
+    [data-theme="light"] .page-header h1 {
+      color: #0F172A !important;
+    }
+    [data-theme="light"] #prof-hero-name {
+      color: #0F172A !important;
+    }
+    [data-theme="light"] input, [data-theme="light"] select, [data-theme="light"] textarea {
+      background-color: #F8FAFC !important;
+      color: #0F172A !important;
+      border-color: #CBD5E1 !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="main-content">
+  <!-- Top Header Navigation -->
+  <div class="page-header" style="border-bottom:1px solid var(--border-color,#1E293B);padding-bottom:1.25rem;margin-bottom:1.75rem">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <a href="dashboard.html" class="btn btn-secondary btn-sm">← Dashboard</a>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <h1 style="font-size:1.35rem;font-weight:800;color:var(--text-primary,#fff);margin:0">Candidate Profile & Edit Preferences</h1>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-cyan-950/60 text-cyan-300 border border-cyan-700/50">
+            Personal Account
+          </span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-muted,#94A3B8);margin-top:2px">
+          Manage your personal identity, target band requirements, exam deadlines, and study preferences.
+        </p>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center">
+      <!-- Theme Switcher -->
+      <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+        <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+        <span class="theme-text">Light</span>
+      </button>
+      <a href="mock-tests.html" class="btn btn-secondary btn-sm flex items-center gap-1.5">
+        <span>📚</span> Cambridge Hub
+      </a>
+      <button onclick="window.openSwitchAccountModal()" class="btn btn-secondary btn-sm flex items-center gap-1.5">
+        <span>👥</span> Switch Profile
+      </button>
+      <button onclick="saveProfile()" class="btn btn-primary btn-sm flex items-center gap-1.5 shadow-lg shadow-purple-600/30">
+        <span>💾</span> Save Changes
+      </button>
+    </div>
+  </div>
+
+  <div class="page-body space-y-6">
+
+    <!-- 1. HERO PROFILE OVERVIEW CARD -->
+    <div class="profile-card bg-gradient-to-r from-purple-950/50 via-[#111B30] to-cyan-950/40 border-purple-800/40 relative overflow-hidden">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        
+        <!-- Left: Avatar & Candidate Identity -->
+        <div class="flex items-center gap-5">
+          <div class="relative">
+            <div id="prof-hero-avatar" class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center text-4xl font-black text-white shadow-xl border-2 border-white/20">
+              🎓
+            </div>
+            <button onclick="switchTab('basic');document.getElementById('avatar-picker-section').scrollIntoView({behavior:'smooth'})" title="Change Avatar" class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-slate-900 border border-slate-700 hover:border-cyan-400 flex items-center justify-center text-xs text-slate-300 hover:text-white transition shadow">
+              ✏️
+            </button>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="prof-hero-name" class="text-2xl font-black text-white">Aisha Rahman</h2>
+              <span id="prof-hero-role-badge" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-900/60 text-purple-300 border border-purple-700/60">
+                Student
+              </span>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-slate-400 mt-1 font-mono">
+              <span id="prof-hero-username" class="text-cyan-400 font-bold">@student</span>
+              <span>•</span>
+              <span id="prof-hero-id">ID: 2026-IELTS-4491</span>
+              <span>•</span>
+              <span id="prof-hero-joindate" class="text-slate-500">Joined Jan 2026</span>
+            </div>
+            <p id="prof-hero-bio" class="text-xs text-slate-300 mt-2 line-clamp-2 max-w-xl italic">
+              "Aiming for Band 8.0 to enter Oxford MSc in Computer Science. Concentrating on Writing Task 2 coherence and Listening Section 4."
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Target Metric Snapshot -->
+        <div class="flex items-center gap-4 bg-[#0A0F1D]/80 border border-slate-800 p-4 rounded-xl flex-shrink-0">
+          <div class="text-center px-2">
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Target Band</div>
+            <div id="prof-hero-target" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 mt-0.5">
+              7.5
+            </div>
+            <div class="text-[10px] text-purple-300 font-mono mt-0.5">CEFR C1</div>
+          </div>
+          <div class="h-10 w-[1px] bg-slate-800"></div>
+          <div class="text-center px-2">
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Official Exam</div>
+            <div id="prof-hero-countdown" class="text-lg font-bold text-emerald-400 mt-1 font-mono">
+              ⏳ 29 Days
+            </div>
+            <div id="prof-hero-date" class="text-[10px] text-slate-500 font-mono">20 Nov 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target Band Progress Bar -->
+      <div class="mt-6 pt-4 border-t border-slate-800/80">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="text-slate-400 flex items-center gap-2">
+            <span>🎯</span> Readiness toward Target Band <strong class="text-cyan-400" id="prof-progress-target-lbl">7.5</strong>
+          </span>
+          <span class="font-mono font-bold text-slate-300" id="prof-progress-status-lbl">
+            Current Est: Band 7.5 (100% of Target)
+          </span>
+        </div>
+        <div class="w-full h-2.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
+          <div id="prof-progress-bar" class="h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-400 rounded-full transition-all duration-700" style="width: 85%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. PRACTICE PORTFOLIO STATS GRID -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="profile-card text-center">
+        <span class="text-2xl">📋</span>
+        <div class="text-xs text-slate-400 uppercase tracking-wider mt-1">Tests Completed</div>
+        <div class="text-2xl font-black text-white mt-0.5" id="stat-total-tests">0</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Full & Module Mocks</div>
+      </div>
+      <div class="profile-card text-center">
+        <span class="text-2xl">🔥</span>
+        <div class="text-xs text-slate-400 uppercase tracking-wider mt-1">Active Study Streak</div>
+        <div class="text-2xl font-black text-amber-400 mt-0.5" id="stat-streak">1 Day</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Consecutive Practice</div>
+      </div>
+      <div class="profile-card text-center">
+        <span class="text-2xl">⭐</span>
+        <div class="text-xs text-slate-400 uppercase tracking-wider mt-1">Estimated Band</div>
+        <div class="text-2xl font-black text-cyan-400 mt-0.5" id="stat-current-band">7.5</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Calculated Overall</div>
+      </div>
+      <div class="profile-card text-center">
+        <span class="text-2xl">🏛️</span>
+        <div class="text-xs text-slate-400 uppercase tracking-wider mt-1">Destination Target</div>
+        <div class="text-xs font-bold text-purple-300 mt-2 truncate px-1" id="stat-dest" title="University of Oxford">
+          University of Oxford
+        </div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Academic Intake 2026</div>
+      </div>
+    </div>
+
+    <!-- 3. PROFILE EDIT & PREFERENCES SECTION -->
+    <div class="profile-card space-y-6">
+      
+      <!-- Tabs Header -->
+      <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-3">
+        <button class="profile-tab-btn active" onclick="switchTab('basic', this)">
+          <span>👤</span> Basic Information & Bio
+        </button>
+        <button class="profile-tab-btn" onclick="switchTab('academic', this)">
+          <span>🎯</span> Target Band & Academic Goals
+        </button>
+        <button class="profile-tab-btn" onclick="switchTab('security', this)">
+          <span>🔒</span> Password & Security
+        </button>
+        <button class="profile-tab-btn" onclick="switchTab('preferences', this)">
+          <span>⚡</span> AI & Audio Preferences
+        </button>
+        <button class="profile-tab-btn" onclick="switchTab('accounts', this)">
+          <span>👥</span> Multi-Account Manager
+        </button>
+      </div>
+
+      <!-- TAB 1: BASIC INFORMATION & BIO -->
+      <div id="tab-basic" class="space-y-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Candidate Full Name *</label>
+            <input type="text" id="edit-name" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500 transition" placeholder="e.g. Aisha Rahman" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Username (Login Handle)</label>
+            <input type="text" id="edit-username" readonly class="w-full bg-[#0A0F1D]/50 border border-slate-800 text-sm text-slate-400 rounded-xl p-3 font-mono cursor-not-allowed" />
+            <span class="text-[10px] text-slate-500 mt-1 block">Username is unique to your candidate account.</span>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Email Address</label>
+            <input type="email" id="edit-email" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500 transition" placeholder="e.g. aisha@candidate.ielts" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Account Role</label>
+            <input type="text" id="edit-role" readonly class="w-full bg-[#0A0F1D]/50 border border-slate-800 text-sm text-slate-400 rounded-xl p-3 cursor-not-allowed capitalize" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1.5">Personal Academic Bio & Study Motivation</label>
+          <textarea id="edit-bio" rows="3" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500 transition leading-relaxed" placeholder="Share your academic goals, target university program, or specific test areas you want to master..."></textarea>
+        </div>
+
+        <!-- Custom Avatar Icon & Color Picker -->
+        <div id="avatar-picker-section" class="pt-4 border-t border-slate-800">
+          <label class="block text-xs font-bold text-slate-300 mb-2">Avatar Icon & Visual Style</label>
+          <div class="flex flex-wrap items-center gap-3">
+            <div onclick="selectAvatarIcon('🎓', this)" class="avatar-choice w-11 h-11 rounded-xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl selected">🎓</div>
+            <div onclick="selectAvatarIcon('⚡', this)" class="avatar-choice w-11 h-11 rounded-xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl">⚡</div>
+            <div onclick="selectAvatarIcon('🌟', this)" class="avatar-choice w-11 h-11 rounded-xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl">🌟</div>
+            <div onclick="selectAvatarIcon('🏆', this)" class="avatar-choice w-11 h-11 rounded-xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl">🏆</div>
+            <div onclick="selectAvatarIcon('🚀', this)" class="avatar-choice w-11 h-11 rounded-xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl">🚀</div>
+            <div onclick="selectAvatarIcon('📚', this)" class="avatar-choice w-11 h-11 rounded-xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl">📚</div>
+            <div onclick="selectAvatarIcon('🔬', this)" class="avatar-choice w-11 h-11 rounded-xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl">🔬</div>
+            <div onclick="selectAvatarIcon('💡', this)" class="avatar-choice w-11 h-11 rounded-xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl">💡</div>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-3">
+          <button onclick="saveProfile()" class="btn btn-primary text-xs font-semibold px-5 py-2.5 rounded-xl">
+            💾 Save Basic Information
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 2: TARGET BAND & ACADEMIC GOALS -->
+      <div id="tab-academic" class="hidden space-y-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Target IELTS Academic Band *</label>
+            <select id="edit-target-band" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500">
+              <option value="6.0">Band 6.0 (Competent User / Undergraduate)</option>
+              <option value="6.5">Band 6.5 (Undergraduate / Standard Masters)</option>
+              <option value="7.0">Band 7.0 (Good User / Top Masters requirement)</option>
+              <option value="7.5" selected>Band 7.5 (High Tier / Oxbridge & Top 50)</option>
+              <option value="8.0">Band 8.0 (Very Good User / Medical & Law Licensing)</option>
+              <option value="8.5">Band 8.5 (Expert Proficiency)</option>
+              <option value="9.0">Band 9.0 (Cambridge Pinnacle / Native Operational)</option>
+            </select>
+            <span class="text-[10px] text-slate-500 mt-1 block">Used by the diagnostic engine to calibrate your target gap analysis.</span>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Scheduled Official Exam Date</label>
+            <input type="date" id="edit-exam-date" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500 font-mono" />
+            <span class="text-[10px] text-slate-500 mt-1 block">Enables live countdown and weekly study pacing milestones.</span>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Target Academic Destination</label>
+            <input type="text" id="edit-destination" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500" placeholder="e.g. University of Oxford (MSc Computer Science)" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Primary Study Focus Skill</label>
+            <input type="text" id="edit-study-focus" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500" placeholder="e.g. Academic Writing Task 2 & Speaking Fluency" />
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-3">
+          <button onclick="saveProfile()" class="btn btn-primary text-xs font-semibold px-5 py-2.5 rounded-xl">
+            💾 Save Academic Goals
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 3: PASSWORD & SECURITY -->
+      <div id="tab-security" class="hidden space-y-5">
+        <div class="max-w-md space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Current Password</label>
+            <input type="password" id="pass-current" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500" placeholder="Enter current password" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">New Password (at least 4 characters)</label>
+            <input type="password" id="pass-new" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500" placeholder="Enter new secure password" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Confirm New Password</label>
+            <input type="password" id="pass-confirm" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500" placeholder="Re-type new password" />
+          </div>
+          <button onclick="updatePassword()" class="btn btn-primary text-xs font-semibold px-5 py-2.5 rounded-xl">
+            🔒 Update Password
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 4: AI & AUDIO PREFERENCES -->
+      <div id="tab-preferences" class="hidden space-y-5">
+        <!-- Gemini API Key -->
+        <div class="p-4 rounded-xl bg-[#0A0F1D] border border-purple-800/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-purple-300 uppercase tracking-wider flex items-center gap-2">
+              <span>⚡</span> Google Gemini 3.8 Flash AI Integration
+            </h4>
+            <span class="text-[10px] text-slate-500">Optional</span>
+          </div>
+          <p class="text-xs text-slate-400">
+            Enables unlimited real-time AI essay scoring, speaking transcription critique, and dynamic test synthesis. Platform includes an automatic offline heuristic engine if no key is provided.
+          </p>
+          <div class="flex gap-2">
+            <input type="password" id="edit-api-key" placeholder="AIzaSy..." class="flex-1 bg-[#111B30] border border-slate-700 text-xs text-white rounded-xl p-3 font-mono outline-none focus:border-purple-500" />
+            <button onclick="testKey()" class="text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-300 border border-purple-700/50 px-4 rounded-xl font-semibold transition">
+              Test Connection
+            </button>
+          </div>
+        </div>
+
+        <!-- Audio Accent and Speed -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Listening & Examiner Accent</label>
+            <select id="edit-accent" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500">
+              <option value="en-GB" selected>British Received Pronunciation (UK Standard)</option>
+              <option value="en-AU">Australian English (Clifftop / Monash)</option>
+              <option value="en-US">North American English (International)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1.5">Speech Delivery Speed</label>
+            <select id="edit-speed" class="w-full bg-[#0A0F1D] border border-slate-700 text-sm text-white rounded-xl p-3 outline-none focus:border-cyan-500">
+              <option value="0.85">0.85x (Gentle / ESL Practice)</option>
+              <option value="1.0" selected>1.0x (Exam Day Authentic Standard)</option>
+              <option value="1.10">1.10x (Challenging / Native Sprint)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-3">
+          <button onclick="saveProfile()" class="btn btn-primary text-xs font-semibold px-5 py-2.5 rounded-xl">
+            💾 Save Preferences
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 5: MULTI-ACCOUNT MANAGER -->
+      <div id="tab-accounts" class="hidden space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div>
+            <h3 class="text-sm font-bold text-white">Registered Candidate Accounts</h3>
+            <p class="text-xs text-slate-400">Switch between student or instructor profiles or create a new personal profile.</p>
+          </div>
+          <button onclick="toggleNewAccountBox()" class="text-xs bg-cyan-950/60 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-800/60 px-3.5 py-2 rounded-xl transition font-medium">
+            + Create New Profile
+          </button>
+        </div>
+
+        <div id="accounts-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+        <!-- Inline New Account Creator -->
+        <div id="new-account-inline-box" class="hidden bg-[#0A0F1D] border border-cyan-800/40 rounded-xl p-4 space-y-3">
+          <h4 class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Register Additional Candidate Account</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Candidate Full Name *</label>
+              <input type="text" id="inline-acc-name" placeholder="e.g. Tariq Chen" class="w-full bg-[#111B30] border border-slate-700 text-xs text-white rounded-lg p-2.5 outline-none focus:border-cyan-500" />
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Username *</label>
+              <input type="text" id="inline-acc-user" placeholder="e.g. tariq_c" class="w-full bg-[#111B30] border border-slate-700 text-xs text-white rounded-lg p-2.5 outline-none focus:border-cyan-500" />
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Password *</label>
+              <input type="password" id="inline-acc-pass" placeholder="Min 4 characters" class="w-full bg-[#111B30] border border-slate-700 text-xs text-white rounded-lg p-2.5 outline-none focus:border-cyan-500" />
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Target Band</label>
+              <select id="inline-acc-band" class="w-full bg-[#111B30] border border-slate-700 text-xs text-white rounded-lg p-2.5 outline-none focus:border-cyan-500">
+                <option value="6.5">Band 6.5</option>
+                <option value="7.0">Band 7.0</option>
+                <option value="7.5" selected>Band 7.5</option>
+                <option value="8.0">Band 8.0</option>
+                <option value="8.5">Band 8.5</option>
+                <option value="9.0">Band 9.0</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button onclick="toggleNewAccountBox()" class="text-xs bg-slate-800 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition">
+              Cancel
+            </button>
+            <button onclick="submitInlineAccount()" class="text-xs bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-4 py-1.5 rounded-lg transition">
+              Register & Switch
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. DATA BACKUP & ARCHIVE MANAGEMENT -->
+    <div class="profile-card flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <h3 class="text-sm font-bold text-white">Personal Data & Test Archive</h3>
+        <p class="text-xs text-slate-400">Download a complete JSON export of your candidate profile and test evaluations.</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="exportCandidateData()" class="btn btn-secondary text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5">
+          <span>📥</span> Export Portfolio
+        </button>
+        <button onclick="clearCandidateHistory()" class="text-xs bg-red-950/40 hover:bg-red-900/50 text-red-400 border border-red-800/50 px-3.5 py-2 rounded-xl transition">
+          🗑️ Clear Test History
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let selectedAvatarIcon = '🎓';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize standard sidebar navigation
+    if (typeof initSidebar === 'function') initSidebar('profile');
+
+    // Auth check
+    const user = Auth.requireAuth();
+    if (!user) return;
+
+    // Load user data into form
+    populateProfileData(user);
+    renderAccountsGrid();
+  });
+
+  function populateProfileData(user) {
+    // Hero Section
+    document.getElementById('prof-hero-name').textContent = user.name || 'Student';
+    document.getElementById('prof-hero-username').textContent = user.username ? `@${user.username}` : '@student';
+    document.getElementById('prof-hero-role-badge').textContent = (user.role || 'student').toUpperCase();
+    document.getElementById('prof-hero-id').textContent = `ID: 2026-IELTS-${(user.username || '4491').slice(0, 4).toUpperCase()}`;
+    
+    selectedAvatarIcon = user.avatarIcon || '🎓';
+    document.getElementById('prof-hero-avatar').textContent = selectedAvatarIcon;
+
+    if (user.joinDate) {
+      const d = new Date(user.joinDate);
+      document.getElementById('prof-hero-joindate').textContent = `Joined ${d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`;
+    }
+
+    if (user.bio) {
+      document.getElementById('prof-hero-bio').textContent = `"${user.bio}"`;
+    }
+
+    const targetBand = user.targetBand || 7.5;
+    document.getElementById('prof-hero-target').textContent = targetBand.toFixed(1);
+    document.getElementById('prof-progress-target-lbl').textContent = targetBand.toFixed(1);
+
+    // Exam countdown
+    const days = UserAccounts.getDaysUntilExam(user.targetExamDate);
+    if (days !== null) {
+      document.getElementById('prof-hero-countdown').textContent = `⏳ ${days > 0 ? days + ' Days' : 'Exam Due!'}`;
+      const d = new Date(user.targetExamDate);
+      document.getElementById('prof-hero-date').textContent = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    // Stats
+    const history = Analytics.getHistory();
+    document.getElementById('stat-total-tests').textContent = history.length;
+    
+    const scores = Analytics.getScores();
+    const curBand = scores.overall || targetBand;
+    document.getElementById('stat-current-band').textContent = curBand.toFixed(1);
+    
+    // Progress bar calculation
+    const pct = Math.min(100, Math.round((curBand / targetBand) * 100));
+    document.getElementById('prof-progress-bar').style.width = `${pct}%`;
+    document.getElementById('prof-progress-status-lbl').textContent = `Current Est: Band ${curBand.toFixed(1)} (${pct}% of Target)`;
+
+    if (user.targetDestination) {
+      document.getElementById('stat-dest').textContent = user.targetDestination;
+      document.getElementById('stat-dest').title = user.targetDestination;
+    }
+
+    // Form inputs
+    document.getElementById('edit-name').value = user.name || '';
+    document.getElementById('edit-username').value = user.username || '';
+    document.getElementById('edit-email').value = user.email || `${user.username || 'student'}@candidate.ielts`;
+    document.getElementById('edit-role').value = user.role || 'student';
+    document.getElementById('edit-bio').value = user.bio || '';
+    document.getElementById('edit-target-band').value = targetBand.toString();
+    if (user.targetExamDate) document.getElementById('edit-exam-date').value = user.targetExamDate;
+    document.getElementById('edit-destination').value = user.targetDestination || '';
+    document.getElementById('edit-study-focus').value = user.studyFocus || '';
+
+    // Preferences
+    const key = Storage.get('gemini_api_key', '') || localStorage.getItem('ielts_gemini_key') || user.apiKey || '';
+    document.getElementById('edit-api-key').value = key;
+
+    const settings = Storage.get('settings', {});
+    if (settings.accent) document.getElementById('edit-accent').value = settings.accent;
+    if (settings.speed) document.getElementById('edit-speed').value = settings.speed.toString();
+
+    // Mark selected avatar choice
+    document.querySelectorAll('.avatar-choice').forEach(el => {
+      if (el.textContent.trim() === selectedAvatarIcon) el.classList.add('selected');
+      else el.classList.remove('selected');
+    });
+  }
+
+  function switchTab(tabName, btn) {
+    const tabs = ['basic', 'academic', 'security', 'preferences', 'accounts'];
+    tabs.forEach(t => {
+      const el = document.getElementById(`tab-${t}`);
+      if (el) el.classList.add('hidden');
+    });
+    document.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+
+    const targetTab = document.getElementById(`tab-${tabName}`);
+    if (targetTab) targetTab.classList.remove('hidden');
+    if (btn) btn.classList.add('active');
+  }
+
+  function selectAvatarIcon(icon, el) {
+    selectedAvatarIcon = icon;
+    document.querySelectorAll('.avatar-choice').forEach(c => c.classList.remove('selected'));
+    if (el) el.classList.add('selected');
+    document.getElementById('prof-hero-avatar').textContent = icon;
+  }
+
+  function saveProfile() {
+    const name = document.getElementById('edit-name').value.trim();
+    const email = document.getElementById('edit-email').value.trim();
+    const bio = document.getElementById('edit-bio').value.trim();
+    const targetBand = parseFloat(document.getElementById('edit-target-band').value) || 7.5;
+    const examDate = document.getElementById('edit-exam-date').value;
+    const destination = document.getElementById('edit-destination').value.trim();
+    const studyFocus = document.getElementById('edit-study-focus').value.trim();
+    const apiKey = document.getElementById('edit-api-key').value.trim();
+    const accent = document.getElementById('edit-accent').value;
+    const speed = parseFloat(document.getElementById('edit-speed').value) || 1.0;
+
+    if (!name) {
+      Toast.warning('Candidate name cannot be empty.');
+      return;
+    }
+
+    const user = Auth.getUser() || {};
+    const updates = {
+      name,
+      email,
+      bio,
+      targetBand,
+      targetExamDate: examDate,
+      targetDestination: destination,
+      studyFocus,
+      avatarIcon: selectedAvatarIcon,
+      apiKey
+    };
+
+    if (user.username && typeof UserAccounts !== 'undefined') {
+      UserAccounts.updateProfile(user.username, updates);
+    } else {
+      Auth.setUser({ ...user, ...updates });
+    }
+
+    // Save audio & general settings
+    Storage.set('settings', { accent, speed });
+
+    if (apiKey) {
+      Storage.set('gemini_api_key', apiKey);
+      localStorage.setItem('ielts_gemini_key', apiKey);
+    } else {
+      Storage.del('gemini_api_key');
+      localStorage.removeItem('ielts_gemini_key');
+    }
+
+    Toast.success('Candidate profile and preferences saved successfully!');
+    populateProfileData(Auth.getUser());
+  }
+
+  function updatePassword() {
+    const curr = document.getElementById('pass-current').value;
+    const pass1 = document.getElementById('pass-new').value;
+    const pass2 = document.getElementById('pass-confirm').value;
+
+    if (!pass1 || pass1.length < 4) {
+      Toast.warning('New password must be at least 4 characters.');
+      return;
+    }
+    if (pass1 !== pass2) {
+      Toast.error('New passwords do not match.');
+      return;
+    }
+
+    const user = Auth.getUser();
+    try {
+      UserAccounts.changePassword(user.username, curr, pass1);
+      Toast.success('Password updated successfully!');
+      document.getElementById('pass-current').value = '';
+      document.getElementById('pass-new').value = '';
+      document.getElementById('pass-confirm').value = '';
+    } catch (e) {
+      Toast.error(e.message || 'Failed to update password.');
+    }
+  }
+
+  async function testKey() {
+    const key = document.getElementById('edit-api-key').value.trim();
+    if (!key) {
+      Toast.warning('Please enter an API key first.');
+      return;
+    }
+    Storage.set('gemini_api_key', key);
+    Toast.info('Connecting to Gemini 3.8 Flash API...');
+    try {
+      const res = await GeminiAPI.call('Reply with the word "Connected" if you can read this.');
+      if (res && res.toLowerCase().includes('connect')) {
+        Toast.success('Gemini API Connected Successfully! AI Evaluator is active.');
+      } else {
+        Toast.success('API responded successfully!');
+      }
+    } catch (err) {
+      Toast.error('Connection failed: ' + err.message);
+    }
+  }
+
+  function renderAccountsGrid() {
+    const container = document.getElementById('accounts-grid');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const currentUser = Auth.getUser() || {};
+    const all = UserAccounts.getAll();
+
+    all.forEach(acc => {
+      const isCurrent = acc.username && currentUser.username && acc.username.toLowerCase() === currentUser.username.toLowerCase();
+      const card = document.createElement('div');
+      card.className = `p-3.5 rounded-xl border transition flex items-center justify-between ${
+        isCurrent ? 'bg-cyan-950/30 border-cyan-500/60 shadow-lg' : 'bg-[#0A0F1D] border-slate-800 hover:border-slate-700'
+      }`;
+
+      card.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base ${
+            isCurrent ? 'bg-cyan-500 text-black' : 'bg-slate-800 text-slate-300'
+          }">
+            ${acc.avatarIcon || (acc.name || 'U')[0].toUpperCase()}
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">${acc.name}</span>
+              ${isCurrent ? '<span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800/80 px-2 py-0.2 rounded-full font-semibold">Active</span>' : ''}
+            </div>
+            <div class="text-[11px] text-slate-400 font-mono mt-0.5">
+              @${acc.username} • Band ${acc.targetBand || 7.5}
+            </div>
+          </div>
+        </div>
+        <div>
+          ${
+            isCurrent
+              ? '<span class="text-xs text-cyan-400 font-semibold px-2 py-1">Current</span>'
+              : `<button onclick="switchCandidateAccount('${acc.username}')" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                   Switch
+                 </button>`
+          }
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function switchCandidateAccount(uname) {
+    try {
+      UserAccounts.switchAccount(uname);
+      Toast.success(`Switched account to @${uname}`);
+      setTimeout(() => window.location.reload(), 600);
+    } catch (e) {
+      Toast.error(e.message || 'Error switching account.');
+    }
+  }
+
+  function toggleNewAccountBox() {
+    const el = document.getElementById('new-account-inline-box');
+    if (el) el.classList.toggle('hidden');
+  }
+
+  function submitInlineAccount() {
+    const name = (document.getElementById('inline-acc-name').value || '').trim();
+    const user = (document.getElementById('inline-acc-user').value || '').trim();
+    const pass = (document.getElementById('inline-acc-pass').value || '').trim();
+    const band = parseFloat(document.getElementById('inline-acc-band').value) || 7.5;
+
+    try {
+      const newAcc = UserAccounts.createAccount({ name, username: user, password: pass, targetBand: band });
+      UserAccounts.switchAccount(newAcc.username);
+      Toast.success(`Personal account created for ${newAcc.name}!`);
+      setTimeout(() => window.location.reload(), 600);
+    } catch (e) {
+      Toast.error(e.message || 'Failed to create account.');
+    }
+  }
+
+  function exportCandidateData() {
+    const user = Auth.getUser();
+    const history = Analytics.getHistory();
+    const backup = { user, history, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `IELTS_Profile_${user.username || 'candidate'}_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    Toast.success('Candidate portfolio exported!');
+  }
+
+  function clearCandidateHistory() {
+    if (confirm('Are you sure you want to reset your practice records? This cannot be undone.')) {
+      Analytics.clearHistory();
+      Toast.warning('Candidate history reset.');
+      setTimeout(() => window.location.reload(), 800);
+    }
+  }
+</script>
+</body>
+</html>

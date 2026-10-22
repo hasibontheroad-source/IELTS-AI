@@ -1,0 +1,804 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   IELTS ACADEMIC AI PLATFORM – ULTRA-PREMIUM UNIFIED DESIGN SYSTEM
+   Supports Dynamic Dark & Light Modes, Executive Typography, Glassmorphism
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap');
+
+/* ── 1. ROOT DESIGN TOKENS (DARK MODE DEFAULT) ── */
+:root,
+[data-theme="dark"],
+html.dark {
+  color-scheme: dark;
+
+  /* App Backgrounds */
+  --bg-app: #0B0F19;
+  --bg-gradient: radial-gradient(circle at 50% -20%, rgba(124, 58, 237, 0.18) 0%, transparent 55%),
+                 radial-gradient(circle at 100% 40%, rgba(6, 182, 212, 0.10) 0%, transparent 50%),
+                 radial-gradient(circle at 0% 75%, rgba(79, 70, 229, 0.10) 0%, transparent 50%),
+                 #0B0F19;
+  --card-bg: #111A2E;
+  --card-bg-elevated: #16223B;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border-hover: rgba(124, 58, 237, 0.45);
+
+  /* Surface & Navigation */
+  --sidebar-bg: #0E1526;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --header-bg: rgba(14, 21, 38, 0.85);
+  --header-border: rgba(255, 255, 255, 0.08);
+
+  /* Typography */
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-heading: #FFFFFF;
+
+  /* Brand Colors & Accents */
+  --primary: #6366F1;
+  --primary-dark: #4F46E5;
+  --primary-light: #818CF8;
+  --primary-gradient: linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #06B6D4 100%);
+  --secondary: #06B6D4;
+  --accent-purple: #7C3AED;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --dark: #0F172A;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(17, 26, 46, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-hover: rgba(124, 58, 237, 0.12);
+
+  /* Form Elements */
+  --input-bg: #080D18;
+  --input-border: #1E2E4E;
+  --input-border-focus: #6366F1;
+  --input-text: #F8FAFC;
+  --input-placeholder: #64748B;
+
+  /* Shadows */
+  --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--card-border);
+  --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.65), 0 0 30px rgba(124, 58, 237, 0.28);
+  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.3);
+
+  /* Exam Simulation Elements */
+  --passage-bg: #101726;
+  --passage-text: #CBD5E1;
+  --exam-panel-bg: #0B0F19;
+  --exam-header-bg: #0E1628;
+
+  /* Band score official ribbons */
+  --band-9: #10B981;
+  --band-8: #34D399;
+  --band-7: #60A5FA;
+  --band-6: #FBBF24;
+  --band-5: #F97316;
+  --band-4: #EF4444;
+}
+
+/* ── 2. LIGHT MODE DESIGN TOKENS (EXECUTIVE IVORY & SLATE) ── */
+[data-theme="light"],
+html:not(.dark) {
+  color-scheme: light;
+
+  /* App Backgrounds */
+  --bg-app: #F8FAFC;
+  --bg-gradient: radial-gradient(circle at 50% -20%, rgba(99, 102, 241, 0.09) 0%, transparent 52%),
+                 radial-gradient(circle at 100% 40%, rgba(6, 182, 212, 0.06) 0%, transparent 45%),
+                 radial-gradient(circle at 0% 75%, rgba(124, 58, 237, 0.05) 0%, transparent 45%),
+                 #F8FAFC;
+  --card-bg: #FFFFFF;
+  --card-bg-elevated: #F1F5F9;
+  --card-border: #E2E8F0;
+  --card-border-hover: #818CF8;
+
+  /* Surface & Navigation */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-border: #E2E8F0;
+  --header-bg: rgba(255, 255, 255, 0.92);
+  --header-border: #E2E8F0;
+
+  /* Typography */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-heading: #0F172A;
+
+  /* Brand Colors & Accents */
+  --primary: #4F46E5;
+  --primary-dark: #4338CA;
+  --primary-light: #6366F1;
+  --primary-gradient: linear-gradient(135deg, #6366F1 0%, #4F46E5 50%, #0891B2 100%);
+  --secondary: #0891B2;
+  --accent-purple: #6D28D9;
+  --success: #059669;
+  --warning: #D97706;
+  --danger: #DC2626;
+  --dark: #F1F5F9;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(226, 232, 240, 0.9);
+  --glass-hover: rgba(79, 70, 229, 0.06);
+
+  /* Form Elements */
+  --input-bg: #FFFFFF;
+  --input-border: #CBD5E1;
+  --input-border-focus: #4F46E5;
+  --input-text: #0F172A;
+  --input-placeholder: #94A3B8;
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 0 0 1px #E2E8F0;
+  --shadow-hover: 0 16px 36px -4px rgba(79, 70, 229, 0.14), 0 0 0 1px rgba(99, 102, 241, 0.35);
+  --shadow-glow: 0 8px 30px rgba(79, 70, 229, 0.12);
+
+  /* Exam Simulation Elements */
+  --passage-bg: #FFFFFF;
+  --passage-text: #1E293B;
+  --exam-panel-bg: #F8FAFC;
+  --exam-header-bg: #FFFFFF;
+
+  /* Band score official ribbons */
+  --band-9: #059669;
+  --band-8: #10B981;
+  --band-7: #2563EB;
+  --band-6: #D97706;
+  --band-5: #EA580C;
+  --band-4: #DC2626;
+}
+
+/* ── 3. BASE RESETS & GLOBAL SMOOTH TRANSITIONS ── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── 4. CUSTOM SCROLLBAR ── */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ── 5. THEME TOGGLE BUTTON & FLOATING SWITCHER ── */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  user-select: none;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow);
+  color: var(--primary);
+}
+
+.theme-toggle-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.15);
+  font-size: 0.85rem;
+  transition: transform 0.4s ease;
+}
+
+.theme-toggle-btn:hover .theme-toggle-indicator {
+  transform: rotate(20deg) scale(1.1);
+}
+
+/* Floating quick toggle button */
+.floating-theme-btn {
+  padding: 0.65rem 1.15rem;
+  font-size: 0.85rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--card-border);
+  background: var(--glass-bg);
+  animation: floatSubtle 4s ease-in-out infinite;
+}
+
+@keyframes floatSubtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ── 6. CARDS & GLASS SURFACES ── */
+.card,
+.stat-card,
+.kpi-card,
+.module-card,
+.difficulty-card,
+.mistake-card,
+.profile-card,
+.settings-card,
+.qs-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-card);
+  position: relative;
+}
+
+.card:hover,
+.qs-card:hover,
+.difficulty-card:hover {
+  border-color: var(--card-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+}
+
+/* ── 7. LUXURY BUTTONS ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.35rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  line-height: 1.3;
+}
+
+.btn-primary {
+  background: var(--primary-gradient);
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(79, 70, 229, 0.45);
+}
+
+.btn-secondary {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--card-border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--glass-hover);
+}
+
+.btn-success {
+  background: var(--success);
+  color: white !important;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white !important;
+}
+
+.btn-luxury {
+  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #06B6D4 100%);
+  color: white !important;
+  border: none;
+  font-weight: 700;
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.35);
+}
+.btn-luxury:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(124, 58, 237, 0.5);
+}
+
+.btn-sm { padding: 0.45rem 0.9rem; font-size: 0.8rem; border-radius: 8px; }
+.btn-lg { padding: 0.85rem 1.85rem; font-size: 1rem; border-radius: 12px; }
+.btn-block { width: 100%; }
+
+/* ── 8. FORM CONTROLS & INPUTS ── */
+.form-input,
+.input-field,
+select,
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="date"],
+input[type="search"] {
+  background: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.input-field:focus,
+select:focus,
+input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+
+.form-textarea,
+.writing-textarea,
+.notes-pad {
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  font-family: 'Merriweather', serif;
+  font-size: 0.975rem;
+  line-height: 1.85;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.writing-textarea:focus,
+.form-textarea:focus,
+.notes-pad:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* ── 9. TYPOGRAPHY & GRADIENTS ── */
+.gradient-text {
+  background: linear-gradient(135deg, #A78BFA, #06B6D4, #7C3AED);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Band color badges */
+.band-9 { color: var(--band-9); }
+.band-8 { color: var(--band-8); }
+.band-7 { color: var(--band-7); }
+.band-6 { color: var(--band-6); }
+.band-5 { color: var(--band-5); }
+.band-4 { color: var(--band-4); }
+
+/* ── 10. TIMERS & EXAM COUNTERS ── */
+.timer-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.12);
+  padding: 0.45rem 0.95rem;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timer-display.danger {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  animation: pulseWarning 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseWarning {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* ── 11. QUESTION NAVIGATOR BUTTONS ── */
+.q-nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  transition: all 0.18s ease;
+}
+
+.q-nav-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.q-nav-btn.answered {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white !important;
+}
+
+.q-nav-btn.flagged {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.q-nav-btn.current {
+  border-color: var(--secondary);
+  color: var(--secondary);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+}
+
+/* ── 12. READING PASSAGES & ACADEMIC TEXT ── */
+.passage-text {
+  font-family: 'Merriweather', serif;
+  font-size: 1rem;
+  line-height: 1.95;
+  color: var(--passage-text);
+}
+
+.passage-text p {
+  margin-bottom: 1.35rem;
+}
+
+/* Highlighting tooltips */
+.highlight-yellow { background: rgba(251, 191, 36, 0.35); }
+.highlight-green  { background: rgba(16, 185, 129, 0.35); }
+.highlight-blue   { background: rgba(96, 165, 250, 0.35); }
+.highlight-pink   { background: rgba(244, 114, 182, 0.35); }
+
+/* ── 13. SIDEBAR NAVIGATION ── */
+.sidebar {
+  width: 260px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+}
+
+.sidebar-logo {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.sidebar-nav {
+  padding: 1rem 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-item,
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.25rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  border-radius: 10px;
+  margin: 2px 8px;
+  width: calc(100% - 16px);
+}
+
+.nav-item:hover,
+.nav-link:hover {
+  color: var(--text-primary);
+  background: var(--glass-hover);
+}
+
+.nav-item.active,
+.nav-link.active {
+  color: var(--primary);
+  background: rgba(99, 102, 241, 0.14);
+  border: 1px solid rgba(99, 102, 241, 0.28);
+}
+
+.nav-section {
+  padding: 0.6rem 1.25rem 0.3rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* ── 14. LAYOUT & MAIN CONTENT ── */
+.main-content {
+  margin-left: 260px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+.page-header {
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--header-border);
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-body {
+  padding: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .sidebar { transform: translateX(-260px); }
+  .sidebar.sidebar-open,
+  .sidebar.mobile-open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+}
+
+/* ── 15. OFFICIAL CD EXAM HEADERS ── */
+.cd-header,
+#test-header {
+  background: var(--exam-header-bg);
+  border-bottom: 1px solid var(--card-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* ── 16. OFFICIAL IELTS TRF CERTIFICATE ── */
+.trf-certificate {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 5px double #334155;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+
+/* ── 17. COMPREHENSIVE LIGHT MODE COLOR OVERRIDES ── */
+/* Ensures all pages with hardcoded dark hex classes adapt cleanly to Light Mode */
+[data-theme="light"] body {
+  background: var(--bg-gradient) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .bg-\[\#0A0F1D\],
+[data-theme="light"] .bg-\[\#0F0F1A\],
+[data-theme="light"] .bg-\[\#060C18\],
+[data-theme="light"] .bg-\[\#080D1A\],
+[data-theme="light"] .bg-\[\#0F172A\] {
+  background-color: var(--bg-app) !important;
+}
+
+[data-theme="light"] .bg-\[\#111B30\],
+[data-theme="light"] .bg-\[\#131B2E\],
+[data-theme="light"] .bg-\[\#1A1A2E\],
+[data-theme="light"] .bg-\[\#0E1628\],
+[data-theme="light"] .bg-\[\#1E293B\],
+[data-theme="light"] .bg-\[\#111A2E\],
+[data-theme="light"] .bg-\[\#0D1424\],
+[data-theme="light"] .bg-\[\#111827\],
+[data-theme="light"] .bg-\[\#13131F\],
+[data-theme="light"] .exam-figure-card,
+[data-theme="light"] .exam-figure-body,
+[data-theme="light"] .pie-subcard {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .sidebar,
+[data-theme="light"] aside.sidebar {
+  background-color: #FFFFFF !important;
+  border-right-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .topbar,
+[data-theme="light"] header.topbar,
+[data-theme="light"] .cd-header,
+[data-theme="light"] #test-header,
+[data-theme="light"] .page-header,
+[data-theme="light"] .exam-figure-header,
+[data-theme="light"] .exam-figure-footer {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  border-bottom-color: #E2E8F0 !important;
+}
+
+/* Light Mode Text Overrides */
+[data-theme="light"] .text-white {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .text-slate-200,
+[data-theme="light"] .text-slate-300 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .text-slate-400 {
+  color: #64748B !important;
+}
+
+[data-theme="light"] .text-slate-500 {
+  color: #94A3B8 !important;
+}
+
+[data-theme="light"] .border-slate-800,
+[data-theme="light"] .border-slate-700,
+[data-theme="light"] .border-\[\#1E2E4E\],
+[data-theme="light"] .border-\[\#222F4C\],
+[data-theme="light"] .border-\[\#2A2A4A\],
+[data-theme="light"] .border-\[\#334155\] {
+  border-color: #E2E8F0 !important;
+}
+
+/* Light mode panels in Reading/Listening/Speaking */
+[data-theme="light"] #passage-panel {
+  background-color: #FFFFFF !important;
+  border-right-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] #questions-panel,
+[data-theme="light"] #split-body,
+[data-theme="light"] #test-screen,
+[data-theme="light"] #setup-screen,
+[data-theme="light"] #results-screen {
+  background-color: #F8FAFC !important;
+}
+
+[data-theme="light"] .examiner-panel {
+  background-color: #F1F5F9 !important;
+  border-right-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .candidate-panel {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="light"] .writing-textarea,
+[data-theme="light"] textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* ── 18. MICRO-ANIMATIONS ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease both;
+}
+
+/* ── 19. OFFICIAL IELTS CD EXAM FIGURE STYLING (Writing Task 1) ── */
+.exam-figure-card {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.exam-figure-header {
+  padding: 0.65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.exam-figure-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exam-figure-body {
+  padding: 1.25rem;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.exam-figure-watermark {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 0.65rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  opacity: 0.4;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.exam-figure-footer {
+  padding: 0.6rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

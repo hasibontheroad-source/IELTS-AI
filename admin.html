@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Control Console – IELTS Academic AI Platform</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { purple: '#7C3AED', cyan: '#06B6D4', dark: '#0A0F1D', card: '#131B2E', border: '#222F4C' }
+          }
+        }
+      }
+    };
+  </script>
+  <script src="../js/core.js"></script>
+  <script src="../js/content.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background: var(--bg-body, #0A0F1D); color: var(--text-primary, #E2E8F0); font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; min-height: 100vh; }
+    .kpi-card {
+      background: var(--bg-card, #111B30);
+      border: 1px solid var(--border-color, #1E2E4E);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.25s ease;
+    }
+    [data-theme="light"] .kpi-card {
+      background: #FFFFFF !important;
+      border-color: #E2E8F0 !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .admin-tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #94A3B8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    [data-theme="light"] .admin-tab {
+      color: #64748B;
+    }
+    .admin-tab.active {
+      background: #7C3AED;
+      color: white;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-8">
+
+  <div class="max-w-6xl mx-auto space-y-8">
+    
+    <!-- Top Header -->
+    <div class="flex items-center justify-between pb-6 border-b border-slate-800">
+      <div class="flex items-center gap-3">
+        <a href="dashboard.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition">
+          ← Dashboard
+        </a>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold text-white">Platform Administrator Control Center</h1>
+            <span class="text-[10px] font-bold bg-purple-900/60 text-purple-300 border border-purple-600/50 px-2 py-0.5 rounded">
+              Superadmin
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Manage Candidate Records, Review AI Test Content, Monitor Psychometric Health</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Universal Theme Switcher -->
+        <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+          <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+          <span class="theme-text">Light</span>
+        </button>
+
+        <a href="mock-tests.html" class="text-xs bg-cyan-950/50 hover:bg-cyan-900/60 text-cyan-300 border border-cyan-700/50 px-3.5 py-2 rounded-lg font-semibold transition flex items-center gap-1.5">
+          <span>📚</span> 1–21 Hub
+        </a>
+        <button onclick="exportCSVReport()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-lg border border-slate-700 font-semibold transition flex items-center gap-1.5">
+          <span>📥</span> Export CSV Logs
+        </button>
+      </div>
+    </div>
+
+    <!-- Platform KPI Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="kpi-card">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>Registered Candidates</span>
+          <span class="text-purple-400 text-base">👥</span>
+        </div>
+        <div class="text-3xl font-black text-white mt-2">1,248</div>
+        <div class="text-xs text-emerald-400 mt-1">↑ +14% this month</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>Mock Tests Completed</span>
+          <span class="text-cyan-400 text-base">📋</span>
+        </div>
+        <div class="text-3xl font-black text-cyan-400 mt-2">4,892</div>
+        <div class="text-xs text-slate-400 mt-1">Across L, R, W, S</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>Platform Mean Band</span>
+          <span class="text-amber-400 text-base">⭐</span>
+        </div>
+        <div class="text-3xl font-black text-amber-400 mt-2">6.85</div>
+        <div class="text-xs text-slate-400 mt-1">Global median IELTS</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>AI Evaluations Run</span>
+          <span class="text-emerald-400 text-base">⚡</span>
+        </div>
+        <div class="text-3xl font-black text-emerald-400 mt-2">12,410</div>
+        <div class="text-xs text-emerald-400 mt-1">Gemini 3.8 Flash Engine</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex gap-2 border-b border-slate-800 pb-3">
+      <button class="admin-tab active" onclick="switchAdminTab('users', this)">👥 Candidates (Users)</button>
+      <button class="admin-tab" onclick="switchAdminTab('tests', this)">🤖 AI Content Review Queue</button>
+      <button class="admin-tab" onclick="switchAdminTab('attempts', this)">📊 Live Test Attempts</button>
+    </div>
+
+    <!-- TAB 1: Candidates Management -->
+    <div id="tab-users" class="space-y-4">
+      <div class="bg-[#111B30] border border-slate-800 rounded-2xl overflow-hidden">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between gap-4">
+          <input type="text" placeholder="Search candidate by name or email..." class="bg-[#0A0F1D] border border-slate-700 text-xs text-white rounded-lg px-3 py-2 w-72 outline-none focus:border-cyan-500" />
+          <div class="text-xs text-slate-400">Showing 5 active mock users</div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-[#0D1526] text-slate-400 border-b border-slate-800 text-[11px] uppercase tracking-wider">
+              <tr>
+                <th class="p-3.5">Candidate</th>
+                <th class="p-3.5">Target Band</th>
+                <th class="p-3.5">Current Band</th>
+                <th class="p-3.5">Tests Completed</th>
+                <th class="p-3.5">Status</th>
+                <th class="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60" id="users-table-body">
+              <tr>
+                <td class="p-3.5 font-semibold text-white flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center text-xs">AR</span>
+                  Aisha Rahman (You)
+                </td>
+                <td class="p-3.5 font-mono text-cyan-400 font-bold">8.0</td>
+                <td class="p-3.5 font-mono text-purple-400 font-bold">7.5</td>
+                <td class="p-3.5">8 tests</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold">Active</span></td>
+                <td class="p-3.5 text-right">
+                  <button onclick="Toast.info('Candidate profile loaded.')" class="text-cyan-400 hover:underline mr-2">Inspect</button>
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-semibold text-white flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs">MK</span>
+                  Marcus Okonkwo
+                </td>
+                <td class="p-3.5 font-mono text-cyan-400 font-bold">7.5</td>
+                <td class="p-3.5 font-mono text-purple-400 font-bold">7.0</td>
+                <td class="p-3.5">14 tests</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold">Active</span></td>
+                <td class="p-3.5 text-right">
+                  <button onclick="Toast.info('Candidate profile loaded.')" class="text-cyan-400 hover:underline mr-2">Inspect</button>
+                  <button onclick="toggleBan(this)" class="text-rose-400 hover:underline">Ban</button>
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-semibold text-white flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-xs">TC</span>
+                  Tariq Chen
+                </td>
+                <td class="p-3.5 font-mono text-cyan-400 font-bold">8.5</td>
+                <td class="p-3.5 font-mono text-purple-400 font-bold">8.0</td>
+                <td class="p-3.5">22 tests</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold">Active</span></td>
+                <td class="p-3.5 text-right">
+                  <button onclick="Toast.info('Candidate profile loaded.')" class="text-cyan-400 hover:underline mr-2">Inspect</button>
+                  <button onclick="toggleBan(this)" class="text-rose-400 hover:underline">Ban</button>
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3.5 font-semibold text-white flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-full bg-amber-600 flex items-center justify-center text-xs">SP</span>
+                  Sofia Petrova
+                </td>
+                <td class="p-3.5 font-mono text-cyan-400 font-bold">7.0</td>
+                <td class="p-3.5 font-mono text-purple-400 font-bold">6.5</td>
+                <td class="p-3.5">5 tests</td>
+                <td class="p-3.5"><span class="px-2 py-0.5 rounded-full bg-rose-950 text-rose-400 border border-rose-800 text-[10px] font-bold">Suspended</span></td>
+                <td class="p-3.5 text-right">
+                  <button onclick="toggleBan(this)" class="text-emerald-400 hover:underline">Unban</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: AI Content Review Queue -->
+    <div id="tab-tests" class="hidden space-y-4">
+      <div class="bg-[#111B30] border border-slate-800 rounded-2xl p-6">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-white">Pending AI-Generated Test Content</h3>
+            <p class="text-xs text-slate-400">Review AI-crafted passages and question items against Cambridge standards prior to student bank publication.</p>
+          </div>
+          <span class="text-xs bg-amber-900/40 text-amber-300 border border-amber-700/50 px-3 py-1 rounded-full font-bold">
+            2 Items Pending Review
+          </span>
+        </div>
+
+        <div class="space-y-4">
+          <div class="p-4 rounded-xl bg-[#0A0F1D] border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <span class="text-[10px] font-bold text-purple-400 uppercase">Academic Reading • Passage 3</span>
+              <h4 class="text-sm font-bold text-white mt-0.5">The Evolution of Animal Cooperation and Altruism</h4>
+              <p class="text-xs text-slate-400 mt-1">Generated by Gemini 3.8 • 810 Words • 13 Items (Headings, Features, Y/N/NG, Summary)</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="Toast.success('Content published to Live Test Bank!')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-lg">
+                Approve & Publish
+              </button>
+              <button onclick="Toast.info('Editing mode opened.')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700">
+                Edit
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[#0A0F1D] border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <span class="text-[10px] font-bold text-cyan-400 uppercase">Academic Listening • Section 4</span>
+              <h4 class="text-sm font-bold text-white mt-0.5">Marine Bioluminescence and Photophore Evolution</h4>
+              <p class="text-xs text-slate-400 mt-1">Lecture Script • 650 Words • 10 Questions (Notes Completion, MCQs)</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="Toast.success('Content published to Live Test Bank!')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-lg">
+                Approve & Publish
+              </button>
+              <button onclick="Toast.info('Editing mode opened.')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700">
+                Edit
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Live Test Attempts -->
+    <div id="tab-attempts" class="hidden space-y-4">
+      <div class="bg-[#111B30] border border-slate-800 rounded-2xl p-6">
+        <h3 class="text-sm font-bold text-white mb-1">Recent Submitted Test Attempts</h3>
+        <p class="text-xs text-slate-400 mb-4">Real-time log of test evaluations across all 4 modules.</p>
+        <div class="space-y-2" id="attempts-feed">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Auth.requireAuth();
+      loadAttempts();
+    });
+
+    function switchAdminTab(tabName, el) {
+      document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+
+      document.getElementById('tab-users').classList.add('hidden');
+      document.getElementById('tab-tests').classList.add('hidden');
+      document.getElementById('tab-attempts').classList.add('hidden');
+
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+    }
+
+    function toggleBan(btn) {
+      if (btn.textContent === 'Ban') {
+        btn.textContent = 'Unban';
+        btn.className = 'text-emerald-400 hover:underline';
+        Toast.warning('Candidate has been suspended.');
+      } else {
+        btn.textContent = 'Ban';
+        btn.className = 'text-rose-400 hover:underline';
+        Toast.success('Candidate access restored.');
+      }
+    }
+
+    function loadAttempts() {
+      const history = Analytics.getHistory();
+      const feed = document.getElementById('attempts-feed');
+      if (!history.length) {
+        feed.innerHTML = `
+          <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-xs flex justify-between items-center">
+            <span>Aisha Rahman • Full Listening Simulation Test</span>
+            <span class="font-bold font-mono text-cyan-400">Band 7.5</span>
+            <span class="text-slate-500">Just now</span>
+          </div>
+        `;
+        return;
+      }
+      feed.innerHTML = history.slice(0, 8).map(h => `
+        <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-xs flex justify-between items-center">
+          <span class="text-white font-medium">${h.title || (h.module.toUpperCase() + ' Test')}</span>
+          <span class="font-bold font-mono text-purple-400">Band ${h.band ? h.band.toFixed(1) : '7.0'}</span>
+          <span class="text-slate-500">${new Date(h.date).toLocaleDateString()}</span>
+        </div>
+      `).join('');
+    }
+
+    function exportCSVReport() {
+      const history = Analytics.getHistory();
+      let csv = 'ID,Module,Band,Date\n';
+      history.forEach(h => {
+        csv += `${h.id},${h.module},${h.band || 'N/A'},${h.date}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'IELTS_Platform_Candidate_Logs.csv';
+      a.click();
+      Toast.success('CSV Report exported successfully!');
+    }
+  </script>
+</body>
+</html>

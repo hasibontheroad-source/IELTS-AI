@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Full IELTS Academic Mock Exam – Official Simulation</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { purple: '#7C3AED', cyan: '#06B6D4', dark: '#0A0F1D', card: '#131B2E', border: '#222F4C' }
+          }
+        }
+      }
+    };
+  </script>
+  <script src="../js/core.js"></script>
+  <script src="../js/cambridge-writing-data.js"></script>
+  <script src="../js/content.js"></script>
+  <script src="../js/cambridge-series.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background: var(--bg-gradient); color: var(--text-primary); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
+    
+    .module-card {
+      background: var(--bg-card, #111B30);
+      border: 1px solid var(--border-color, #1E2E4E);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+    [data-theme="light"] .module-card {
+      background: #FFFFFF !important;
+      border-color: #E2E8F0 !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .module-card.active {
+      border-color: #7C3AED;
+      box-shadow: 0 0 25px rgba(124, 58, 237, 0.25);
+    }
+    .module-card.completed {
+      border-color: #10B981;
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    /* Official IELTS TRF Certificate Styling */
+    .trf-certificate {
+      background: #FFFFFF;
+      color: #0F172A;
+      border: 6px double #334155;
+      border-radius: 12px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    .trf-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 5rem;
+      font-weight: 900;
+      color: rgba(15, 23, 42, 0.04);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-8">
+
+  <div class="max-w-5xl mx-auto space-y-8">
+    
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between pb-6 border-b border-slate-800">
+      <div class="flex items-center gap-3">
+        <a href="dashboard.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition">
+          ← Dashboard
+        </a>
+        <div>
+          <h1 class="text-xl font-bold text-white">Full IELTS Academic Mock Examination</h1>
+          <p class="text-xs text-slate-400">Exact 4-Module Computer-Delivered Examination Workflow</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+          <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+          <span class="theme-text">Light</span>
+        </button>
+
+        <a href="mock-tests.html" class="text-xs bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-300 border border-cyan-700/50 px-3 py-1.5 rounded-lg transition font-semibold flex items-center gap-1.5">
+          <span>📚</span> 1–21 Hub
+        </a>
+
+        <a href="profile.html" class="text-xs bg-purple-950/50 hover:bg-purple-900/60 text-purple-300 border border-purple-700/50 px-3 py-1.5 rounded-lg transition font-semibold flex items-center gap-1.5">
+          <span>👤</span> Profile
+        </a>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs text-emerald-400 font-semibold">Simulation Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cambridge Academic 1–21 Series Selector Banner -->
+    <div class="bg-[#111B30] border border-purple-800/40 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">📚</span>
+        <div>
+          <div class="text-xs font-bold text-purple-400 uppercase tracking-wider">Cambridge Academic Series Benchmark (84 Official Tests)</div>
+          <h3 class="text-base font-bold text-white mt-0.5" id="mock-series-title">Cambridge IELTS Academic 1 Test 1 Full Mock Exam</h3>
+          <p class="text-xs text-slate-400" id="mock-series-theme">Foundation Era • Urban Infrastructure & Maritime Systems</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0 flex-wrap">
+        <label class="text-xs text-slate-400 font-semibold">Book:</label>
+        <select id="mock-book-select" onchange="selectMockBook(this.value)" class="bg-[#0A0F1D] border border-purple-600/60 text-purple-200 text-xs font-bold rounded-xl px-3 py-2 outline-none cursor-pointer">
+          <!-- Injected Cambridge 1 to 21 -->
+        </select>
+        <label class="text-xs text-slate-400 font-semibold">Test:</label>
+        <select id="mock-test-select" onchange="selectMockTest(this.value)" class="bg-[#0A0F1D] border border-cyan-600/60 text-cyan-200 text-xs font-bold rounded-xl px-3 py-2 outline-none cursor-pointer">
+          <option value="1">Test 1</option>
+          <option value="2">Test 2</option>
+          <option value="3">Test 3</option>
+          <option value="4">Test 4</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Candidate Check-In Verification Card -->
+    <div class="bg-gradient-to-r from-purple-950/40 to-slate-900 border border-purple-800/40 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-4">
+        <a href="profile.html" title="View Profile" class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg hover:ring-2 hover:ring-cyan-400 transition cursor-pointer no-underline">
+          👤
+        </a>
+        <div>
+          <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Candidate Verification</span>
+          <h2 class="text-xl font-bold text-white mt-0.5"><a href="profile.html" class="hover:text-cyan-400 text-white transition no-underline" id="cand-name">Aisha Rahman</a></h2>
+          <div class="flex flex-wrap gap-4 text-xs text-slate-400 mt-1 font-mono">
+            <span>Candidate No: <strong>408912</strong></span>
+            <span>Center: <strong>BD001 (Dhaka IELTS IDP)</strong></span>
+            <span>Date: <strong id="cand-date">22 Oct 2026</strong></span>
+          </div>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="text-xs text-slate-400">Total Test Duration</div>
+        <div class="text-2xl font-black text-white font-mono">2h 45m</div>
+      </div>
+    </div>
+
+    <!-- 4 Module Pipeline Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Module 1: Listening -->
+      <div class="module-card active" id="card-mod-1">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-2xl">🎧</span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-900/50 text-purple-300 border border-purple-700/50" id="badge-mod-1">In Progress</span>
+        </div>
+        <h3 class="text-sm font-bold text-white">1. Listening</h3>
+        <p class="text-xs text-slate-400 mt-1">4 Sections • 40 Questions</p>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+          <span class="text-slate-500 font-mono">30 mins</span>
+          <a href="listening.html" id="link-mod-1" class="text-cyan-400 hover:underline font-semibold flex items-center gap-1">
+            Start Listening →
+          </a>
+        </div>
+      </div>
+
+      <!-- Module 2: Reading -->
+      <div class="module-card" id="card-mod-2">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-2xl">📖</span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400" id="badge-mod-2">Scheduled</span>
+        </div>
+        <h3 class="text-sm font-bold text-white">2. Reading</h3>
+        <p class="text-xs text-slate-400 mt-1">3 Passages • 40 Questions</p>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+          <span class="text-slate-500 font-mono">60 mins</span>
+          <a href="reading.html" id="link-mod-2" class="text-cyan-400 hover:underline font-semibold flex items-center gap-1">
+            Start Reading →
+          </a>
+        </div>
+      </div>
+
+      <!-- Module 3: Writing -->
+      <div class="module-card" id="card-mod-3">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-2xl">✍️</span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400" id="badge-mod-3">Scheduled</span>
+        </div>
+        <h3 class="text-sm font-bold text-white">3. Writing</h3>
+        <p class="text-xs text-slate-400 mt-1">Task 1 (Chart) + Task 2 (Essay)</p>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+          <span class="text-slate-500 font-mono">60 mins</span>
+          <a href="writing.html" id="link-mod-3" class="text-cyan-400 hover:underline font-semibold flex items-center gap-1">
+            Start Writing →
+          </a>
+        </div>
+      </div>
+
+      <!-- Module 4: Speaking -->
+      <div class="module-card" id="card-mod-4">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-2xl">🎤</span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400" id="badge-mod-4">Scheduled</span>
+        </div>
+        <h3 class="text-sm font-bold text-white">4. Speaking</h3>
+        <p class="text-xs text-slate-400 mt-1">AI Virtual Interview • Parts 1, 2, 3</p>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+          <span class="text-slate-500 font-mono">11–14 mins</span>
+          <a href="speaking.html" id="link-mod-4" class="text-cyan-400 hover:underline font-semibold flex items-center gap-1">
+            Start Speaking →
+          </a>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Aggregate Exam Score & TRF Generation Area -->
+    <div class="bg-[#111B30] border border-slate-800 rounded-2xl p-6 sm:p-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h3 class="text-lg font-bold text-white">Aggregated Test Report Form (TRF)</h3>
+          <p class="text-xs text-slate-400">Calculate cumulative IELTS Academic Band using official Cambridge rounding rules.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="calculateFullMockScore(true)" class="btn-primary text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center gap-2">
+            <span>⚡</span> Compute Final IELTS Band
+          </button>
+          <a href="results.html" class="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold text-xs px-4 py-2.5 rounded-lg flex items-center gap-1.5 shadow-lg shadow-purple-600/30 transition">
+            <span>💡</span> View Diagnostic Analysis & Tips →
+          </a>
+        </div>
+      </div>
+
+      <!-- TRF Certificate Preview Component -->
+      <div class="trf-certificate" id="trf-sheet">
+        <div class="trf-watermark">IELTS ACADEMIC</div>
+        
+        <!-- TRF Header -->
+        <div class="flex items-start justify-between border-b-2 border-slate-900 pb-4 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-red-700 text-white font-black text-2xl flex items-center justify-center rounded">
+              IELTS
+            </div>
+            <div>
+              <div class="text-base font-black tracking-wide text-slate-900 uppercase">Test Report Form</div>
+              <div class="text-[10px] text-slate-600 font-semibold">ACADEMIC MODULE • COMPUTER DELIVERED</div>
+            </div>
+          </div>
+          <div class="text-right text-xs text-slate-700 font-mono">
+            <div>Center Number: <strong>BD001</strong></div>
+            <div>Date: <strong id="trf-date-label">22/10/2026</strong></div>
+          </div>
+        </div>
+
+        <!-- Candidate Details -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs text-slate-800 pb-4 border-b border-slate-300 mb-6 font-medium">
+          <div>Family Name: <strong class="block text-sm font-bold text-slate-900" id="trf-cand-name">RAHMAN</strong></div>
+          <div>First Name: <strong class="block text-sm font-bold text-slate-900">AISHA</strong></div>
+          <div>Candidate ID: <strong class="block text-sm font-bold text-slate-900 font-mono">408912</strong></div>
+          <div>Scheme Code: <strong class="block text-sm font-bold text-slate-900">Private Candidate</strong></div>
+        </div>
+
+        <!-- Module Band Breakdown Table -->
+        <div class="overflow-x-auto mb-6">
+          <table class="w-full text-center border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 text-slate-900 font-bold border border-slate-300">
+                <th class="p-2 border border-slate-300">Listening</th>
+                <th class="p-2 border border-slate-300">Reading</th>
+                <th class="p-2 border border-slate-300">Writing</th>
+                <th class="p-2 border border-slate-300">Speaking</th>
+                <th class="p-2 border border-slate-300 bg-purple-100 text-purple-900 font-black">Overall Band Score</th>
+                <th class="p-2 border border-slate-300">CEFR Level</th>
+              </tr>
+            </thead>
+            <tbody class="font-mono text-base font-bold">
+              <tr>
+                <td class="p-3 border border-slate-300 text-slate-800" id="trf-l">7.5</td>
+                <td class="p-3 border border-slate-300 text-slate-800" id="trf-r">8.0</td>
+                <td class="p-3 border border-slate-300 text-slate-800" id="trf-w">7.0</td>
+                <td class="p-3 border border-slate-300 text-slate-800" id="trf-s">7.5</td>
+                <td class="p-3 border border-slate-300 bg-purple-50 text-purple-800 text-xl font-black" id="trf-overall">7.5</td>
+                <td class="p-3 border border-slate-300 text-slate-700 font-sans text-xs font-semibold" id="trf-cefr">C1 (Effective Operational)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Official Seal & Authenticity Footer -->
+        <div class="flex items-center justify-between text-[11px] text-slate-500 pt-3 border-t border-slate-200">
+          <div>Administrator Signature: <span class="font-serif italic font-bold text-slate-800">Dr. M. Thornton</span></div>
+          <div>Validation: <span class="font-mono font-bold text-slate-700">VERIFIED AUTHENTIC</span></div>
+          <button onclick="window.print()" class="text-purple-700 hover:underline font-bold text-xs flex items-center gap-1">
+            🖨️ Print Certificate
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMockBook = 1;
+    let currentMockTest = 1;
+    let isAiMock = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = Auth.requireAuth();
+      if (user) {
+        document.getElementById('cand-name').textContent = user.name || 'Candidate';
+        document.getElementById('trf-cand-name').textContent = (user.name || 'CANDIDATE').toUpperCase();
+      }
+
+      // Check URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      currentMockBook = parseInt(urlParams.get('book'), 10) || 1;
+      currentMockTest = parseInt(urlParams.get('test'), 10) || 1;
+      isAiMock = urlParams.get('source') === 'ai';
+
+      // Populate Cambridge books selector
+      populateMockBookSelect(currentMockBook);
+      const tSel = document.getElementById('mock-test-select');
+      if (tSel) tSel.value = currentMockTest;
+
+      updateMockBookUI(currentMockBook, currentMockTest);
+
+      // Set today's date on TRF
+      const today = new Date();
+      const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      const dateFmt = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+      const candDateEl = document.getElementById('cand-date');
+      const trfDateEl = document.getElementById('trf-date-label');
+      if (candDateEl) candDateEl.textContent = dateStr;
+      if (trfDateEl) trfDateEl.textContent = dateFmt;
+
+      // Check existing scores from Analytics
+      calculateFullMockScore();
+    });
+
+    function populateMockBookSelect(selectedNum = 1) {
+      const sel = document.getElementById('mock-book-select');
+      if (!sel) return;
+      sel.innerHTML = '';
+      for (let i = 1; i <= 21; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.className = 'bg-slate-900 text-slate-200';
+        const era = i <= 6 ? 'Found.' : i <= 13 ? 'Std' : i <= 17 ? 'Adv' : 'CD';
+        opt.textContent = `Cambridge Academic ${i} [${era}]`;
+        if (i === selectedNum) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+
+    function selectMockBook(bookNum) {
+      currentMockBook = parseInt(bookNum, 10) || 1;
+      isAiMock = false;
+      updateMockBookUI(currentMockBook, currentMockTest);
+      Toast.info(`Activated Cambridge Academic ${currentMockBook} Test ${currentMockTest} Simulation!`);
+    }
+
+    function selectMockTest(testNum) {
+      currentMockTest = parseInt(testNum, 10) || 1;
+      isAiMock = false;
+      updateMockBookUI(currentMockBook, currentMockTest);
+      Toast.info(`Activated Cambridge Academic ${currentMockBook} Test ${currentMockTest} Simulation!`);
+    }
+
+    function updateMockBookUI(bookNum, testNum = 1) {
+      if (isAiMock) {
+        document.getElementById('mock-series-title').textContent = `🤖 AI-Generated Full IELTS Academic Simulation`;
+        document.getElementById('mock-series-theme').textContent = `100% Original Psychometric Assessment • Calibrated to Cambridge Standards`;
+        document.getElementById('link-mod-1').href = `listening.html?source=ai`;
+        document.getElementById('link-mod-2').href = `reading.html?source=ai`;
+        document.getElementById('link-mod-3').href = `writing.html?source=ai`;
+        document.getElementById('link-mod-4').href = `speaking.html?source=ai`;
+        return;
+      }
+
+      let bookTitle = `Cambridge IELTS Academic ${bookNum}`;
+      let bookEra = '';
+      let bookTheme = '';
+      if (typeof CAMBRIDGE_ACADEMIC_SERIES !== 'undefined') {
+        try {
+          const book = CAMBRIDGE_ACADEMIC_SERIES.getBook(bookNum);
+          if (book) {
+            bookTitle = book.title;
+            bookEra = book.era;
+            bookTheme = book.theme;
+          }
+        } catch(e) {}
+      }
+      document.getElementById('mock-series-title').textContent = `${bookTitle} Test ${testNum} Full Mock Exam`;
+      document.getElementById('mock-series-theme').textContent = `${bookEra ? bookEra + ' • ' : ''}${bookTheme || 'Official Computer-Delivered Examination'}`;
+
+      // Update module card links with ?book=N&test=M
+      document.getElementById('link-mod-1').href = `listening.html?book=${bookNum}&test=${testNum}`;
+      document.getElementById('link-mod-2').href = `reading.html?book=${bookNum}&test=${testNum}`;
+      document.getElementById('link-mod-3').href = `writing.html?book=${bookNum}&test=${testNum}`;
+      document.getElementById('link-mod-4').href = `speaking.html?book=${bookNum}&test=${testNum}`;
+    }
+
+
+    function calculateFullMockScore(shouldSave = false) {
+      const scores = Analytics.getScores();
+      const l = scores.listening || 7.5;
+      const r = scores.reading || 8.0;
+      const w = scores.writing || 7.0;
+      const s = scores.speaking || 7.5;
+
+      const overall = IELTSScoring.overallBand(l, r, w, s);
+
+      document.getElementById('trf-l').textContent = l.toFixed(1);
+      document.getElementById('trf-r').textContent = r.toFixed(1);
+      document.getElementById('trf-w').textContent = w.toFixed(1);
+      document.getElementById('trf-s').textContent = s.toFixed(1);
+      document.getElementById('trf-overall').textContent = overall.toFixed(1);
+
+      // CEFR mapping
+      let cefr = 'C1 (Advanced)';
+      if (overall >= 8.5) cefr = 'C2 (Mastery)';
+      else if (overall >= 7.0) cefr = 'C1 (Effective Operational Proficiency)';
+      else if (overall >= 5.5) cefr = 'B2 (Vantage)';
+      else if (overall >= 4.0) cefr = 'B1 (Threshold)';
+      document.getElementById('trf-cefr').textContent = cefr;
+
+      if (shouldSave) {
+        Analytics.addResult({
+          module: 'overall',
+          title: 'Full IELTS Academic Mock Exam',
+          listening_band: l,
+          reading_band: r,
+          writing_band: w,
+          speaking_band: s,
+          overall_band: overall,
+          band: overall,
+          date: new Date().toISOString()
+        });
+        Toast.success(`Calculated Overall Band: ${overall.toFixed(1)} (${cefr}) — Results saved!`);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IELTS Academic Reading – IELTS AI Platform</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <script src="../js/theme.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Core & Content scripts -->
+  <script src="../js/core.js"></script>
+  <script src="../js/content.js"></script>
+  <script src="../js/cambridge-series.js"></script>
+
+  <style>
+    /* ── Layout: fixed header + full-height split below ── */
+    html, body { height: 100%; overflow: hidden; background: var(--bg-app); color: var(--text-primary); }
+
+    #test-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+      height: 56px;
+      background: var(--header-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.25rem; gap: 1rem;
+    }
+
+    /* Setup & Results: scrollable pages under header */
+    #setup-screen, #results-screen {
+      position: fixed; top: 56px; left: 0; right: 0; bottom: 0;
+      overflow-y: auto; padding: 2rem;
+      background: var(--bg-app);
+    }
+
+    /* Test screen: two panels side-by-side filling viewport below header */
+    #test-screen {
+      position: fixed; top: 56px; left: 0; right: 0; bottom: 0;
+      display: flex; flex-direction: column;
+      background: var(--bg-app);
+    }
+
+    #highlight-toolbar {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.75rem;
+      background: var(--card-bg-elevated);
+      border-bottom: 1px solid var(--card-border);
+      flex-shrink: 0;
+    }
+
+    #split-body {
+      display: flex; flex: 1; overflow: hidden;
+      gap: 0;
+    }
+
+    #passage-panel {
+      flex: 1; overflow-y: auto; padding: 1.5rem 1.75rem;
+      border-right: 1px solid var(--card-border);
+      background: var(--card-bg);
+    }
+
+    #questions-panel {
+      width: 46%; min-width: 340px; overflow-y: auto;
+      padding: 1.25rem 1.5rem;
+      background: var(--card-bg-elevated, #141c2e);
+    }
+    [data-theme="light"] #questions-panel {
+      background: #F8FAFC !important;
+      border-left: 1px solid #E2E8F0;
+    }
+    [data-theme="light"] .q-item {
+      background: #FFFFFF !important;
+      border-color: #E2E8F0 !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    [data-theme="light"] .tfng-btn {
+      background: #FFFFFF;
+      border-color: #CBD5E1;
+      color: #334155;
+    }
+    [data-theme="light"] .mcq-opt {
+      background: #FFFFFF;
+      border-color: #E2E8F0;
+      color: #334155;
+    }
+
+    /* Q-nav modal overlay */
+    #qnav-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px); z-index: 400;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #qnav-box {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 1.5rem; width: 380px; max-width: 95vw;
+    }
+
+    /* Passage paragraphs */
+    .para-block { margin-bottom: 1.4rem; }
+    .para-label {
+      display: inline-block; width: 28px; height: 28px;
+      background: rgba(79,70,229,0.2); color: var(--primary-light);
+      border-radius: 6px; text-align: center; line-height: 28px;
+      font-weight: 700; font-size: 0.85rem; margin-right: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    /* Question items */
+    .q-item { margin-bottom: 1.4rem; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 10px; }
+    .q-item.bookmarked { border-color: var(--warning); }
+    .q-header { display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .q-num { font-weight: 700; color: var(--primary-light); min-width: 28px; }
+    .q-text { font-size: 0.9rem; color: var(--text-primary); line-height: 1.5; flex: 1; }
+
+    /* TF/NG buttons */
+    .tfng-btn {
+      padding: 0.4rem 0.9rem; border-radius: 6px; border: 1px solid var(--card-border);
+      background: transparent; color: var(--text-secondary); cursor: pointer;
+      font-size: 0.8rem; font-weight: 600; transition: all 0.15s;
+    }
+    .tfng-btn:hover { border-color: var(--primary); color: var(--primary-light); }
+    .tfng-btn.selected-true  { background: rgba(16,185,129,0.2); border-color: var(--success); color: var(--success); }
+    .tfng-btn.selected-false { background: rgba(239,68,68,0.2); border-color: var(--danger); color: var(--danger); }
+    .tfng-btn.selected-ng    { background: rgba(245,158,11,0.2); border-color: var(--warning); color: var(--warning); }
+
+    /* MCQ radio */
+    .mcq-opt {
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--card-border);
+      cursor: pointer; margin-bottom: 0.4rem; transition: all 0.15s;
+      font-size: 0.875rem; color: var(--text-secondary);
+    }
+    .mcq-opt:hover { border-color: var(--primary); color: var(--text-primary); }
+    .mcq-opt.selected { background: rgba(79,70,229,0.15); border-color: var(--primary); color: var(--text-primary); }
+
+    /* Heading match select */
+    .heading-select {
+      width: 100%; padding: 0.6rem 0.75rem; font-size: 0.85rem;
+      background: var(--dark); color: var(--text-primary);
+      border: 1px solid var(--card-border); border-radius: 8px;
+      outline: none; cursor: pointer;
+    }
+    .heading-select:focus { border-color: var(--primary); }
+
+    /* Summary input */
+    .summary-input {
+      display: inline-block;
+      min-width: 140px; max-width: 100%;
+      border: none; border-bottom: 2px solid var(--primary);
+      background: transparent; color: var(--text-primary);
+      font-size: 0.9rem; padding: 0.15rem 0.3rem;
+      outline: none; font-family: 'Inter', sans-serif;
+    }
+    .summary-input:focus { border-color: var(--secondary); }
+
+    /* Question-type group headers */
+    .qtype-header {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted);
+      margin: 1.25rem 0 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    /* Results: answer rows */
+    .res-row {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      padding: 0.85rem 1rem; border-radius: 10px;
+      margin-bottom: 0.6rem; font-size: 0.875rem;
+      border: 1px solid var(--card-border);
+    }
+    .res-row.correct { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.06); }
+    .res-row.wrong   { border-color: rgba(239,68,68,0.4);  background: rgba(239,68,68,0.06); }
+
+    /* Highlight swatch */
+    .hl-swatch {
+      width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.15s;
+    }
+    .hl-swatch.active { border-color: white; transform: scale(1.2); }
+
+    /* Progress strip */
+    #progress-strip {
+      height: 3px; background: var(--card-border);
+    }
+    #progress-fill {
+      height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transition: width 0.4s ease;
+    }
+
+    /* Passage title */
+    .passage-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text-primary); }
+    .passage-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+
+    /* Setup cards */
+    .passage-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 12px; padding: 1.25rem 1.5rem; cursor: pointer;
+      transition: all 0.25s;
+    }
+    .passage-card:hover, .passage-card.selected { border-color: var(--primary); box-shadow: 0 0 18px rgba(79,70,229,0.2); }
+    .passage-card.selected { background: rgba(79,70,229,0.08); }
+
+    /* Band ring on results */
+    .big-band {
+      width: 120px; height: 120px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; font-weight: 900;
+      border: 5px solid;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      #split-body { flex-direction: column; }
+      #passage-panel { flex: none; height: 45vh; border-right: none; border-bottom: 1px solid var(--card-border); }
+      #questions-panel { width: 100%; flex: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     FIXED HEADER BAR
+══════════════════════════════════════════════════ -->
+<header id="test-header">
+  <!-- Left: title + section -->
+  <div style="display:flex;align-items:center;gap:1rem;flex:1;min-width:0;">
+    <a href="dashboard.html" style="color:var(--text-muted);font-size:1.2rem;text-decoration:none;flex-shrink:0;" title="Dashboard">⬅</a>
+    <div style="min-width:0;">
+      <div style="font-weight:700;font-size:0.95rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="hdr-title">IELTS Academic Reading</div>
+      <div style="font-size:0.72rem;color:var(--text-muted);" id="hdr-section">Select a passage to begin</div>
+    </div>
+  </div>
+
+  <!-- Centre: timer (hidden until test starts) -->
+  <div id="hdr-timer-wrap" style="display:none;">
+    <div class="timer-display" id="hdr-timer">60:00</div>
+  </div>
+
+  <!-- Right: actions -->
+  <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+    <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+      <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+      <span class="theme-text">Light</span>
+    </button>
+    <a href="profile.html" class="btn btn-secondary btn-sm" title="My Candidate Profile">👤 Profile</a>
+    <button id="btn-qnav" onclick="openQNav()" style="display:none;"
+      class="btn btn-secondary btn-sm">
+      📋 Questions
+    </button>
+    <button id="btn-submit" onclick="confirmSubmit()" style="display:none;"
+      class="btn btn-danger btn-sm">
+      Submit Test
+    </button>
+  </div>
+</header>
+
+<!-- Progress strip (hidden until test) -->
+<div id="progress-strip" style="position:fixed;top:56px;left:0;right:0;z-index:299;display:none;">
+  <div id="progress-fill" style="width:0%;"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 1: SETUP
+══════════════════════════════════════════════════ -->
+<div id="setup-screen">
+  <div style="max-width:780px;margin:0 auto;">
+    <h1 style="font-size:1.7rem;font-weight:800;margin-bottom:0.4rem;" class="gradient-text">Reading Test Setup</h1>
+    <p style="color:var(--text-muted);margin-bottom:2rem;font-size:0.9rem;">Choose a passage, set difficulty, and start your timed 60-minute test.</p>
+
+    <!-- Cambridge Academic Series 1–21 -->
+    <div class="card" style="margin-bottom:1.5rem;border-color:rgba(124,58,237,0.3);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:0.5rem;">
+        <div>
+          <div style="font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:0.5rem;">
+            <span>📚</span> Cambridge Academic Series (Books 1–21)
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-muted);" id="cambridge-era-info">Select a book to explore authentic academic passages</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+          <label style="font-size:0.75rem;color:var(--text-muted);">Book:</label>
+          <select id="cambridge-book-filter" onchange="filterCambridgeBook(this.value)" class="form-input" style="padding:0.35rem 0.65rem;font-size:0.8rem;width:auto;border-color:var(--primary);background:var(--dark);color:var(--text-primary);">
+            <!-- Populated: Cambridge Academic 1 to 21 -->
+          </select>
+          <label style="font-size:0.75rem;color:var(--text-muted);margin-left:4px;">Test:</label>
+          <select id="cambridge-test-filter" onchange="filterCambridgeTest(this.value)" class="form-input" style="padding:0.35rem 0.65rem;font-size:0.8rem;width:auto;border-color:#06B6D4;background:var(--dark);color:#67E8F9;font-weight:700;">
+            <option value="1">Test 1</option>
+            <option value="2">Test 2</option>
+            <option value="3">Test 3</option>
+            <option value="4">Test 4</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.6rem;max-height:280px;overflow-y:auto;padding-right:4px;" id="cambridge-list">
+        <!-- Injected by renderSetup() -->
+      </div>
+    </div>
+
+    <!-- Built-in passages -->
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-weight:600;margin-bottom:0.75rem;color:var(--text-secondary);">📖 Standard Benchmark Passages</div>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;" id="builtin-list"></div>
+    </div>
+
+
+    <!-- Divider -->
+    <div style="display:flex;align-items:center;gap:1rem;margin:1.5rem 0;">
+      <div style="flex:1;height:1px;background:var(--card-border);"></div>
+      <span style="color:var(--text-muted);font-size:0.8rem;">OR GENERATE WITH AI</span>
+      <div style="flex:1;height:1px;background:var(--card-border);"></div>
+    </div>
+
+    <!-- AI Generate -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div style="font-weight:600;margin-bottom:0.75rem;">✨ Generate with Gemini AI</div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+        <input type="text" id="ai-topic" class="form-input" placeholder="Enter topic (e.g. Ocean Plastic Pollution)" style="flex:1;min-width:200px;" />
+        <button class="btn btn-primary" onclick="generateAIPassage()">
+          <span id="ai-gen-icon">✨</span> <span id="ai-gen-text">Generate Passage</span>
+        </button>
+      </div>
+      <div id="ai-gen-status" style="margin-top:0.75rem;display:none;" class="ai-thinking">
+        <div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div>
+        <span id="ai-status-text">Generating passage…</span>
+      </div>
+    </div>
+
+    <!-- Difficulty -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div style="font-weight:600;margin-bottom:0.75rem;">🎯 Difficulty</div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;" id="difficulty-btns">
+        <button class="btn btn-secondary btn-sm diff-btn" data-val="Easy" onclick="setDifficulty(this)">Easy</button>
+        <button class="btn btn-secondary btn-sm diff-btn active-diff" data-val="Cambridge Standard" onclick="setDifficulty(this)">Cambridge Standard</button>
+        <button class="btn btn-secondary btn-sm diff-btn" data-val="Hard" onclick="setDifficulty(this)">Hard</button>
+      </div>
+    </div>
+
+    <!-- Start -->
+    <button class="btn btn-primary btn-lg btn-block" id="start-btn" onclick="startTest()" disabled style="opacity:0.5;">
+      🚀 Start 60-Minute Test
+    </button>
+    <p style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:0.75rem;">Select a passage above to enable the start button.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 2: MAIN TEST (split-screen)
+══════════════════════════════════════════════════ -->
+<div id="test-screen" style="display:none;">
+
+  <!-- Highlight toolbar -->
+  <div id="highlight-toolbar">
+    <span style="font-size:0.75rem;color:var(--text-muted);margin-right:0.25rem;">Highlight:</span>
+    <div class="hl-swatch active" style="background:rgba(251,191,36,0.55);" data-color="yellow" onclick="setHighlightColor(this,'yellow')" title="Yellow"></div>
+    <div class="hl-swatch" style="background:rgba(16,185,129,0.5);"  data-color="green"  onclick="setHighlightColor(this,'green')"  title="Green"></div>
+    <div class="hl-swatch" style="background:rgba(96,165,250,0.5);"  data-color="blue"   onclick="setHighlightColor(this,'blue')"   title="Blue"></div>
+    <div class="hl-swatch" style="background:rgba(244,114,182,0.5);" data-color="pink"   onclick="setHighlightColor(this,'pink')"   title="Pink"></div>
+    <button onclick="clearHighlights()" style="padding:0.25rem 0.6rem;border-radius:5px;border:1px solid var(--card-border);background:transparent;color:var(--text-muted);font-size:0.75rem;cursor:pointer;margin-left:0.25rem;">Clear All</button>
+    <span style="flex:1;"></span>
+    <span style="font-size:0.75rem;color:var(--text-muted);" id="toolbar-answered">Answered: 0 / 0</span>
+  </div>
+
+  <!-- Split panels -->
+  <div id="split-body">
+    <!-- LEFT: passage -->
+    <div id="passage-panel">
+      <div class="passage-title" id="passage-title-display"></div>
+      <div class="passage-subtitle" id="passage-subtitle-display"></div>
+      <div class="passage-text" id="passage-body" onmouseup="applyHighlight()"></div>
+    </div>
+    <!-- RIGHT: questions -->
+    <div id="questions-panel">
+      <div id="questions-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 3: RESULTS
+══════════════════════════════════════════════════ -->
+<div id="results-screen" style="display:none;">
+  <div style="max-width:820px;margin:0 auto;">
+
+    <!-- Band card -->
+    <div class="card" style="text-align:center;margin-bottom:1.5rem;padding:2rem;">
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;">IELTS Academic Reading</div>
+      <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;">Your Results</h2>
+      <div style="display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;align-items:center;">
+        <div>
+          <div class="big-band" id="res-band-ring">–</div>
+          <div style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-muted);">Band Score</div>
+          <div style="font-size:0.95rem;font-weight:600;" id="res-band-label"></div>
+        </div>
+        <div>
+          <div style="font-size:3rem;font-weight:900;" id="res-raw-score" class="gradient-text">–</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">Raw Score</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);" id="res-raw-label"></div>
+        </div>
+        <div id="res-stats-col" style="text-align:left;font-size:0.85rem;color:var(--text-secondary);line-height:2;"></div>
+      </div>
+    </div>
+
+    <!-- Band score guide -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div style="font-weight:600;margin-bottom:0.75rem;">📊 Band Score Guide</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem;" id="band-guide"></div>
+    </div>
+
+    <!-- Q-by-Q review -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div style="font-weight:600;margin-bottom:1rem;">🔍 Question Review</div>
+      <div id="review-body"></div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+      <a href="results.html" class="btn btn-primary" style="background:linear-gradient(135deg,#7C3AED,#06B6D4);border:none;box-shadow:0 6px 16px rgba(124,58,237,0.3);font-weight:700">
+        💡 Complete Diagnostic Breakdown & Tips →
+      </a>
+      <button class="btn btn-primary" onclick="resetToSetup()">📝 Try Another Passage</button>
+      <a href="analytics.html" class="btn btn-secondary">📊 View Analytics</a>
+      <a href="dashboard.html" class="btn btn-secondary">🏠 Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     Q-NAV OVERLAY
+══════════════════════════════════════════════════ -->
+<div id="qnav-overlay" style="display:none;" onclick="closeQNav(event)">
+  <div id="qnav-box" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div style="font-weight:700;">Question Navigator</div>
+      <button onclick="closeQNav()" style="background:none;border:none;color:var(--text-muted);font-size:1.4rem;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;" id="qnav-grid"></div>
+    <div style="display:flex;gap:1rem;font-size:0.75rem;color:var(--text-muted);">
+      <span>⬜ Unanswered</span>
+      <span style="color:var(--primary-light);">🟦 Answered</span>
+      <span style="color:var(--warning);">🔖 Bookmarked</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SUBMIT CONFIRM MODAL
+══════════════════════════════════════════════════ -->
+<div id="submit-modal" style="display:none;" class="modal-overlay">
+  <div class="modal scale-in" style="max-width:440px;">
+    <div class="modal-header">
+      <h3 style="font-weight:700;">Submit Test?</h3>
+      <button onclick="document.getElementById('submit-modal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="submit-warn-text" style="color:var(--text-secondary);margin-bottom:1rem;"></p>
+      <p style="font-size:0.875rem;color:var(--text-muted);">Once submitted you cannot change your answers.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('submit-modal').style.display='none'">Continue Test</button>
+      <button class="btn btn-danger" onclick="submitTest()">Submit Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════ -->
+<script>
+  // ── Auth guard ──────────────────────────────────────
+  Auth.requireAuth();
+
+  // ── State ───────────────────────────────────────────
+  let currentPassage   = null;   // passage object
+  let userAnswers      = {};     // { qId: answer }
+  let bookmarks        = new Set();
+  let highlightColor   = 'yellow';
+  let testTimer        = null;
+  let timerSeconds     = 60 * 60; // 60 min
+  let testStarted      = false;
+  let testSubmitted    = false;
+  let selectedDifficulty = 'Cambridge Standard';
+
+  // Heading pools (built-in passages have specific headings)
+  const HEADING_POOL = {
+    R001: [
+      { id: 'A', text: 'The historical roots of urban migration' },
+      { id: 'B', text: 'Early statistical evidence linking cities and mental illness' },
+      { id: 'C', text: 'The cognitive cost of constant sensory overload' },
+      { id: 'D', text: 'The restorative power of natural settings' },
+      { id: 'E', text: 'How urban crowding affects body chemistry' },
+      { id: 'F', text: 'Developmental impacts on young city dwellers' },
+      { id: 'G', text: 'Research methods informing urban design practice' },
+      { id: 'H', text: 'Global statistics on rural vs urban mental health rates' },   // distractor
+      { id: 'I', text: 'Economic arguments for increased urban green space' },          // distractor
+    ],
+    R002: [
+      { id: 'A', text: 'An overview of deep-sea mineral formations and their value' },
+      { id: 'B', text: 'The role of battery demand in driving mining interest' },
+      { id: 'C', text: 'Uncertainties in the financial viability of extraction' },
+      { id: 'D', text: 'The ecological consequences of abyssal disturbance' },
+      { id: 'E', text: 'International regulation and disputes over development rights' },
+      { id: 'F', text: 'Future developments that could change the industry\'s outlook' },
+      { id: 'G', text: 'Government subsidies for ocean floor exploration' },            // distractor
+      { id: 'H', text: 'Terrestrial alternatives that compete with ocean mining' },    // distractor
+    ]
+  };
+
+  // ── SETUP SCREEN ────────────────────────────────────
+
+  // ── SETUP SCREEN ────────────────────────────────────
+
+  let currentCambridgeBook = 1;
+  let currentCambridgeTest = 1;
+
+  async function handleAiReadingSource() {
+    let aiData = null;
+    const rawStr = localStorage.getItem('ielts_ai_generated_test');
+    if (rawStr) {
+      try {
+        const parsed = JSON.parse(rawStr);
+        aiData = parsed.reading || parsed;
+      } catch (e) {
+        console.warn('AI reading parse error:', e);
+      }
+    }
+
+    if (!aiData || !aiData.paragraphs || !aiData.paragraphs.length) {
+      Toast.info('Synthesizing fresh Cambridge-calibrated AI passage...');
+      try {
+        aiData = await ContentGenerator.generateReadingPassage('Environmental Systems and Computational Ecology', 'Cambridge Modern CD');
+      } catch (err) {
+        console.warn('AI generation fallback:', err);
+      }
+    }
+
+    if (aiData && aiData.paragraphs && aiData.paragraphs.length) {
+      currentPassage = {
+        id: 'AI_' + Date.now(),
+        title: aiData.title || 'AI Empirical Academic Research',
+        subtitle: aiData.subtitle || 'Contemporary Psychometric Assessment',
+        difficulty: 'Cambridge Modern CD',
+        paragraphs: aiData.paragraphs,
+        questions: (aiData.questions || []).map((q, i) => ({
+          id: i + 1,
+          type: q.type || 'TFNG',
+          question: q.question,
+          answer: q.answer,
+          explanation: q.explanation || '',
+          options: q.options || undefined
+        })),
+        _ai: true
+      };
+
+      const hdrTitle = document.getElementById('hdr-title');
+      if (hdrTitle) {
+        hdrTitle.innerHTML = `🤖 AI Reading Test: <span style="color:#A78BFA;">${currentPassage.title}</span>`;
+      }
+      startTest();
+      Toast.success('AI-Generated Cambridge Reading Test launched!');
+    }
+  }
+
+  function renderSetup() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAi = urlParams.get('source') === 'ai';
+    const initialBook = parseInt(urlParams.get('book'), 10) || 1;
+    const initialTest = parseInt(urlParams.get('test'), 10) || 1;
+
+    currentCambridgeBook = initialBook;
+    currentCambridgeTest = initialTest;
+
+    populateCambridgeFilter(initialBook, initialTest);
+    renderCambridgePassages(initialBook, initialTest);
+
+    // 4. Render Built-in Standard Passages
+    const list = document.getElementById('builtin-list');
+    list.innerHTML = '';
+    IELTS_CONTENT.reading.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'passage-card';
+      card.dataset.id = p.id;
+      const qCount = p.questions.length;
+      const types = [...new Set(p.questions.map(q => q.type))].map(t => ({
+        heading_match:'Heading Match', TFNG:'True/False/NG', summary:'Summary', mcq:'MCQ', YFNG:'Y/F/NG'
+      }[t] || t)).join(', ');
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-weight:700;margin-bottom:0.3rem;">${p.title}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">${qCount} questions &nbsp;·&nbsp; ${types}</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.2rem;">${p.paragraphs.length} paragraphs</div>
+          </div>
+          <span class="badge ${p.difficulty === 'Hard' ? 'badge-danger' : 'badge-primary'}">${p.difficulty}</span>
+        </div>`;
+      card.onclick = () => selectPassage(p, card);
+      list.appendChild(card);
+    });
+
+    if (isAi) {
+      handleAiReadingSource();
+    }
+  }
+
+  function populateCambridgeFilter(selectedBook = 1, selectedTest = 1) {
+    const sel = document.getElementById('cambridge-book-filter');
+    if (sel) {
+      sel.innerHTML = '';
+      for (let i = 1; i <= 21; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        const era = i <= 6 ? 'Found.' : i <= 13 ? 'Std' : i <= 17 ? 'Adv' : 'CD';
+        opt.textContent = `Cambridge Academic ${i} [${era}]`;
+        if (i === selectedBook) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+    const tSel = document.getElementById('cambridge-test-filter');
+    if (tSel) {
+      tSel.value = selectedTest;
+    }
+  }
+
+  function filterCambridgeBook(bookNum) {
+    currentCambridgeBook = parseInt(bookNum, 10) || 1;
+    renderCambridgePassages(currentCambridgeBook, currentCambridgeTest);
+  }
+
+  function filterCambridgeTest(testNum) {
+    currentCambridgeTest = parseInt(testNum, 10) || 1;
+    renderCambridgePassages(currentCambridgeBook, currentCambridgeTest);
+  }
+
+  function renderCambridgePassages(bookNum, testNum = 1) {
+    const list = document.getElementById('cambridge-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+
+    let book = null;
+    if (typeof CAMBRIDGE_ACADEMIC_SERIES !== 'undefined') {
+      try { book = CAMBRIDGE_ACADEMIC_SERIES.getBook(bookNum); } catch(e) {}
+    }
+    const eraInfo = document.getElementById('cambridge-era-info');
+    if (eraInfo && book) {
+      eraInfo.textContent = `${book.era || ''} • ${book.theme || ''} • Test ${testNum}`;
+    }
+
+    // Get reading passages from CAMBRIDGE_ACADEMIC_SERIES
+    let passages = [];
+    if (typeof CAMBRIDGE_ACADEMIC_SERIES !== 'undefined') {
+      try {
+        const reading = CAMBRIDGE_ACADEMIC_SERIES.getReading(bookNum, testNum);
+        // getReading returns array of passage objects directly
+        if (Array.isArray(reading)) passages = reading;
+        else if (reading && reading.passages) passages = reading.passages;
+      } catch(e) {}
+    }
+    // Fallback to IELTS_CONTENT
+    if (!passages.length) {
+      const fb = IELTS_CONTENT.getReadingTest ? IELTS_CONTENT.getReadingTest(bookNum, testNum) : (book ? (book.reading || []) : []);
+      if (Array.isArray(fb)) passages = fb;
+    }
+    if (!passages || !passages.length) {
+      list.innerHTML = `<div style="font-size:0.8rem;color:var(--text-muted);padding:0.5rem;">No passages available for Book ${bookNum} Test ${testNum}.</div>`;
+      return;
+    }
+
+    passages.forEach((p, idx) => {
+      const card = document.createElement('div');
+      card.className = 'passage-card';
+      card.dataset.id = p.id;
+      const qCount = p.questions ? p.questions.length : 0;
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+          <div>
+            <div style="font-weight:700;margin-bottom:0.25rem;font-size:0.88rem;">
+              <span style="color:var(--primary);margin-right:4px;">Part ${p.passageNumber || (idx + 1)}:</span> ${p.title}
+            </div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">${qCount} questions &nbsp;·&nbsp; ${p.paragraphs ? p.paragraphs.length : 0} paragraphs &nbsp;·&nbsp; Cambridge Book ${bookNum} Test ${testNum}</div>
+          </div>
+          <span class="badge ${p.difficulty === 'Hard' ? 'badge-danger' : 'badge-primary'}">${p.difficulty || 'Medium'}</span>
+        </div>`;
+      card.onclick = () => selectPassage(p, card);
+      list.appendChild(card);
+    });
+
+    // Auto-select Passage 1 if URL specified
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('book') && passages.length > 0 && !urlParams.has('source')) {
+      const firstCard = list.firstElementChild;
+      if (firstCard) selectPassage(passages[0], firstCard);
+    }
+  }
+
+
+  function selectPassage(p, cardEl) {
+    currentPassage = p;
+    document.querySelectorAll('.passage-card').forEach(c => c.classList.remove('selected'));
+    cardEl.classList.add('selected');
+    const btn = document.getElementById('start-btn');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+
+  function setDifficulty(btn) {
+    document.querySelectorAll('.diff-btn').forEach(b => {
+      b.classList.remove('btn-primary','active-diff');
+      b.classList.add('btn-secondary');
+    });
+    btn.classList.add('btn-primary','active-diff');
+    btn.classList.remove('btn-secondary');
+    selectedDifficulty = btn.dataset.val;
+  }
+
+  async function generateAIPassage() {
+    const topic = document.getElementById('ai-topic').value.trim();
+    if (!topic) { Toast.warning('Please enter a topic.'); return; }
+    const apiKey = Storage.get('gemini_api_key','');
+    if (!apiKey) { Toast.error('Set your Gemini API key in Settings first.'); return; }
+
+    const icon = document.getElementById('ai-gen-icon');
+    const text = document.getElementById('ai-gen-text');
+    const status = document.getElementById('ai-gen-status');
+    const statusText = document.getElementById('ai-status-text');
+
+    icon.textContent = '⏳'; text.textContent = 'Generating…';
+    status.style.display = 'flex';
+    statusText.textContent = 'Asking Gemini to write an IELTS passage…';
+
+    try {
+      const result = await ContentGenerator.generateReadingPassage(topic, selectedDifficulty);
+      // Build passage object compatible with our system
+      const passage = {
+        id: 'AI_' + Date.now(),
+        title: result.title || topic,
+        subtitle: result.subtitle || '',
+        difficulty: selectedDifficulty,
+        paragraphs: result.paragraphs || [],
+        questions: (result.questions || []).map((q,i) => ({
+          id: i + 1,
+          type: q.type || 'TFNG',
+          question: q.question,
+          answer: q.answer,
+          explanation: q.explanation || '',
+          options: q.options || undefined
+        })),
+        _ai: true,
+        _headings: result.paragraph_headings || []
+      };
+      currentPassage = passage;
+
+      // Add a fake card for AI passage
+      const list = document.getElementById('builtin-list');
+      const card = document.createElement('div');
+      card.className = 'passage-card selected';
+      card.dataset.id = passage.id;
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-weight:700;margin-bottom:0.3rem;">✨ ${passage.title}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">${passage.questions.length} questions</div>
+          </div>
+          <span class="badge badge-success">AI Generated</span>
+        </div>`;
+      document.querySelectorAll('.passage-card').forEach(c => c.classList.remove('selected'));
+      list.appendChild(card);
+      card.onclick = () => { currentPassage = passage; document.querySelectorAll('.passage-card').forEach(c=>c.classList.remove('selected')); card.classList.add('selected'); };
+
+      const btn = document.getElementById('start-btn');
+      btn.disabled = false; btn.style.opacity = '1';
+      Toast.success('Passage generated! Ready to start.');
+      statusText.textContent = '✅ Passage ready.';
+    } catch (e) {
+      Toast.error('Generation failed: ' + e.message);
+      statusText.textContent = '❌ ' + e.message;
+    } finally {
+      icon.textContent = '✨'; text.textContent = 'Generate Passage';
+    }
+  }
+
+  // ── START TEST ───────────────────────────────────────
+  function startTest() {
+    if (!currentPassage) { Toast.warning('Select a passage first.'); return; }
+
+    userAnswers = {};
+    bookmarks   = new Set();
+    testSubmitted = false;
+    testStarted = true;
+
+    // Switch screens
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('results-screen').style.display = 'none';
+    document.getElementById('test-screen').style.display = 'flex';
+    document.getElementById('btn-qnav').style.display = '';
+    document.getElementById('btn-submit').style.display = '';
+    document.getElementById('hdr-timer-wrap').style.display = '';
+    document.getElementById('progress-strip').style.display = 'block';
+
+    // Header
+    document.getElementById('hdr-title').textContent = currentPassage.title;
+    document.getElementById('hdr-section').textContent = `${currentPassage.paragraphs.length} paragraphs · ${currentPassage.questions.length} questions`;
+
+    // Render passage
+    renderPassage();
+    // Render questions
+    renderQuestions();
+    // Start timer
+    startTimer();
+    updateProgress();
+  }
+
+  function renderPassage() {
+    const p = currentPassage;
+    document.getElementById('passage-title-display').textContent = p.title;
+    document.getElementById('passage-subtitle-display').textContent = p.subtitle || p.difficulty + ' · Academic Reading Passage';
+
+    const body = document.getElementById('passage-body');
+    body.innerHTML = '';
+    p.paragraphs.forEach(para => {
+      const block = document.createElement('div');
+      block.className = 'para-block';
+      block.innerHTML = `<div style="display:flex;align-items:flex-start;gap:0;">
+        <span class="para-label">${para.label}</span>
+        <span>${para.text}</span>
+      </div>`;
+      body.appendChild(block);
+    });
+  }
+
+  function renderQuestions() {
+    const qs = currentPassage.questions;
+    const container = document.getElementById('questions-body');
+    container.innerHTML = '';
+
+    // Group by type
+    const groups = {};
+    qs.forEach(q => {
+      const t = q.type;
+      if (!groups[t]) groups[t] = [];
+      groups[t].push(q);
+    });
+
+    // Preferred render order
+    const order = ['heading_match','TFNG','YFNG','mcq','summary','sentence_completion'];
+    const rendered = new Set();
+
+    const typeLabels = {
+      heading_match: 'Questions – Matching Headings\nChoose the correct heading for each paragraph from the list below.',
+      TFNG: 'Questions – True / False / Not Given\nDo the following statements agree with the information in the passage?',
+      YFNG: 'Questions – Yes / No / Not Given\nDo the following statements agree with the views of the writer?',
+      mcq: 'Questions – Multiple Choice\nChoose the correct answer, A, B, C or D.',
+      summary: 'Questions – Summary Completion\nComplete the summary using words from the passage. Write NO MORE THAN THREE WORDS.',
+      sentence_completion: 'Questions – Sentence Completion\nComplete each sentence with words from the passage.'
+    };
+
+    // Build heading pool for this passage
+    const headingPool = buildHeadingPool();
+
+    order.forEach(type => {
+      if (groups[type]) {
+        rendered.add(type);
+        renderGroup(container, type, groups[type], typeLabels[type] || type, headingPool);
+      }
+    });
+    // Render any leftover types
+    Object.keys(groups).forEach(type => {
+      if (!rendered.has(type)) renderGroup(container, type, groups[type], typeLabels[type] || type, headingPool);
+    });
+
+    updateProgress();
+    updateQNav();
+  }
+
+  function buildHeadingPool() {
+    const pid = currentPassage.id;
+    if (HEADING_POOL[pid]) return HEADING_POOL[pid];
+    // AI passage: use paragraph headings if available
+    if (currentPassage._headings && currentPassage._headings.length) {
+      return currentPassage._headings.map((h, i) => ({ id: String.fromCharCode(65 + i), text: h }));
+    }
+    // Fallback: generate generic headings from answers
+    const headings = [];
+    currentPassage.questions.filter(q => q.type === 'heading_match').forEach(q => {
+      headings.push({ id: q.answer, text: q.question });
+    });
+    return headings;
+  }
+
+  function renderGroup(container, type, questions, labelRaw, headingPool) {
+    const label = labelRaw.split('\n');
+    const header = document.createElement('div');
+    header.className = 'qtype-header';
+    header.innerHTML = `<div style="color:var(--primary-light);font-weight:700;font-size:0.8rem;">${label[0]}</div>
+      ${label[1] ? `<div style="color:var(--text-muted);font-size:0.75rem;font-weight:400;text-transform:none;letter-spacing:normal;margin-top:0.2rem;">${label[1]}</div>` : ''}`;
+    container.appendChild(header);
+
+    if (type === 'heading_match') {
+      // Show heading list
+      const hlist = document.createElement('div');
+      hlist.style.cssText = 'background:rgba(79,70,229,0.06);border:1px solid rgba(79,70,229,0.2);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.82rem;';
+      hlist.innerHTML = '<div style="font-weight:600;color:var(--text-secondary);margin-bottom:0.5rem;">List of Headings</div>';
+      const hul = document.createElement('ul');
+      hul.style.cssText = 'list-style:none;display:flex;flex-direction:column;gap:0.25rem;';
+      headingPool.forEach(h => {
+        const li = document.createElement('li');
+        li.style.cssText = 'display:flex;gap:0.5rem;align-items:flex-start;';
+        li.innerHTML = `<span style="font-weight:700;color:var(--primary-light);min-width:18px;">${h.id}.</span><span style="color:var(--text-secondary);">${h.text}</span>`;
+        hul.appendChild(li);
+      });
+      hlist.appendChild(hul);
+      container.appendChild(hlist);
+    }
+
+    questions.forEach(q => {
+      const item = document.createElement('div');
+      item.className = 'q-item';
+      item.id = `qitem-${q.id}`;
+
+      const hdr = document.createElement('div');
+      hdr.className = 'q-header';
+      hdr.innerHTML = `<span class="q-num">${q.id}.</span><span class="q-text">${buildQuestionText(q)}</span>
+        <button title="Bookmark" onclick="toggleBookmark(${q.id},this)" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--text-muted);flex-shrink:0;" data-qid="${q.id}">🔖</button>`;
+      item.appendChild(hdr);
+
+      // Input area
+      const inp = document.createElement('div');
+      inp.id = `qinput-${q.id}`;
+      item.appendChild(inp);
+      container.appendChild(item);
+
+      renderInput(q, inp, headingPool);
+    });
+  }
+
+  function buildQuestionText(q) {
+    if (q.type === 'summary' || q.type === 'sentence_completion') {
+      // Replace ___ with inline input
+      return q.question.replace(/___+/g, `<input class="summary-input" id="sinput-${q.id}" oninput="recordAnswer(${q.id},this.value)" placeholder="…" />`);
+    }
+    if (q.type === 'heading_match') {
+      return `Paragraph <strong>${q.answer}</strong>: <span style="font-style:italic;color:var(--text-muted);">Choose heading</span>`;
+    }
+    return q.question;
+  }
+
+  function renderInput(q, container, headingPool) {
+    if (q.type === 'TFNG' || q.type === 'YFNG') {
+      const labels = q.type === 'YFNG'
+        ? ['YES','NO','NOT GIVEN']
+        : ['TRUE','FALSE','NOT GIVEN'];
+      const wrap = document.createElement('div');
+      wrap.style.display = 'flex'; wrap.style.gap = '0.5rem'; wrap.style.flexWrap = 'wrap';
+      labels.forEach(lbl => {
+        const btn = document.createElement('button');
+        const shortKey = lbl === 'NOT GIVEN' ? 'ng' : lbl.toLowerCase();
+        btn.className = `tfng-btn`;
+        btn.textContent = lbl;
+        btn.dataset.val = lbl;
+        btn.onclick = () => {
+          wrap.querySelectorAll('.tfng-btn').forEach(b => b.className='tfng-btn');
+          btn.className = `tfng-btn selected-${shortKey}`;
+          recordAnswer(q.id, lbl);
+        };
+        wrap.appendChild(btn);
+      });
+      container.appendChild(wrap);
+      return;
+    }
+
+    if (q.type === 'mcq') {
+      const wrap = document.createElement('div');
+      (q.options || []).forEach(opt => {
+        const div = document.createElement('div');
+        div.className = 'mcq-opt';
+        const letter = opt[0]; // 'A', 'B', etc.
+        div.innerHTML = `<span style="font-weight:700;color:var(--primary-light);flex-shrink:0;">${letter}</span><span>${opt.slice(2)}</span>`;
+        div.onclick = () => {
+          wrap.querySelectorAll('.mcq-opt').forEach(d => d.classList.remove('selected'));
+          div.classList.add('selected');
+          recordAnswer(q.id, letter);
+        };
+        wrap.appendChild(div);
+      });
+      container.appendChild(wrap);
+      return;
+    }
+
+    if (q.type === 'heading_match') {
+      const wrap = document.createElement('div');
+      const sel = document.createElement('select');
+      sel.className = 'heading-select';
+      sel.innerHTML = '<option value="">— Select a heading —</option>';
+      headingPool.forEach(h => {
+        const opt = document.createElement('option');
+        opt.value = h.id;
+        opt.textContent = `${h.id}. ${h.text}`;
+        sel.appendChild(opt);
+      });
+      sel.onchange = () => recordAnswer(q.id, sel.value);
+      wrap.appendChild(sel);
+      container.appendChild(wrap);
+      return;
+    }
+
+    // summary / sentence_completion: input is already inline in question text
+    // Nothing extra needed here
+  }
+
+  // ── ANSWERS ──────────────────────────────────────────
+  function recordAnswer(qid, val) {
+    if (testSubmitted) return;
+    if (val === '' || val === null || val === undefined) {
+      delete userAnswers[qid];
+    } else {
+      userAnswers[qid] = val;
+    }
+    updateProgress();
+    updateQNav();
+    // Update q-item border colour
+    const item = document.getElementById(`qitem-${qid}`);
+    if (item) item.style.borderColor = val ? 'rgba(79,70,229,0.5)' : '';
+  }
+
+  function toggleBookmark(qid, btn) {
+    const item = document.getElementById(`qitem-${qid}`);
+    if (bookmarks.has(qid)) {
+      bookmarks.delete(qid);
+      btn.style.color = 'var(--text-muted)';
+      item?.classList.remove('bookmarked');
+    } else {
+      bookmarks.add(qid);
+      btn.style.color = 'var(--warning)';
+      item?.classList.add('bookmarked');
+    }
+    updateQNav();
+  }
+
+  function updateProgress() {
+    const total = currentPassage?.questions.length || 0;
+    const answered = Object.keys(userAnswers).length;
+    const pct = total ? (answered / total) * 100 : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('toolbar-answered').textContent = `Answered: ${answered} / ${total}`;
+  }
+
+  // ── Q-NAV ────────────────────────────────────────────
+  function openQNav() {
+    updateQNav();
+    document.getElementById('qnav-overlay').style.display = 'flex';
+  }
+  function closeQNav(e) {
+    if (!e || e.target === document.getElementById('qnav-overlay') || !e.target) {
+      document.getElementById('qnav-overlay').style.display = 'none';
+    }
+  }
+  function updateQNav() {
+    const grid = document.getElementById('qnav-grid');
+    if (!grid || !currentPassage) return;
+    grid.innerHTML = '';
+    currentPassage.questions.forEach(q => {
+      const btn = document.createElement('button');
+      btn.className = 'q-nav-btn';
+      btn.textContent = q.id;
+      if (bookmarks.has(q.id)) btn.classList.add('flagged');
+      else if (userAnswers[q.id] !== undefined) btn.classList.add('answered');
+      btn.onclick = () => {
+        const el = document.getElementById(`qitem-${q.id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        closeQNav();
+      };
+      grid.appendChild(btn);
+    });
+  }
+
+  // ── TIMER ────────────────────────────────────────────
+  function startTimer() {
+    timerSeconds = 60 * 60;
+    const display = document.getElementById('hdr-timer');
+    if (testTimer) testTimer.stop();
+    testTimer = new IELTSTimer(
+      timerSeconds,
+      (rem) => {
+        display.textContent = testTimer.format(rem);
+        if (rem <= 300) display.classList.add('danger');
+        else display.classList.remove('danger');
+      },
+      () => {
+        Toast.warning('Time is up! Submitting automatically…');
+        submitTest();
+      }
+    );
+    testTimer.start();
+  }
+
+  // ── SUBMIT ────────────────────────────────────────────
+  function confirmSubmit() {
+    const total = currentPassage.questions.length;
+    const answered = Object.keys(userAnswers).length;
+    const unanswered = total - answered;
+    document.getElementById('submit-warn-text').textContent =
+      unanswered > 0
+        ? `You have ${unanswered} unanswered question${unanswered > 1 ? 's' : ''}. Are you sure you want to submit?`
+        : 'All questions answered. Ready to submit?';
+    document.getElementById('submit-modal').style.display = 'flex';
+  }
+
+  function submitTest() {
+    document.getElementById('submit-modal').style.display = 'none';
+    if (testTimer) testTimer.stop();
+    testSubmitted = true;
+
+    // Score
+    const qs = currentPassage.questions;
+    let correct = 0;
+    const results = qs.map(q => {
+      const userAns = (userAnswers[q.id] || '').toString().trim().toLowerCase();
+      const correctAns = (q.answer || '').toString().trim().toLowerCase();
+      // Flexible match for summary: accept if answer contains the key phrase
+      let isCorrect = false;
+      if (q.type === 'summary' || q.type === 'sentence_completion') {
+        isCorrect = userAns.includes(correctAns) || correctAns.includes(userAns);
+      } else {
+        isCorrect = userAns === correctAns;
+      }
+      if (isCorrect) correct++;
+      return { ...q, userAnswer: userAnswers[q.id] || '', correct: isCorrect };
+    });
+
+    const band = IELTSScoring.readingBand(correct);
+
+    // Save
+    Analytics.addResult({
+      module: 'reading',
+      type: 'reading',
+      title: currentPassage.title,
+      passage: currentPassage.title,
+      rawScore: correct,
+      raw_score: correct,
+      total: qs.length,
+      band: band,
+      reading_band: band,
+      overall_band: band,
+      reviewItems: results,
+      date: new Date().toISOString()
+    });
+
+    // Show results
+    showResults(correct, qs.length, band, results);
+  }
+
+  function showResults(raw, total, band, results) {
+    document.getElementById('test-screen').style.display = 'none';
+    document.getElementById('btn-qnav').style.display = 'none';
+    document.getElementById('btn-submit').style.display = 'none';
+    document.getElementById('progress-strip').style.display = 'none';
+    document.getElementById('hdr-timer-wrap').style.display = 'none';
+    document.getElementById('hdr-title').textContent = 'IELTS Academic Reading';
+    document.getElementById('hdr-section').textContent = 'Results';
+
+    const color = IELTSScoring.bandColor(band);
+    const label = IELTSScoring.bandLabel(band);
+    const pct = Math.round((raw / total) * 100);
+
+    // Band ring
+    const ring = document.getElementById('res-band-ring');
+    ring.textContent = band.toFixed(1);
+    ring.style.borderColor = color;
+    ring.style.color = color;
+
+    document.getElementById('res-band-label').textContent = label;
+    document.getElementById('res-band-label').style.color = color;
+    document.getElementById('res-raw-score').textContent = `${raw}/${total}`;
+    document.getElementById('res-raw-label').textContent = `${pct}% accuracy`;
+
+    // Stats
+    const correct = results.filter(r => r.correct).length;
+    const wrong   = results.filter(r => !r.correct && r.userAnswer).length;
+    const skipped = results.filter(r => !r.userAnswer).length;
+    document.getElementById('res-stats-col').innerHTML = `
+      <div>✅ Correct: <strong style="color:var(--success)">${correct}</strong></div>
+      <div>❌ Incorrect: <strong style="color:var(--danger)">${wrong}</strong></div>
+      <div>⬜ Skipped: <strong style="color:var(--text-muted)">${skipped}</strong></div>
+      <div>📋 Passage: <strong>${currentPassage.title.substring(0,28)}…</strong></div>`;
+
+    // Band guide
+    const bandGuide = document.getElementById('band-guide');
+    bandGuide.innerHTML = '';
+    [[9,'Expert','#10B981'],[8.5,'Very Good','#34D399'],[8,'Very Good','#34D399'],
+     [7.5,'Good','#60A5FA'],[7,'Good','#60A5FA'],[6.5,'Competent','#FBBF24'],
+     [6,'Competent','#FBBF24'],[5.5,'Modest','#F97316'],[5,'Modest','#F97316'],
+     [4.5,'Limited','#EF4444'],[4,'Limited','#EF4444']].forEach(([b,l,c]) => {
+      const el = document.createElement('div');
+      el.style.cssText = `background:rgba(0,0,0,0.2);border-radius:8px;padding:0.5rem 0.75rem;border:1px solid ${b===band?c:'var(--card-border)'};`;
+      el.innerHTML = `<div style="font-size:1.1rem;font-weight:800;color:${c};">${b}</div><div style="font-size:0.7rem;color:var(--text-muted);">${l}</div>`;
+      if (b === band) el.style.background = `rgba(0,0,0,0.35)`;
+      bandGuide.appendChild(el);
+    });
+
+    // Q-by-Q review
+    const reviewBody = document.getElementById('review-body');
+    reviewBody.innerHTML = '';
+    results.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'res-row ' + (r.correct ? 'correct' : 'wrong');
+      const icon = r.correct ? '✅' : (r.userAnswer ? '❌' : '⬜');
+      const typeLabel = {
+        TFNG:'T/F/NG', YFNG:'Y/N/NG', heading_match:'Heading', mcq:'MCQ',
+        summary:'Summary', sentence_completion:'Sentence'
+      }[r.type] || r.type;
+
+      let trapNotice = '';
+      if (!r.correct) {
+        if (r.type === 'TFNG' || r.type === 'YFNG') {
+          trapNotice = `
+            <div style="margin-top:0.5rem;padding:0.5rem;border-radius:6px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);font-size:0.75rem;">
+              <strong style="color:#FCA5A5;">⚠️ Logic Trap:</strong> Confirm if the passage factually refutes the statement (FALSE) or merely leaves it undocumented (NOT GIVEN).<br>
+              <strong style="color:#67E8F9;">💡 Tip:</strong> Direct contradiction = FALSE. Absence of definitive proof = NOT GIVEN.
+            </div>
+          `;
+        } else if (r.type === 'heading_match') {
+          trapNotice = `
+            <div style="margin-top:0.5rem;padding:0.5rem;border-radius:6px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);font-size:0.75rem;">
+              <strong style="color:#FCA5A5;">⚠️ Detail vs. Gist Trap:</strong> Beware picking headings that reflect only an illustrative example in the final sentence.<br>
+              <strong style="color:#67E8F9;">💡 Tip:</strong> The true heading must synthesize at least 80% of the paragraph's sentences.
+            </div>
+          `;
+        } else {
+          trapNotice = `
+            <div style="margin-top:0.5rem;padding:0.5rem;border-radius:6px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);font-size:0.75rem;">
+              <strong style="color:#FCA5A5;">⚠️ Paraphrase Trap:</strong> Cambridge paraphrases key adjectives and nouns rather than copying question words directly.<br>
+              <strong style="color:#67E8F9;">💡 Tip:</strong> Triangulate with subject + verb + condition rather than hunting for single keywords.
+            </div>
+          `;
+        }
+      }
+
+      row.innerHTML = `
+        <div style="flex-shrink:0;font-size:1.1rem;">${icon}</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.3rem;">
+            <span style="font-weight:700;color:var(--text-primary);">Q${r.id}</span>
+            <span class="badge badge-primary" style="font-size:0.68rem;">${typeLabel}</span>
+          </div>
+          <div style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:0.4rem;">${truncate(r.question,110)}</div>
+          <div style="display:flex;gap:1.5rem;flex-wrap:wrap;font-size:0.82rem;">
+            <span>Your answer: <strong style="color:${r.correct?'var(--success)':'var(--danger)'};">${r.userAnswer || '(blank)'}</strong></span>
+            <span>Correct: <strong style="color:var(--success);">${r.answer}</strong></span>
+          </div>
+          ${r.explanation ? `<div style="margin-top:0.4rem;font-size:0.78rem;color:var(--text-muted);font-style:italic;">${r.explanation}</div>` : ''}
+          ${trapNotice}
+        </div>`;
+      reviewBody.appendChild(row);
+    });
+
+    document.getElementById('results-screen').style.display = 'block';
+  }
+
+  function truncate(str, n) { return str.length > n ? str.slice(0, n) + '…' : str; }
+
+  function resetToSetup() {
+    currentPassage = null;
+    userAnswers = {};
+    bookmarks = new Set();
+    testStarted = false;
+    testSubmitted = false;
+    if (testTimer) { testTimer.stop(); testTimer = null; }
+
+    document.getElementById('results-screen').style.display = 'none';
+    document.getElementById('test-screen').style.display = 'none';
+    document.getElementById('hdr-timer-wrap').style.display = 'none';
+    document.getElementById('btn-qnav').style.display = 'none';
+    document.getElementById('btn-submit').style.display = 'none';
+    document.getElementById('progress-strip').style.display = 'none';
+    document.getElementById('hdr-title').textContent = 'IELTS Academic Reading';
+    document.getElementById('hdr-section').textContent = 'Select a passage to begin';
+    document.getElementById('hdr-timer').textContent = '60:00';
+    document.getElementById('hdr-timer').classList.remove('danger');
+
+    // Reset start button
+    const btn = document.getElementById('start-btn');
+    btn.disabled = true; btn.style.opacity = '0.5';
+    document.querySelectorAll('.passage-card').forEach(c => c.classList.remove('selected'));
+
+    document.getElementById('setup-screen').style.display = 'block';
+  }
+
+  // ── HIGHLIGHT SYSTEM ─────────────────────────────────
+  function setHighlightColor(el, color) {
+    document.querySelectorAll('.hl-swatch').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    highlightColor = color;
+    Highlighter.selectedColor = color;
+  }
+
+  function applyHighlight() {
+    if (!testStarted || testSubmitted) return;
+    Highlighter.apply();
+  }
+
+  function clearHighlights() {
+    document.querySelectorAll('#passage-body [data-highlight]').forEach(el => {
+      const parent = el.parentNode;
+      while (el.firstChild) parent.insertBefore(el.firstChild, el);
+      parent.removeChild(el);
+    });
+  }
+
+  // ── INIT ─────────────────────────────────────────────
+  renderSetup();
+</script>
+</body>
+</html>

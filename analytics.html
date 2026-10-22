@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detailed IELTS Analytics & Performance Diagnostic</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <script src="../js/theme.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { purple: '#7C3AED', cyan: '#06B6D4', dark: '#0A0F1D', card: '#131B2E', border: '#222F4C' }
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="../js/core.js"></script>
+  <script src="../js/content.js"></script>
+  <script src="../js/cambridge-series.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background: var(--bg-gradient); color: var(--text-primary); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; }
+    
+    .stat-card {
+      background: var(--bg-card, #111B30);
+      border: 1px solid var(--border-color, #1E2E4E);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.25s ease;
+    }
+    [data-theme="light"] .stat-card {
+      background: #FFFFFF !important;
+      border-color: #E2E8F0 !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-8">
+
+  <div class="max-w-6xl mx-auto space-y-8">
+    
+    <!-- Top Header -->
+    <div class="flex items-center justify-between pb-6 border-b border-slate-800">
+      <div class="flex items-center gap-3">
+        <a href="dashboard.html" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition">
+          ← Dashboard
+        </a>
+        <div>
+          <h1 class="text-xl font-bold text-white">IELTS Psychometric Analytics & Score Predictor</h1>
+          <p class="text-xs text-slate-400">Deep Diagnostic Evaluation Across All 4 Test Components</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Theme Switcher -->
+        <button class="theme-toggle-btn" type="button" onclick="ThemeManager.toggle()" title="Toggle Dark/Light Mode">
+          <span class="theme-toggle-indicator"><span class="theme-icon">☀️</span></span>
+          <span class="theme-text">Light</span>
+        </button>
+
+        <a href="mock-tests.html" class="text-xs bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-300 border border-cyan-700/50 px-3.5 py-2 rounded-lg font-semibold transition flex items-center gap-1.5">
+          <span>📚</span> 1–21 Hub
+        </a>
+        <a href="profile.html" class="text-xs bg-purple-950/50 hover:bg-purple-900/60 text-purple-300 border border-purple-700/50 px-3.5 py-2 rounded-lg font-semibold transition flex items-center gap-1.5">
+          <span>👤</span> Profile
+        </a>
+        <button onclick="window.print()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-lg border border-slate-700 font-semibold transition flex items-center gap-1.5">
+          <span>🖨️</span> Export PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Predicted Exam Band Hero -->
+    <div class="bg-gradient-to-r from-purple-950/50 via-slate-900 to-cyan-950/40 border border-purple-800/40 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+      <div>
+        <div class="inline-flex items-center gap-2 bg-purple-900/40 border border-purple-700/50 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold mb-2">
+          🎯 Cambridge Psychometric Band Prediction
+        </div>
+        <h2 class="text-2xl font-black text-white">Predicted Real Exam Band: <span class="text-cyan-400" id="hero-pred-band">7.5</span></h2>
+        <p class="text-xs text-slate-400 mt-1 max-w-lg leading-relaxed">
+          Based on your historical response accuracy, distractibility index in Listening, reading inference speed, and AI writing/speaking criteria metrics.
+        </p>
+        <div class="flex flex-wrap gap-4 mt-3 text-xs text-slate-400 font-mono">
+          <span>Confidence Interval: <strong class="text-emerald-400">7.5 ± 0.5</strong></span>
+          <span>Target Milestone: <strong class="text-purple-400" id="hero-target-milestone">Band 7.5</strong></span>
+          <a href="profile.html" class="text-cyan-400 hover:underline">Edit Goal →</a>
+        </div>
+      </div>
+      <div class="text-center flex-shrink-0 bg-[#0A0F1D]/80 border border-slate-800 p-6 rounded-2xl">
+        <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Overall Current Band</div>
+        <div class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400" id="hero-cur-band">7.5</div>
+        <div class="text-xs text-emerald-400 font-semibold mt-1">Good User (CEFR C1)</div>
+      </div>
+    </div>
+
+    <!-- 4 Module Score Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="stat-card text-center">
+        <span class="text-2xl">🎧</span>
+        <div class="text-xs text-slate-400 uppercase tracking-wider mt-1">Listening</div>
+        <div class="text-3xl font-black text-cyan-400 mt-1" id="sc-l">7.5</div>
+        <div class="text-[11px] text-slate-500 mt-1">Raw Accuracy: ~34/40</div>
+      </div>
+      <div class="stat-card text-center">
+        <span class="text-2xl">📖</span>
+        <div class="text-xs text-slate-400 uppercase tracking-wider mt-1">Reading</div>
+        <div class="text-3xl font-black text-purple-400 mt-1" id="sc-r">8.0</div>
+        <div class="text-[11px] text-slate-500 mt-1">Raw Accuracy: ~36/40</div>
+      </div>
+      <div class="stat-card text-center">
+        <span class="text-2xl">✍️</span>
+        <div class="text-xs text-slate-400 uppercase tracking-wider mt-1">Writing</div>
+        <div class="text-3xl font-black text-indigo-400 mt-1" id="sc-w">7.0</div>
+        <div class="text-[11px] text-slate-500 mt-1">Task 1: 7.0 • Task 2: 7.0</div>
+      </div>
+      <div class="stat-card text-center">
+        <span class="text-2xl">🎤</span>
+        <div class="text-xs text-slate-400 uppercase tracking-wider mt-1">Speaking</div>
+        <div class="text-3xl font-black text-amber-400 mt-1" id="sc-s">7.5</div>
+        <div class="text-[11px] text-slate-500 mt-1">WPM: 135 • Fluency: 7.5</div>
+      </div>
+    </div>
+
+    <!-- Interactive Charts Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Spider Radar Chart -->
+      <div class="stat-card flex flex-col justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-white mb-1">Competency Radar Diagnostic</h3>
+          <p class="text-xs text-slate-400 mb-4">Multi-axis balance across the 4 core exam components vs Band 8.5 target.</p>
+        </div>
+        <div class="h-64 flex items-center justify-center">
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Historical Progress Timeline Chart -->
+      <div class="stat-card flex flex-col justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-white mb-1">Score Progression Timeline</h3>
+          <p class="text-xs text-slate-400 mb-4">Chronological band score trajectory across recent mock test attempts.</p>
+        </div>
+        <div class="h-64 flex items-center justify-center">
+          <canvas id="timelineChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-Skills Diagnostics & Strengths/Weaknesses -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Strengths & High Performance Areas -->
+      <div class="stat-card space-y-3">
+        <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+          <span>💪</span> Strongest Competencies
+        </h3>
+        <ul class="text-xs text-slate-300 space-y-2">
+          <li class="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-800/30">
+            <strong>Reading Main Ideas & Heading Matching:</strong> 92% accuracy across Passage 2 and 3 academic texts.
+          </li>
+          <li class="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-800/30">
+            <strong>Speaking Natural Rhythm & Intonation:</strong> Speech pace consistently sits in the sweet spot (125–140 WPM).
+          </li>
+          <li class="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-800/30">
+            <strong>Writing Task 2 Structure & Thesis:</strong> Clear 4-paragraph framework with distinct topic sentences.
+          </li>
+        </ul>
+      </div>
+
+      <!-- Weaknesses & Vulnerabilities -->
+      <div class="stat-card space-y-3">
+        <h3 class="text-sm font-bold text-rose-400 flex items-center gap-2">
+          <span>⚠️</span> Areas Requiring Immediate Focus
+        </h3>
+        <ul class="text-xs text-slate-300 space-y-2">
+          <li class="p-2.5 rounded-lg bg-rose-950/20 border border-rose-800/30">
+            <strong>Listening Section 3 & 4 Distractors:</strong> Vulnerability when speakers correct their previous statements or use conditional hedging.
+          </li>
+          <li class="p-2.5 rounded-lg bg-rose-950/20 border border-rose-800/30">
+            <strong>Reading True/False/Not Given Distinctions:</strong> Confusion between "False" (directly contradictory) and "Not Given" (absence of verification).
+          </li>
+          <li class="p-2.5 rounded-lg bg-rose-950/20 border border-rose-800/30">
+            <strong>Writing Task 1 Overview Completeness:</strong> Ensure you always identify both the extreme values and the primary divergence trend.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- AI Personalized 14-Day Study Plan -->
+    <div class="stat-card space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div>
+          <h3 class="text-base font-bold text-white">AI Personalized 14-Day Study Recommendation</h3>
+          <p class="text-xs text-slate-400">Tailored action plan targeting your lowest-scoring sub-skills to push your predicted band from 7.5 to 8.0+.</p>
+        </div>
+        <span class="text-xs font-mono font-bold text-purple-400 bg-purple-900/30 border border-purple-700/50 px-3 py-1 rounded-full">
+          Adaptive Roadmap
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="p-4 rounded-xl bg-[#0A0F1D] border border-slate-800">
+          <div class="text-xs font-bold text-cyan-400 mb-1">Days 1–5 • Listening Focus</div>
+          <p class="text-slate-300 leading-relaxed">
+            Practice 10 Section 3 audio tracks specifically highlighting self-corrections. Note down synonymous paraphrasing between prompt and recording before answering.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-[#0A0F1D] border border-slate-800">
+          <div class="text-xs font-bold text-purple-400 mb-1">Days 6–10 • Reading Precision</div>
+          <p class="text-slate-300 leading-relaxed">
+            Drill 25 TFNG questions using the "Can I prove it false?" test. If no textual statement directly negates the claim, strictly mark NOT GIVEN.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-[#0A0F1D] border border-slate-800">
+          <div class="text-xs font-bold text-amber-400 mb-1">Days 11–14 • Writing & Speaking Polish</div>
+          <p class="text-slate-300 leading-relaxed">
+            Incorporate Band 8+ academic collocations (e.g., <em>systemic reform, disproportionately affects, catalysts for innovation</em>). Write 3 full Task 1 summaries in under 18 minutes.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = Auth.requireAuth();
+      if (user && user.targetBand) {
+        const tEl = document.getElementById('hero-target-milestone');
+        if (tEl) tEl.textContent = `Band ${user.targetBand.toFixed(1)}`;
+      }
+
+      // Retrieve dynamic or baseline scores
+      const scores = Analytics.getScores();
+      const l = scores.listening || 7.5;
+      const r = scores.reading || 8.0;
+      const w = scores.writing || 7.0;
+      const s = scores.speaking || 7.5;
+      const overall = IELTSScoring.overallBand(l, r, w, s);
+
+      document.getElementById('sc-l').textContent = l.toFixed(1);
+      document.getElementById('sc-r').textContent = r.toFixed(1);
+      document.getElementById('sc-w').textContent = w.toFixed(1);
+      document.getElementById('sc-s').textContent = s.toFixed(1);
+      document.getElementById('hero-cur-band').textContent = overall.toFixed(1);
+      document.getElementById('hero-pred-band').textContent = overall.toFixed(1);
+
+      // Theme-Aware Chart Renderer
+      let radarChartInstance = null;
+      let timelineChartInstance = null;
+
+      function renderAnalyticsCharts(theme) {
+        const isDark = theme === 'dark';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)';
+        const gridSubtle = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+        const textColor = isDark ? '#E2E8F0' : '#1E293B';
+        const mutedTextColor = isDark ? '#94A3B8' : '#64748B';
+
+        // 1. Radar Chart
+        if (radarChartInstance) radarChartInstance.destroy();
+        const ctxRadar = document.getElementById('radarChart').getContext('2d');
+        radarChartInstance = new Chart(ctxRadar, {
+          type: 'radar',
+          data: {
+            labels: ['Listening', 'Reading', 'Writing', 'Speaking'],
+            datasets: [
+              {
+                label: 'Your Current Score',
+                data: [l, r, w, s],
+                backgroundColor: 'rgba(6, 182, 212, 0.25)',
+                borderColor: '#06B6D4',
+                borderWidth: 2,
+                pointBackgroundColor: '#06B6D4'
+              },
+              {
+                label: 'Target Band 8.5',
+                data: [8.5, 8.5, 8.5, 8.5],
+                backgroundColor: isDark ? 'rgba(124, 58, 237, 0.1)' : 'rgba(99, 102, 241, 0.08)',
+                borderColor: isDark ? '#7C3AED' : '#6366F1',
+                borderDash: [5, 5],
+                borderWidth: 1.5,
+                pointBackgroundColor: isDark ? '#7C3AED' : '#6366F1'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                angleLines: { color: gridColor },
+                grid: { color: gridColor },
+                pointLabels: { color: textColor, font: { size: 11, weight: 'bold' } },
+                ticks: { color: mutedTextColor, backdropColor: 'transparent', stepSize: 1.0, min: 4, max: 9 }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: mutedTextColor, font: { size: 10 } } }
+            }
+          }
+        });
+
+        // 2. Timeline Progression Chart
+        const history = Analytics.getHistory();
+        const labels = history.length ? history.slice(0, 7).reverse().map((h, i) => `Test ${i+1}`) : ['Test 1', 'Test 2', 'Test 3', 'Test 4', 'Test 5'];
+        const dataPoints = history.length ? history.slice(0, 7).reverse().map(h => h.band || 7.0) : [6.5, 7.0, 7.0, 7.5, overall];
+
+        if (timelineChartInstance) timelineChartInstance.destroy();
+        const ctxLine = document.getElementById('timelineChart').getContext('2d');
+        timelineChartInstance = new Chart(ctxLine, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Band Progression',
+              data: dataPoints,
+              borderColor: isDark ? '#7C3AED' : '#6366F1',
+              backgroundColor: isDark ? 'rgba(124, 58, 237, 0.15)' : 'rgba(99, 102, 241, 0.1)',
+              fill: true,
+              tension: 0.35,
+              pointBackgroundColor: '#06B6D4',
+              pointRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                min: 5.0,
+                max: 9.0,
+                grid: { color: gridSubtle },
+                ticks: { color: mutedTextColor, stepSize: 0.5 }
+              },
+              x: {
+                grid: { color: gridSubtle },
+                ticks: { color: mutedTextColor }
+              }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+
+      const initialTheme = document.documentElement.getAttribute('data-theme') || (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      renderAnalyticsCharts(initialTheme);
+      window.addEventListener('themechanged', e => renderAnalyticsCharts(e.detail.theme));
+    });
+  </script>
+</body>
+</html>
